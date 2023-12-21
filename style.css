@@ -1,0 +1,33 @@
+body {
+    background-image: url("background.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0;
+    /* Remove default margin for better aesthetics */
+}
+
+h1 {
+    text-align: center;
+    color: black;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: center;
+}
+
+li {
+    margin: 10px 0;
+}
+
+a {
+    text-decoration: none;
+    color: blue;
+    /* Adjust link color as needed */
+}
+
+a:hover {
+    color: red;
+    /* Change link color on hover as needed */
+}
