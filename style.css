@@ -5,22 +5,22 @@ body {
     margin: 0;
     /* Remove default margin for better aesthetics */
 }
-
+/* Header/Logo Title */
 h1 {
     text-align: center;
     color: black;
 }
-
+/* Page Content */
 ul {
     list-style-type: none;
     padding: 0;
     text-align: center;
 }
-
+/* Style the list items */
 li {
     margin: 10px 0;
 }
-
+/* Style the links inside the list items */
 a {
     text-decoration: none;
     color: blue;
