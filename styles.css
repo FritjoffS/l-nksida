@@ -1,0 +1,82 @@
+body {
+    background-image: url("background.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0; /* Remove default margin for better aesthetics */
+}
+
+nav {
+    background-color: #333; /* Add a dark background color to the top navigation */
+}
+
+.navbar {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.navbar li {
+    float: left;
+}
+
+.navbar a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    background-color: #555;
+}
+/* Style the header */
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+
+/* Style the top navigation bar */
+h1 {
+    text-align: center;
+    color: black;
+    background-color: white;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: center;
+}
+
+/* Style the navigation bar links */
+li {
+    margin: 10px 0;
+}
+
+a {
+    text-decoration: none;
+    color: blue; /* Adjust link color as needed */
+}
+
+a:hover {
+    color: red; /* Change link color on hover as needed */
+}
+
+.toolbox-button {
+    /* center the button */
+    display: block;
+    width: 300px; /* Adjust button width as needed */
+    height: 90px; /* Adjust button height as needed */
+    background-image: url("toolbox.png"); /* Add toolbox image */
+    background-size: cover; /* Adjust image size to cover button */
+    border: 2px solid black; /* Add a black border */
+    cursor: pointer; /* Change cursor to pointer on hover */
+
+    /*Positioning properties*/
+    position: absolute;
+    top: 50%; /* Position button at 50% of the containing element */
+    left: 50%; /* Position button at 50% of the containing element */
+    transform: translate(-50%, -50%); /* Move button 50% from the top and 50% from the left */
+
+}
