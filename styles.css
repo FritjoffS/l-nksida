@@ -68,8 +68,8 @@ a:hover {
 .toolbox-button {
     /* center the button */
     display: block;
-    width: 300px; /* Adjust button width as needed */
-    height: 90px; /* Adjust button height as needed */
+    width: 15%; /* Adjust button width as needed */
+    height: 10%; /* Adjust button height as needed */
     background-image: url("images/toolbox.png"); /* Add toolbox image */
     background-size: cover; /* Adjust image size to cover button */
     border: 2px solid black; /* Add a black border */
@@ -86,8 +86,8 @@ a:hover {
 .stihl_b2b-button {
     /* center the button */
     display: block;
-    width: 300px; /* Adjust button width as needed */
-    height: 90px; /* Adjust button height as needed */
+    width: 15%; /* Adjust button width as needed */
+    height: 10%; /* Adjust button height as needed */
     background-image: url("images/stihl_b2b.png"); /* Add toolbox image */
     background-size: cover; /* Adjust image size to cover button */
     border: 2px solid black; /* Add a black border */
@@ -104,8 +104,8 @@ a:hover {
 .stihl_ssc-button {
     /* center the button */
     display: block;
-    width: 300px; /* Adjust button width as needed */
-    height: 90px; /* Adjust button height as needed */
+    width: 15%; /* Adjust button width as needed */
+    height: 10%; /* Adjust button height as needed */
     background-image: url("images/stihl_ssc.png"); /* Add toolbox image */
     background-size: cover; /* Adjust image size to cover button */
     border: 2px solid black; /* Add a black border */
