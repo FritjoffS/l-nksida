@@ -6,9 +6,7 @@ body {
 }
 
 nav {
-    background-color: #333; /* Add a dark background color to the top navigation */
-
-    
+    background-color: #333; /* Add a dark background color to the top navigation */    
 }
 
 .navbar { 
@@ -85,7 +83,7 @@ a:hover {
 
 }
 
-    .stihl_b2b-button {
+.stihl_b2b-button {
     /* center the button */
     display: block;
     width: 300px; /* Adjust button width as needed */
@@ -120,8 +118,37 @@ a:hover {
     transform: translate(-50%, -50%); /* Move button 50% from the top and 50% from the left */
 }
 
-.stihl_ssc-button:hover {
-    background-color: blue; /* Set the background color when hovering */
+.logiq-button {
+    /* center the button */
+    display: block;
+    width: 200px; /* Adjust button width as needed */
+    height: 90px; /* Adjust button height as needed */
+    background-image: url("images/logiq.png"); /* Add toolbox image */
+    background-size:contain; /* Adjust image size to cover button */
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 2px solid black; /* Add a black border */
+    cursor: pointer; /* Change cursor to pointer on hover */
+
+    /*Positioning properties*/
+    position: absolute;
+    top: 20%; /* Position button at 50% of the containing element */
+    left: 10%; /* Position button at 50% of the containing element */
+    transform: translate(-50%, -50%); /* Move button 50% from the top and 50% from the left */
 }
 
+#clock {
+    font-size: 3em; /* Change the font size */
+    font-family: 'Arial', sans-serif; /* Change the font family */
+    color: #333; /* Change the text color */
+    background-color: #f8f8f8; /* Change the background color */
+    padding: 10px; /* Add padding around the clock */
+    border: 2px solid #ccc; /* Add a border */
+    border-radius: 5px; /* Add border radius for rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add a box shadow */
+    text-align: center; /* Center the time */
+    margin-top: 10px; /* Add some space between the time and the toolbox button */
+    margin-left: 10px; /* Add some space between the time and the toolbox button */
+    display: inline-block;
+}
 
