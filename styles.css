@@ -18,7 +18,7 @@ nav {
 
 
 .navbar li {
-    float: left;    
+    float: left;
 }
 
 .navbar a {
@@ -80,7 +80,6 @@ a:hover {
     top: 20%; /* Position button at 50% of the containing element */
     left: 10%; /* Position button at 50% of the containing element */
     transform: translate(-50%, -50%); /* Move button 50% from the top and 50% from the left */
-
 }
 
 .stihl_b2b-button {
@@ -98,7 +97,6 @@ a:hover {
     top: 35%; /* Position button at 50% of the containing element */
     left: 10%; /* Position button at 50% of the containing element */
     transform: translate(-50%, -50%); /* Move button 50% from the top and 50% from the left */
-
 }
 
 .stihl_ssc-button {
