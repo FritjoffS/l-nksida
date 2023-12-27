@@ -1,0 +1,112 @@
+.toolbox-button {
+    /* center the button */
+    display: inline-block;
+    width: 435px; /* Adjust button width as needed */
+    height: 133px; /* Adjust button height as needed */
+    background-image: url("images/toolbox.png"); /* Add toolbox image */
+    background-size: cover; /* Adjust image size to cover button */
+    border: 2px solid black; 
+    cursor: pointer; 
+    margin-left: 50px;
+    margin-top: 50px;
+}
+
+.stihl_b2b-button {
+    
+    display: inline-block;
+    width: 435px; 
+    height: 133px; 
+    background-image: url("images/stihl_b2b.png");
+    background-size: cover;
+    background-position: center;
+    border: 2px solid black; 
+    cursor: pointer; 
+    margin-left: 20px;
+    margin-top: 50px;
+}
+
+.stihl_ssc-button {
+    
+    display: inline-block;
+    width: 435px; 
+    height: 133px; 
+    background-image: url("images/stihl_ssc.png"); 
+    background-size: cover;
+    background-position: center;
+    border: 2px solid black; 
+    cursor: pointer; 
+    margin-left: 20px;
+    margin-top: 50px;
+}
+
+.stiga-button {
+    
+    display: inline-block;
+    width: 435px; 
+    height: 133px; 
+    background-image: url("images/stiga.png");
+    background-size: cover;
+    background-position: center;
+    border: 2px solid black;
+    cursor: pointer;
+    margin-left: 20px;
+    margin-top: 50px;
+}
+
+.power_portal-button {
+    
+    display: inline-block;
+    width: 435px; 
+    height: 133px; 
+    background-image: url("images/power_portal.png");
+    background-size: cover;
+    background-position: center;
+    border: 2px solid black;
+    cursor: pointer;
+    margin-left: 50px;
+    margin-top: 50px;
+}
+
+.kramp-button {
+    
+    display: inline-block;
+    width: 435px; 
+    height: 133px; 
+    background-image: url("images/kramp.png");
+    background-size: cover;
+    background-position: center;
+    border: 2px solid black;
+    cursor: pointer;
+    margin-left: 20px;
+    margin-top: 50px;
+}
+
+.husqvarna-button {
+    
+    display: inline-block;
+    width: 435px; 
+    height: 133px; 
+    background-image: url("images/husqvarna.png");
+    background-size: cover;
+    background-position: center;
+    border: 2px solid black;
+    
+    cursor: pointer;
+    margin-left: 20px;
+    margin-top: 50px;
+}
+
+.jofrab-button {
+    
+    display: inline-block;
+    width: 435px; 
+    height: 133px; 
+    background-image: url("images/jofrab.png");
+    background-size: cover;
+    background-position: center;
+    border: 2px solid black;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-left: 20px;
+    margin-top: 50px;
+}
