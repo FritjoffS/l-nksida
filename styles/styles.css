@@ -1,5 +1,5 @@
 body {
-    background-image: url("images/b-m-back.jpg");
+    background-image: url("../images/b-m-back.jpg");
     background-size: cover;
     background-repeat: no-repeat;
     margin: 0; /* Remove default margin for better aesthetics */

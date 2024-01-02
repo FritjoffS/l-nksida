@@ -1,10 +1,9 @@
 .toolbox-button {
-    /* center the button */
     display: inline-block;
-    width: 435px; /* Adjust button width as needed */
-    height: 133px; /* Adjust button height as needed */
-    background-image: url("images/toolbox.png"); /* Add toolbox image */
-    background-size: cover; /* Adjust image size to cover button */
+    width: 435px; 
+    height: 133px;
+    background-image: url("../images/toolbox.png");
+    background-size: cover; 
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer; 
@@ -25,7 +24,7 @@
     display: inline-block;
     width: 435px; 
     height: 133px; 
-    background-image: url("images/stihl_b2b.png");
+    background-image: url("../images/stihl_b2b.png");
     background-size: cover;
     background-position: center;
     border: 2px solid black;
@@ -48,7 +47,7 @@
     display: inline-block;
     width: 435px; 
     height: 133px; 
-    background-image: url("images/stihl_ssc.png"); 
+    background-image: url("../images/stihl_ssc.png"); 
     background-size: cover;
     background-position: center;
     border: 2px solid black;
@@ -71,7 +70,7 @@
     display: inline-block;
     width: 435px; 
     height: 133px; 
-    background-image: url("images/stiga.png");
+    background-image: url("../images/stiga.png");
     background-size: cover;
     background-position: center;
     border: 2px solid black;
@@ -94,7 +93,7 @@
     display: inline-block;
     width: 435px; 
     height: 133px; 
-    background-image: url("images/power_portal.png");
+    background-image: url("../images/power_portal.png");
     background-size: cover;
     background-position: center;
     border: 2px solid black;
@@ -117,7 +116,7 @@
     display: inline-block;
     width: 435px; 
     height: 133px; 
-    background-image: url("images/kramp.png");
+    background-image: url("../images/kramp.png");
     background-size: cover;
     background-position: center;
     border: 2px solid black;
@@ -140,7 +139,7 @@
     display: inline-block;
     width: 435px; 
     height: 133px; 
-    background-image: url("images/husqvarna.png");
+    background-image: url("../images/husqvarna.png");
     background-size: cover;
     background-position: center;
     border: 2px solid black;
@@ -163,7 +162,7 @@
     display: inline-block;
     width: 435px; 
     height: 133px; 
-    background-image: url("images/jofrab.png");
+    background-image: url("../images/jofrab.png");
     background-size: cover;
     background-position: center;
     border: 2px solid black;
