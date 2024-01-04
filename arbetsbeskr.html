@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta author="Name" content="Fredrik Söderberg" />
+  <title>Aviseringar</title>
+  <link rel="stylesheet" href="styles/styles.css" />
+</head>
+
+<body>
+  <header>
+    <nav>
+      <ul class="navbar">
+        <li><a href="index.html">Hem</a></li>
+        <li><a href="verkstad.html">Verkstad</a></li>
+        <li><a href="kontor.html">Kontor</a></li>
+        <li><a href="aviseringar.html">Aviseringar</a></li>
+        <li><a href="arbetsbeskr.html">Arbetsbeskrivningar</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="container">
+    
+    <button id="copyButton1" class="copyButton">Autoclip</button>
+    <button id="copyButton2" class="copyButton">Automower</button>
+    <button id="copyButton3" class="copyButton">IMow</button>
+    <button id="copyButton4" class="copyButton">Motorgräsklippare</button>
+    <button id="copyButton5" class="copyButton">Åkgräsklippare</button>
+    <button id="copyButton6" class="copyButton">Åkgräsklippare HST</button>
+    <button id="copyButton7" class="copyButton">Grästrimmer</button>
+    <button id="copyButton8" class="copyButton">Röjsåg</button>
+    <button id="copyButton9" class="copyButton">Motorsåg</button>
+    <button id="copyButton10" class="copyButton">Lövblås</button>
+    <button id="copyButton11" class="copyButton">Cykel</button>
+    <button id="copyButton12" class="copyButton">Snöslunga</button>
+  </div>
+
+  <script>
+    // Funktion för att kopiera texten
+    function copyTextToClipboard(textToCopy) {
+      // Skapa en osynlig textarea för att kopiera texten
+      var textarea = document.createElement("textarea");
+      textarea.value = textToCopy;
+      document.body.appendChild(textarea);
+
+      // Markera och kopiera texten
+      textarea.select();
+      document.execCommand("copy");
+
+      // Ta bort den temporära textarean
+      document.body.removeChild(textarea);
+
+      // Meddela användaren om att texten har kopierats
+      alert("Texten har kopierats till urklippet:\n" + textToCopy);
+    }
+
+    // Lägg till händelselyssnare för varje knapp
+    document
+      .getElementById("copyButton1")
+      .addEventListener("click", function () {
+        var textToCopy1 =
+          "Service Autoclip\n\n• Allmän kontroll av mekaniska delar och skruvarnas åtdragning\n• Kontroll av felstatistik\n• Kontroll och ev uppdatering av programvara\n• Kontroll av batteri\n• Kontroll av framhjulets lager\n• Kontroll av skärblad och verifiering av eventuella skador\n• Allmän kontroll och rengöring\n• Kontroll av slitage på fram och bakhjul, eventuellt byte.\n• Kontroll av regnsensorn\n• Verifiera motorreducerventilens buller, smörjning och byt eventuellt ut den.\n• Verifiera skärbladsmotorns buller (med avmonterad kniv)\n• Byte av kniv";
+        copyTextToClipboard(textToCopy1);
+      });
+    document
+      .getElementById("copyButton2")
+      .addEventListener("click", function () {
+        var textToCopy2 =
+          "Service Automower\n\n• Avlägsna karossen och rengör chassit.\n• Kontrollera kabeln till laddblecken i karossen\n• Kontrollera ventilationsfiltret.\n• Kontrollera de lägre framhjulslagren.\n• Kontrollera gummibälgen till klipphöjdsjusteringen.\n• Öppna chassit och fetta in de två chassihalvorna igen.\n• Fetta in höjdjusteringen och knappen för höjdjustering igen.\n• Byt ut hjulmotorns packningar.\n• Kontrollera åtdragningsmomentet för chassits skruvar.\n• Kontrollera åtdragningsmomentet för bakhjulens mittre skruvar.\n• Kontrollera chassits kabelgenomföringar.\n• Kontrollera knivarna och knivskruvarna.\n• Kontrollera hasplåten och hasplåtens lager.\n• Kontrollera gummihatten på huvudbrytaren.\n• Rengör laddstationen.\n• Kontrollera och polera laddblecken på gräsklipparen och i laddstationen.\n• Utför ett komplett Autotest i Autocheck EXP.\n• Kontrollera att dockning och laddning fungerar korrekt.\n• Kontrollera batteriets tillstånd genom att utföra ett batteritest.\n• Ladda batteriet fullt.\n• Studera servicemeddelanden för eventuellt rekommenderade uppgraderingar.\n";
+        copyTextToClipboard(textToCopy2);
+      });
+    document
+      .getElementById("copyButton3")
+      .addEventListener("click", function () {
+        var textToCopy3 =
+          "Service I Mow\n\n• Allmänt maskintest\n• Grundläggande Rengöring\n• Framhjulens lager-kontroll/smörjning\n• Knivenhet-kontroll/rengöring\n• Laddbleck-Kontroll/rengöring\n• Uderrede/drivhjul-Kotroll/rengöring\n• Klipphöjdsinställning - Kontroll/rengöring\n• Kåpa/Strömbrytare - Kontroll/Rengöring\n• Batteri uppladdning\n• Mjukvara Diagnos/uppdatering\n• Funktionstest\n• Byte av kniv";
+        copyTextToClipboard(textToCopy3);
+      });
+    document
+      .getElementById("copyButton4")
+      .addEventListener("click", function () {
+        var textToCopy4 =
+          "Service Motorgräsklippare\n\n• Byte Tändstift\n• Byte Luftfilter\n• Byte Motorolja\n• Rengöring Kylsystem\n• Kontroll kompression\n• Kontroll / Justering Varvtal\n• Kontroll Elsystem\n• Kontroll Drivsystem\n• Kontroll Skärsystem\n• Kontroll Startsystem\n• Slipning av kniv\n• Säkerhetskontroll\n• Provkörning\n• Rengöring";
+        copyTextToClipboard(textToCopy4);
+      });
+    document
+      .getElementById("copyButton5")
+      .addEventListener("click", function () {
+        var textToCopy5 =
+          "Service Åkgräsklippare\n\n• Rengöring\n• Kontroll/Justering av däckstryck\n• Kontroll/Justering av reglage och pedaler\n• Kontroll/Justering av styrinrättning\n• Kontroll av transmission\n• Kontroll av kraftuttag\n• Kontroll/Justering av remmar och remstyrningar\n• Smörjning\n• Kontroll /Justering av klippaggregat\n• Kontroll/Slipning av knivar\n• Byte av tändstift\n• Byte av motorolja\n• Kontroll/Byte av luftfilter\n• Byte av ev bränslefilter\n• Kontroll av batteri och elsystem\n• Kontroll/Rengöring av motorns kylsystem\n• Kontroll av avgassystem\n• Kontroll/Justering av varvtal\n• Säkerhetskontroll\n• Provkörning";
+        copyTextToClipboard(textToCopy5);
+      });
+    document
+      .getElementById("copyButton6")
+      .addEventListener("click", function () {
+        var textToCopy6 =
+          "Service Åkgräsklippare HST\n\n• Grundläggande rengöring\n• Kontroll/Justering av däckstryck\n• Kontroll/Justering av reglage och pedaler\n• Kontroll/Justering av styrinrättning\n• Kontroll av transmission\n• Kontroll av kraftuttag\n• Kontroll/Justering av remmar och remstyrningar\n• Smörjning\n• Kontroll /Justering av klippaggregat\n• Kontroll/Slipning av knivar\n• Byte av tändstift\n• Byte av motorolja\n• Kontroll/Byte av luftfilter\n• Byte av bränslefilter\n• Kontroll av olja i hydrostat\n• Kontroll av batteri och elsystem\n• Kontroll/Rengöring av motorns kylsystem\n• Kontroll av avgassystem\n• Kontroll/Justering av varvtal\n• Säkerhetskontroll\n• Provkörning";
+        copyTextToClipboard(textToCopy6);
+      });
+    document
+      .getElementById("copyButton7")
+      .addEventListener("click", function () {
+        var textToCopy7 =
+          "Service Trimmer\n\n• Tändstift Byte\n• Bränslefilter Byte\n• Luftfilter Kontroll/Rengöring\n• Drivlina Kontroll\n• Skärutrustning Kontroll\n• Varvtal Kontroll/Justering\n• Kompression Kontroll\n• Kylsystem Rengöring\n• Startsystem Kontroll\n• Säkerhetskontroll\n• Funktionskontroll\n• Provkörning";
+        copyTextToClipboard(textToCopy7);
+      });
+    document
+      .getElementById("copyButton8")
+      .addEventListener("click", function () {
+        var textToCopy8 =
+          "Service Röjsåg\n\n• Tändstift Byte\n• Bränslefilter Byte\n• Luftfilter Kontroll/Rengöring\n• Vinkelväxel Kontroll/Smörjning\n• Skärutrustning Kontroll\n• Varvtal Kontroll/Justering\n• Kompression Kontroll\n• Kylsystem Rengöring\n• Startsystem Kontroll\n• Säkerhetskontroll\n• Funktionskontroll";
+        copyTextToClipboard(textToCopy8);
+      });
+    document
+      .getElementById("copyButton9")
+      .addEventListener("click", function () {
+        var textToCopy9 =
+          "Service Motorsåg\n\n• Grundläggande regöring\n• Tändstift Byte\n• Bränslefilter Byte\n• Luftfilter Kontroll/Rengöring\n• Drivhjul Kontroll\n• Skärutrustning Kontroll\n• Varvtal Kontroll/Justering\n• Kompression Kontroll\n• Kylsystem Rengöring\n• Startsystem Kontroll\n• Säkerhetskontroll\n• Funktionskontroll";
+        copyTextToClipboard(textToCopy9);
+      });
+    document
+      .getElementById("copyButton10")
+      .addEventListener("click", function () {
+        var textToCopy10 =
+          "Service Lövblås\n\n• Tändstift Byte\n• Bränslefilter Byte\n• Luftfilter Kontroll/Rengöring\n• Blåsenhet kontroll\n• Varvtal Kontroll/Justering\n• Kompression Kontroll\n• Kylsystem Rengöring\n• Startsystem Kontroll\n• Säkerhetskontroll\n• Funktionskontroll\n• Provkörning";
+        copyTextToClipboard(textToCopy10);
+      });
+    document
+      .getElementById("copyButton11")
+      .addEventListener("click", function () {
+        var textToCopy11 =
+          "Service Cykel\n\n• Översyn\n• Kedja Kontroll / Smörjning\n• Däcktryck kontroll / Justering\n• Broms Kontroll / Justering\n• Växel Kontroll / Justering\n• Belysning och Reflexer Kontroll\n• Däck Kontroll\n• Smörjning\n• Provkörning";
+        copyTextToClipboard(textToCopy11);
+      });
+    document
+      .getElementById("copyButton12")
+      .addEventListener("click", function () {
+        var textToCopy12 =
+          "Service Snöslunga\n\n• Byte Tändstift\n• Byte Motorolja\n• Rengöring Kylsystem\n• Kontroll kompression\n• Kontroll / Justering Varvtal\n• Kontroll Elsystem\n• Kontroll Drivsystem\n• Kontroll Inmatning/Utkast\n• Kontroll Startsystem\n• Smörjning\n• Säkerhetskontroll\n• Provkörning\n• Rengöring";
+        copyTextToClipboard(textToCopy12);
+      });
+  </script>
+</body>
+
+</html>
