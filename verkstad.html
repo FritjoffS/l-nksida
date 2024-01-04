@@ -8,7 +8,7 @@
     <link rel="icon" href="icon.png" type="image/x-icon">
     <link rel="stylesheet" href="styles/styles.css">
     <link rel="stylesheet" href="styles/verkstad.css">
-    <title>Verkstad Home</title>
+    <title>Verkstad</title>
    
 </head>
 
@@ -18,10 +18,12 @@
             <li><a href="index.html">Hem</a></li>
             <li><a href="verkstad.html">Verkstad</a></li>
             <li><a href="kontor.html">Kontor</a></li>
+            <li><a href="aviseringar.html">Aviseringar</a></li>
         </ul>
     </nav>
 
-    <div>
+    <div class="container">
+        
         <button class="toolbox-button" onclick="openNewWindow('https://stihltoolbox.com/sv')"></button>
         <button class="stihl_b2b-button" onclick="openNewWindow('https://b2b.stihl.com/se/sv')"></button>
         <button class="stihl_ssc-button" onclick="openNewWindow('https://ssc.stihl.com/#/ssc/sso/en/catalog')"></button>
@@ -31,14 +33,18 @@
         <button class="husqvarna-button" onclick="openNewWindow('https://supportsites.husqvarnagroup.com/se/')"></button>
         <button class="jofrab-button" onclick="openNewWindow('https://www.jofrab.se/mitt-konto')"></button>
         <button class="fairown-button" onclick="openNewWindow('https://dashboard.fairown.com/login')"></button>
+
+        <div class="search-bar">
+            <form action="https://www.google.com/search" method="get" target="_blank">
+                <input type="text" name="q" placeholder="Search Google">
+                <button class="search-bar button" type="submit">Search</button>
+            </form>
+
+        </div>
+         
     </div>
 
-    <div class="search-bar">
-        <form action="https://www.google.com/search" method="get" target="_blank">
-            <input type="text" name="q" placeholder="Search Google">
-            <button type="submit">Search</button>
-        </form>
-    </div>   
+ 
 
     <script src="script.js"></script>    
     

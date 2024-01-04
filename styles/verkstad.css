@@ -7,7 +7,7 @@
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer; 
-    margin-left: 50px;
+    margin-left: 20px;
     margin-top: 50px;
 }
 
@@ -99,7 +99,7 @@
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer;
-    margin-left: 50px;
+    margin-left: 20px;
     margin-top: 50px;
 }
 
@@ -191,7 +191,7 @@
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer;
-    margin-left: 50px;
+    margin-left: 20px;
     margin-top: 50px;
 }
 
@@ -200,36 +200,4 @@
     transform: scale(1.1);
     opacity: 0.8;
     filter: grayscale(100%);    
-}
-
-.search-bar{
-    margin-top: 350px;
-    margin-left: 600px;    
-        
-}
-
-.search-bar input[type=text] {
-    padding: 10px;
-    font-size: 17px;
-    border: 1px solid grey;
-    float: left;
-    width: 400px;
-    background: #f1f1f1;
-    border-radius: 10px;
-    margin-left: 50px;
-    margin-top: 50px;
-}
-
-.search-bar button {
-    float: left;
-    padding: 10px;
-    background: #2196F3;
-    color: white;
-    font-size: 17px;
-    border: 1px solid grey;
-    border-left: none;
-    cursor: pointer;
-    border-radius: 10px;
-    margin-left: 20px;
-    margin-top: 50px;
 }
