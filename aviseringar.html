@@ -1,132 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta author="Name" content="Fredrik Söderberg" />
-    <title>Aviseringar</title>
-    <link rel="stylesheet" href="styles/styles.css" />
-  </head>
-  <body>
-    <header>
-      <nav>
-        <ul class="navbar">
-          <li><a href="index.html">Hem</a></li>
-          <li><a href="verkstad.html">Verkstad</a></li>
-          <li><a href="kontor.html">Kontor</a></li>
-          <li><a href="aviseringar.html">Aviseringar</a></li>
-        </ul>
-      </nav>
-    </header>
 
-    <div class="container">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta author="Name" content="Fredrik Söderberg" />
+  <title>Aviseringar</title>
+  <link rel="stylesheet" href="styles/styles.css" />
+</head>
 
-      <button id="copyButton10" class="copyButton">Reservdelar Kommit</button>
-      <button id="copyButton1" class="copyButton">Cykel Klar</button>
-      <button id="copyButton2" class="copyButton">Motorgräsklippare Klar</button>
-      <button id="copyButton3" class="copyButton">Åkgräsklippare Klar</button>
-      <button id="copyButton4" class="copyButton">Robotgräsklippare Klar</button>
-      <button id="copyButton5" class="copyButton">Grästrimmer Klar</button>
-      <button id="copyButton6" class="copyButton">Röjsåg Klar</button>
-      <button id="copyButton7" class="copyButton">Motorsåg Klar</button>
-      <button id="copyButton8" class="copyButton">Sågkedja Klar</button>
-      <button id="copyButton9" class="copyButton">Däck Klar</button>
+<body>
+  <header>
+    <nav>
+      <ul class="navbar">
+        <li><a href="index.html">Hem</a></li>
+        <li><a href="verkstad.html">Verkstad</a></li>
+        <li><a href="kontor.html">Kontor</a></li>
+        <li><a href="aviseringar.html">Aviseringar</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="container">
     
-    </div>
+    <button id="copyButton1" class="copyButton">Cykel Klar</button>
+    <button id="copyButton2" class="copyButton">Motorgräsklippare Klar</button>
+    <button id="copyButton3" class="copyButton">Åkgräsklippare Klar</button>
+    <button id="copyButton4" class="copyButton">Robotgräsklippare Klar</button>
+    <button id="copyButton5" class="copyButton">Grästrimmer Klar</button>
+    <button id="copyButton6" class="copyButton">Röjsåg Klar</button>
+    <button id="copyButton7" class="copyButton">Motorsåg Klar</button>
+    <button id="copyButton8" class="copyButton">Sågkedja Klar</button>
+    <button id="copyButton9" class="copyButton">Däck Klart</button>
+    <button id="copyButton10" class="copyButton">Reservdelar Kommit</button>
+  </div>
 
-    <script>
-      // Funktion för att kopiera texten
-      function copyTextToClipboard(textToCopy) {
-        // Skapa en osynlig textarea för att kopiera texten
-        var textarea = document.createElement("textarea");
-        textarea.value = textToCopy;
-        document.body.appendChild(textarea);
+  <script>
+    // Funktion för att kopiera texten
+    function copyTextToClipboard(textToCopy) {
+      // Skapa en osynlig textarea för att kopiera texten
+      var textarea = document.createElement("textarea");
+      textarea.value = textToCopy;
+      document.body.appendChild(textarea);
 
-        // Markera och kopiera texten
-        textarea.select();
-        document.execCommand("copy");
+      // Markera och kopiera texten
+      textarea.select();
+      document.execCommand("copy");
 
-        // Ta bort den temporära textarean
-        document.body.removeChild(textarea);
+      // Ta bort den temporära textarean
+      document.body.removeChild(textarea);
 
-        // Meddela användaren om att texten har kopierats
-        alert("Texten har kopierats till urklippet:\n" + textToCopy);
-      }
+      // Meddela användaren om att texten har kopierats
+      alert("Texten har kopierats till urklippet:\n" + textToCopy);
+    }
 
-      // Lägg till händelselyssnare för varje knapp
-      document
-        .getElementById("copyButton1")
-        .addEventListener("click", function () {
-          var textToCopy1 =
-            "Er Cykel är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-          copyTextToClipboard(textToCopy1);
-        });
-      document
-        .getElementById("copyButton2")
-        .addEventListener("click", function () {
-          var textToCopy2 =
-            "Er Motorgräsklippare är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-          copyTextToClipboard(textToCopy2);
-        });
-      document
-        .getElementById("copyButton3")
-        .addEventListener("click", function () {
-          var textToCopy3 =
-            "Er Åkgräsklippare är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-          copyTextToClipboard(textToCopy3);
-        });
-      document
-        .getElementById("copyButton4")
-        .addEventListener("click", function () {
-          var textToCopy4 =
-            "Er Robotgräsklippare är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-          copyTextToClipboard(textToCopy4);
-        });
-      document
-        .getElementById("copyButton5")
-        .addEventListener("click", function () {
-          var textToCopy5 =
-            "Er Grästrimmer är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-          copyTextToClipboard(textToCopy5);
-        });
-      document
-        .getElementById("copyButton6")
-        .addEventListener("click", function () {
-          var textToCopy6 =
-            "Er Röjsåg är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-          copyTextToClipboard(textToCopy6);
-        });
-      document
-        .getElementById("copyButton7")
-        .addEventListener("click", function () {
-          var textToCopy7 =
-            "Er Motorsåg är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-          copyTextToClipboard(textToCopy7);
-        });
-      document
-        .getElementById("copyButton8")
-        .addEventListener("click", function () {
-          var textToCopy8 =
-            "Er Sågkedja är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-          copyTextToClipboard(textToCopy8);
-        });
-      document
-        .getElementById("copyButton9")
-        .addEventListener("click", function () {
-          var textToCopy9 =
-            "Erat Däck är nu klart i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-          copyTextToClipboard(textToCopy9);
-        });
-        document
-        .getElementById("copyButton10")
-        .addEventListener("click", function () {
-          var textToCopy10 =
-            "Bästa kund.\nDina reservdelar som du beställt har nu kommit till vårt lager och finns för avhämtning. \nVardagar 8.00-18.00 Lördagar 9.00-13.00 \nVälkommen \nSollenrunns Järhnhandel \n0322-40330";
-          copyTextToClipboard(textToCopy10);
-        });
+    // Lägg till händelselyssnare för varje knapp
+    document
+      .getElementById("copyButton1")
+      .addEventListener("click", function () {
+        var textToCopy1 =
+          "Er Cykel är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
+        copyTextToClipboard(textToCopy1);
+      });
+    document
+      .getElementById("copyButton2")
+      .addEventListener("click", function () {
+        var textToCopy2 =
+          "Er Motorgräsklippare är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
+        copyTextToClipboard(textToCopy2);
+      });
+    document
+      .getElementById("copyButton3")
+      .addEventListener("click", function () {
+        var textToCopy3 =
+          "Er Åkgräsklippare är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
+        copyTextToClipboard(textToCopy3);
+      });
+    document
+      .getElementById("copyButton4")
+      .addEventListener("click", function () {
+        var textToCopy4 =
+          "Er Robotgräsklippare är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
+        copyTextToClipboard(textToCopy4);
+      });
+    document
+      .getElementById("copyButton5")
+      .addEventListener("click", function () {
+        var textToCopy5 =
+          "Er Grästrimmer är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
+        copyTextToClipboard(textToCopy5);
+      });
+    document
+      .getElementById("copyButton6")
+      .addEventListener("click", function () {
+        var textToCopy6 =
+          "Er Röjsåg är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
+        copyTextToClipboard(textToCopy6);
+      });
+    document
+      .getElementById("copyButton7")
+      .addEventListener("click", function () {
+        var textToCopy7 =
+          "Er Motorsåg är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
+        copyTextToClipboard(textToCopy7);
+      });
+    document
+      .getElementById("copyButton8")
+      .addEventListener("click", function () {
+        var textToCopy8 =
+          "Er Sågkedja är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
+        copyTextToClipboard(textToCopy8);
+      });
+    document
+      .getElementById("copyButton9")
+      .addEventListener("click", function () {
+        var textToCopy9 =
+          "Erat Däck är nu klart i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
+        copyTextToClipboard(textToCopy9);
+      });
+    document
+      .getElementById("copyButton10")
+      .addEventListener("click", function () {
+        var textToCopy10 =
+          "Bästa kund.\nDina reservdelar som du beställt har nu kommit till vårt lager och finns för avhämtning. \nVardagar 8.00-18.00 Lördagar 9.00-13.00 \nVälkommen \nSollenrunns Järhnhandel \n0322-40330";
+        copyTextToClipboard(textToCopy10);
+      });
+  </script>
+</body>
 
-    </script>
-
-
-  </body>
 </html>

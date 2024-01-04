@@ -13,7 +13,7 @@ body {
 
   div {
     width: 100%;
-    min-height: 100vh;
+    min-height: 50vh;
     flex-direction: column;
   }
 

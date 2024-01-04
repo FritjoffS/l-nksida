@@ -5,3 +5,7 @@ function openNewWindow(url) {
     window.open(url, '_blank');
 }
 
+function navigateToUrl(url) {
+    window.location.href = url;
+}
+
