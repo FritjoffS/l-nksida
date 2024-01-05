@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="style.css">
+
+    <title>MultiBarcodes</title>
+
+
+    <!-- <script src="JsBarcode.all.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/jsbarcode/3.0.0/JsBarcode.all.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/jsbarcode/3.11.0/JsBarcode.all.min.js"></script>     -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="script.js"></script>
+
+
+</head>
+
+<body>
+
+    <nav>
+        <ul class="navbar">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="single.html">Single</a></li>
+            <li><a href="multi.html">Multi</a></li>
+        </ul>
+    </nav>
+
+    <div id="barcode-container">
+        
+        <label for="barcode-input">Enter Barcodes (separated by new lines):</label>
+        <textarea id="barcode-input" placeholder="Barcode Numbers"></textarea>
+        <button onclick="generateBarcodes()">Generate Barcodes</button>
+        <label for="display-value-checkbox">Display Value</label>
+        <input type="checkbox" id="display-value-checkbox" checked>
+        <div id="generated-barcodes"></div>
+    </div>
+
+</body>
+
+</html>
