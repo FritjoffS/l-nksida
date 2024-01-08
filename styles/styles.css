@@ -3,6 +3,7 @@ body {
   background-size: cover;
   background-repeat: no-repeat;
   margin: 0;
+  padding: 0;
 }
 
 .flexCenter {
@@ -39,6 +40,28 @@ nav {
   padding: 14px 16px;
   text-decoration: none;
 }
+
+button {
+  display: inline-block;
+  width: 300px;
+  height: 133px;
+  background-color: rgb(9, 9, 109);
+  border: 2px solid black;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-left: 20px;
+  margin-top: 50px;
+  color: white;
+  font-size: 20px;
+}
+
+button:hover {
+  background-color: #555;
+  transform: scale(1.1);
+  opacity: 0.8;
+  filter: grayscale(100%);
+}
+
 
 .navbar a:hover {
   background-color: #555;
@@ -104,6 +127,7 @@ a:hover {
   border: 1px solid grey;
   float: left;
   width: 400px;
+  height: 2rem;
   background: #f1f1f1;
   border-radius: 10px;
   margin-left: 50px;
@@ -122,26 +146,8 @@ a:hover {
   border-radius: 10px;
   margin-left: 20px;
   margin-top: 50px;
+  width: 5rem;
+  height: 3rem;
 }
 
-button {
-  display: inline-block;
-  width: 300px;
-  height: 133px;
-  background-color: rgb(9, 9, 109);
-  border: 2px solid black;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-left: 20px;
-  margin-top: 50px;
-  color: white;
-  font-size: 20px;
-}
-
-button:hover {
-  background-color: #555;
-  transform: scale(1.1);
-  opacity: 0.8;
-  filter: grayscale(100%);
-}
 
