@@ -1,3 +1,7 @@
+* {
+  font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+
 body {
   background-image: url("../images/b-m-back.jpg");
   background-size: cover;
@@ -111,8 +115,7 @@ a:hover {
 }
 
 #clock {
-  font-size: 6em;
-  font-family: "Arial", sans-serif;
+  font-size: 16rem;
   color: white;
 }
 
