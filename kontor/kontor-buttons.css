@@ -1,15 +1,30 @@
-* {
+/*  * {
     margin: 0;
     padding: 0;
     vertical-align: top;
-}
+} */
 
-.logiq-button {
+button {
     display: inline-block;
     width: 300px;
     height: 133px;
+    border: 2px solid black;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-left: 20px;
+    margin-top: 50px;
+    color: white;
+    font-size: 20px;
+    vertical-align: top;
+  }
+
+.logiq-button {
+    display: inline-block;
+    width: 10em;
     background-image: url("../images/logiq.png");
-    background-size: cover;
+    background-size: 10em;
+    background-position: center;
+    background-repeat: no-repeat;
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer;
@@ -26,10 +41,11 @@
 
 .prihandel-button {
     display: inline-block;
-    width: 300px;
-    height: 133px;
+    width: 10em;
     background-image: url("../images/pri.png");
-    background-size: cover;
+    background-size: 10em;
+    background-position: center;
+    background-repeat: no-repeat;
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer;
@@ -46,8 +62,7 @@
 
 .kundorder-button {
     display: inline-block;
-    width: 300px;
-    height: 133px;
+    width: 10em;
     background-color: rgb(9, 9, 109);
     border: 2px solid black;
     border-radius: 10px;

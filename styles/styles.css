@@ -45,11 +45,11 @@ nav {
   text-decoration: none;
 }
 
-button {
+/* button {
   display: inline-block;
   width: 300px;
   height: 133px;
-  background-color: rgb(9, 9, 109);
+  background-color: white;
   border: 2px solid black;
   border-radius: 10px;
   cursor: pointer;
@@ -58,13 +58,13 @@ button {
   color: white;
   font-size: 20px;
 }
-
-button:hover {
+ */
+/* button:hover {
   background-color: #555;
   transform: scale(1.1);
   opacity: 0.8;
   filter: grayscale(100%);
-}
+} */
 
 
 .navbar a:hover {

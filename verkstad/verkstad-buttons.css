@@ -1,55 +1,70 @@
-.toolbox-button {
+button {
     display: inline-block;
-    width: 435px; 
+    width: 300px;
     height: 133px;
+    /* background-color: white; */
+    border: 2px solid black;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-left: 20px;
+    margin-top: 50px;
+    color: white;
+    font-size: 20px;
+  }
+
+  button:hover {
+    background-color: #555;
+    transform: scale(1.1);
+    opacity: 0.8;
+    filter: grayscale(100%);
+  }
+
+.toolbox-button {
+    display: inline-flex;
+    width: 10em;
+    /* width: 435px;  */
+    /* height: 133px; */
     background-image: url("../images/toolbox.png");
-    background-size: cover; 
+    background-size: 10em;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: white;
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer; 
     margin-left: 20px;
     margin-top: 50px;
-}
-
-.toolbox-button:hover {
-    background-color: #555;
-    transform: scale(1.1);
-    opacity: 0.8;
-    filter: grayscale(100%);
-    
 }
 
 .stihl_b2b-button {
     
     display: inline-block;
-    width: 435px; 
-    height: 133px; 
+    width: 10em;
+/*     width: 435px; 
+    height: 133px;  */
     background-image: url("../images/stihl_b2b.png");
-    background-size: cover;
+    background-size: 10em;
     background-position: center;
+    background-repeat: no-repeat;
+    background-color: white;
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer; 
     margin-left: 20px;
     margin-top: 50px;
-}
-
-.stihl_b2b-button:hover {
-    background-color: #555;
-    transform: scale(1.1);
-    opacity: 0.8;
-    filter: grayscale(100%);
-    
 }
 
 .stihl_ssc-button {
     
     display: inline-block;
-    width: 435px; 
-    height: 133px; 
+    width: 10em;
+/*     width: 435px; 
+    height: 133px;  */
     background-image: url("../images/stihl_ssc.png"); 
-    background-size: cover;
+    background-size: 10em;
     background-position: center;
+    background-repeat: no-repeat;
+    background-color: white;
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer; 
@@ -57,68 +72,51 @@
     margin-top: 50px;
 }
 
-.stihl_ssc-button:hover {
-    background-color: #555;
-    transform: scale(1.1);
-    opacity: 0.8;
-    filter: grayscale(100%);
-    
-}
-
 .stiga-button {
     
     display: inline-block;
-    width: 435px; 
-    height: 133px; 
+    width: 10em;
+/*     width: 435px; 
+    height: 133px;  */
     background-image: url("../images/stiga.png");
-    background-size: cover;
+    background-size: 10em;
     background-position: center;
+    background-repeat: no-repeat;
+    background-color: white;
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer;
     margin-left: 20px;
     margin-top: 50px;
-}
-
-.stiga-button:hover {
-    background-color: #555;
-    transform: scale(1.1);
-    opacity: 0.8;
-    filter: grayscale(100%);
-    
 }
 
 .power_portal-button {
     
     display: inline-block;
-    width: 435px; 
-    height: 133px; 
+    width: 10em;
+/*     width: 435px; 
+    height: 133px;  */
     background-image: url("../images/power_portal.png");
-    background-size: cover;
+    background-size: 10em;
     background-position: center;
-    border: 2px solid black;
+    background-repeat: no-repeat;
+    background-color: rgba(255, 0, 0, 0.719);
     border-radius: 10px;
     cursor: pointer;
     margin-left: 20px;
     margin-top: 50px;
 }
 
-.power_portal-button:hover {
-    background-color: #555;
-    transform: scale(1.1);
-    opacity: 0.8;
-    filter: grayscale(100%);
-    
-}
-
 .kramp-button {
     
     display: inline-block;
-    width: 435px; 
-    height: 133px; 
+    width: 10em;
+/*     width: 435px; 
+    height: 133px; */ 
     background-image: url("../images/kramp.png");
-    background-size: cover;
+    background-size: 10em;
     background-position: center;
+    background-repeat: no-repeat;
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer;
@@ -137,11 +135,12 @@
 .husqvarna-button {
     
     display: inline-block;
-    width: 435px; 
-    height: 133px; 
+    width: 10em;
+/*     width: 435px; 
+    height: 133px;  */
     background-image: url("../images/husqvarna.png");
-    background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer;
@@ -160,11 +159,12 @@
 .jofrab-button {
     
     display: inline-block;
-    width: 435px; 
-    height: 133px; 
+    width: 10em;
+/*     width: 435px; 
+    height: 133px;  */
     background-image: url("../images/jofrab.png");
-    background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer;
@@ -183,11 +183,13 @@
 .fairown-button {
     
     display: inline-block;
-    width: 435px; 
-    height: 133px; 
+    width: 10em;    
+/*     width: 435px; 
+    height: 133px;  */
     background-image: url("../images/allinclusive.png");
-    background-size: cover;
+    background-size: 10em;
     background-position: center;
+    background-repeat: no-repeat;
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer;
@@ -196,6 +198,29 @@
 }
 
 .fairown-button:hover {
+    background-color: #555;
+    transform: scale(1.1);
+    opacity: 0.8;
+    filter: grayscale(100%);    
+}
+
+.openai-button {
+    
+    display: inline-block;
+    width: 10em;
+/*     width: 435px; 
+    height: 133px;  */
+    background-image: url("../images/openai.png");
+    background-size: 10em;
+    background-position: center;
+    border: 2px solid black;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-left: 20px;
+    margin-top: 50px;
+}
+
+.openai-button:hover {
     background-color: #555;
     transform: scale(1.1);
     opacity: 0.8;
