@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta author="Fredrik Söderberg" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Home</title>
+</head>
+
+<body>
+  <nav>
+    <ul class="navbar">
+      <li><a href="../index.html">Hem</a></li>
+      <li><a href="../verkstad/verkstad.html">Verkstad</a></li>
+      <li><a href="../kontor/kontor.html">Kontor</a></li>
+      <li><a href="../lager/lager.html">Lager</a></li>
+      <li><a href="../aviseringar/aviseringar.html">Aviseringar</a></li>
+      <!-- <li><a href="verkstad/arbetsbeskr.html">Arbetsbeskrivningar</a></li> -->
+      <!-- <li><a href="barcodeProject/index.html">Streckkoder</a></li> -->
+      <!--         <li><a href="https://script.google.com/macros/s/AKfycbyvK0gD3Sd-Gg78qJ34IOi-kUakqgOKvxCHaLqTlbv9xPge0wzsh6yrjLBZGU3MQAau/exec">Testpage</a></li> -->
+    </ul>
+  </nav>
+  <div class="area">
+
+    <div class="container-left">
+      <div class="form">
+        <button>Hem</button>
+        <button>Verkstad</button>
+        <button>Kontor</button>
+        <button>Lager</button>
+        <button>Button5</button>
+
+      </div>
+
+      <div class="time">
+
+        <div id="date"></div>
+        <div class="flexCenter" id="clock"></div>
+
+      </div>
+
+    </div>
+
+    <div class="container-right">
+
+  </div>
+
+  </div>
+
+
+
+
+  <script src="clock.js"></script>
+  <script>
+    // JavaScript to display date and day in Swedish
+    const dateContainer = document.getElementById('date');
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = today.toLocaleDateString('sv-SE', options);
+    dateContainer.textContent = formattedDate;
+  </script>
+
+
+</body>
+
+</html>

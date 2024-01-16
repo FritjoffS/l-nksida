@@ -1,0 +1,183 @@
+* {
+  font-family: "times new roman", times, serif;
+}
+
+body {
+  background-image: url("../images/b-m-back.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
+  
+}
+
+nav {
+  background-color: #333; /* Add a dark background color to the top navigation */
+}
+
+.navbar {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.navbar li {
+  float: left;
+}
+
+.navbar a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.navbar a:hover {
+  background-color: #555;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+  text-align: center;
+}
+
+/* Style the navigation bar links */
+li {
+  margin: 10px 0;
+}
+
+a:hover {
+  color: red; /* Change link color on hover as needed */
+}
+
+.area {
+  text-align: center;
+  display: flex;
+}
+
+/* Create two unequal columns that floats next to each other */
+/* Left column */
+.container-left {
+  float: left;
+  width: 12%;
+  padding: 20px;
+  box-sizing: border-box;
+  border-left: rgb(176, 181, 185) 4px solid;
+  border-top: rgb(176, 181, 185) 4px solid;
+  border-right: darkslategrey 4px solid;
+  border-bottom: darkslategray 4px solid;
+  background-color: slategray;
+  height: 85vh; /* Adjust the height as needed */
+  margin: 20px;
+}
+
+/* Right column */
+.container-right {
+  float: left;
+  width: 50%;
+  padding: 10px;
+  box-sizing: border-box;
+  border-left: rgb(176, 181, 185) 4px solid;
+  border-top: rgb(176, 181, 185) 4px solid;
+  border-right: darkslategrey 4px solid;
+  border-bottom: darkslategray 4px solid;
+  background-color: slategray;
+  height: 85vh; /* Adjust the height as needed */
+  margin: 20px;
+}
+
+.form {
+  display: block;
+  flex-direction: column;
+  justify-content: center;
+  /* align-items: center; */
+  border-right: rgb(176, 181, 185) 4px solid;
+  border-bottom: rgb(176, 181, 185) 4px solid;
+  border-left: darkslategrey 4px solid;
+  border-top: darkslategray 4px solid;
+  height: 35%;
+  padding: 10px;
+  margin-bottom: 315px;
+}
+
+.time {
+  display: block;
+  flex-direction: column;
+  justify-content: center;
+  /* align-items: center; */
+  border-right: rgb(176, 181, 185) 4px solid;
+  border-bottom: rgb(176, 181, 185) 4px solid;
+  border-left: darkslategrey 4px solid;
+  border-top: darkslategray 4px solid;
+  height: 14%;
+  padding: 10px;
+  
+}
+
+button {
+  display: block;
+  width: 150px;
+  height: 50px;
+  border-left: rgb(176, 181, 185) 4px solid;
+  border-top: rgb(176, 181, 185) 4px solid;
+  border-right: darkslategrey 4px solid;
+  border-bottom: darkslategray 4px solid;
+  background-color: slategray;
+  color: white;
+  font-size: 20px;
+  padding: 10px;
+}
+
+button:active {
+  border-right: rgb(176, 181, 185) 4px solid;
+  border-bottom: rgb(176, 181, 185) 4px solid;
+  border-left: darkslategrey 4px solid;
+  border-top: darkslategray 4px solid;
+}
+
+#clock {
+  font-size: 2rem;
+  color: white;
+  margin-top: 20px;
+}
+
+#date {
+  font-size: 1.2rem;
+  color: white;
+  /* margin-top: 370px; */
+}
+
+.flexCenter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+/* button {
+  display: inline-block;
+  width: 300px;
+  height: 133px;
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-left: 20px;
+  margin-top: 50px;
+  color: black;
+  font-size: 20px;
+}
+ 
+ button:hover {
+  background-color: #555;
+  transform: scale(1.1);
+  opacity: 0.8;
+  filter: grayscale(100%);
+} */
+
+
+
+
