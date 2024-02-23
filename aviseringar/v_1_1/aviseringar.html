@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviseringar</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="../firebase.config.js" type="module"></script>
+
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul class="navbar">
+                <li><a href="../index.html">Hem</a></li>
+                <li><a href="../verkstad/verkstad.html">Verkstad</a></li>
+                <li><a href="../kontor/kontor.html">Kontor</a></li>
+                <li><a href="aviseringar.html">Aviseringar</a></li>
+                <li><a href="../verkstad/arbetsbeskr.html">Arbetsbeskrivningar</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <button id="copyButton1" class="copyButton">Cykel Klar</button>
+        <!-- Add similar buttons for other messages -->
+    </div>
+
+    <script>
+
+
+        function copyTextToClipboard(textToCopy) {
+            var textarea = document.createElement("textarea");
+            textarea.value = textToCopy;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            alert("Texten har kopierats till urklippet:\n" + textToCopy);
+        }
+
+        document.getElementById("copyButton1").addEventListener("click", function () {
+            var cykelText = localStorage.getItem('cykelText');
+            copyTextToClipboard(cykelText);
+        });
+        // Add similar event listeners for other buttons
+    </script>
+</body>
+
+</html>

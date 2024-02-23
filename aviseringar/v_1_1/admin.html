@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+</head>
+
+<body>
+    <h1>Admin Page</h1>
+    <label for="cykelText">Cykel Klar:</label><br>
+    <textarea id="cykelText" rows="4" cols="50"></textarea><br><br>
+
+    <button onclick="saveText()">Save Changes</button>
+
+    <script src="../firebase-handler.js" type="module"></script>
+    <script>
+        async function saveText() {
+            var cykelText = document.getElementById('cykelText').value;
+            try {
+                await saveText(cykelText);
+                alert('Text saved successfully!');
+            } catch (error) {
+                console.error('Error saving text:', error);
+            }
+        }
+
+        async function retrieveText() {
+            try {
+                const textFromFirebase = await retrieveText();
+                if (textFromFirebase) {
+                    document.getElementById('cykelText').value = textFromFirebase;
+                }
+            } catch (error) {
+                console.error('Error retrieving text:', error);
+            }
+        }
+
+        // Call retrieveText function to populate the textarea with text from Firebase when the page loads
+        retrieveText();
+    </script>
+</body>
+
+</html>
