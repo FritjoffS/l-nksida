@@ -10,17 +10,17 @@ body {
   padding: 0;
 }
 
-.flexCenter {
+/* .flexCenter {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
+  } */
 
-  div {
+  /* div {
     width: 100%;
     min-height: 50vh;
     flex-direction: column;
-  }
+  } */
 
 nav {
   background-color: #333; /* Add a dark background color to the top navigation */
@@ -115,13 +115,33 @@ a:hover {
 }
 
 #clock {
+  /* background-color: #333; */
   font-size: 16rem;
   color: white;
+  text-align: center;
+}
+
+#date {
+  background-color: rgba(51, 51, 51, 0.8);
+  border-radius: 20px;
+  font-size: 3rem;
+  color: white;
+  text-align: center;
+}
+
+.flexCenter {
+  display: flex;
+  justify-content: center;
+  margin: auto;
+  padding: 20px;
+  width: 300px;
 }
 
 .search-bar {
   margin-top: 50px;
-  margin-left: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .search-bar input[type="text"] {
@@ -152,5 +172,3 @@ a:hover {
   width: 5rem;
   height: 3rem;
 }
-
-
