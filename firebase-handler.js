@@ -5,17 +5,18 @@ import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/1
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "your-api-key",
-    authDomain: "your-auth-domain",
-    databaseURL: "your-database-url",
-    projectId: "your-project-id",
-    storageBucket: "your-storage-bucket",
-    messagingSenderId: "your-messaging-sender-id",
-    appId: "your-app-id"
+    apiKey: "AIzaSyBICefnA70xIvkdxhPtRzopKrsMrCSj-GQ",
+    authDomain: "lenksida.firebaseapp.com",
+    databaseURL: "https://lenksida-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "lenksida",
+    storageBucket: "lenksida.appspot.com",
+    messagingSenderId: "344382936717",
+    appId: "1:344382936717:web:67c0f34fdb4341573b34c4"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
 const database = getDatabase(); // Get a reference to the database
 
 // Function to save text to Firebase

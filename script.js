@@ -9,24 +9,55 @@ function navigateToUrl(url) {
     window.location.href = url;
 }
 
-// Get the current date
+// // Get the current date
+// const currentDate = new Date();
+
+// // Array of weekdays
+// const weekdays = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
+
+// // Get the day of the week (0-6)
+// const dayOfWeek = currentDate.getDay();
+
+// // Get the day, month, and year
+// const day = currentDate.getDate();
+// const month = currentDate.getMonth() + 1; // Months are zero-based
+// const year = currentDate.getFullYear();
+
+// // Format the date as "DD/MM - YYYY" in two lines
+// const formattedDate = `${day}/${month} \n ${year}`;
+
+// // Update the #date element with the formatted date and day of the week
+// document.getElementById("date").innerText = `${weekdays[dayOfWeek]} ${formattedDate}`;
+
+// Hämta aktuellt datum
 const currentDate = new Date();
 
-// Array of weekdays
-const weekdays = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
+// Veckodagar som en array
+const veckodagar = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
 
-// Get the day of the week (0-6)
-const dayOfWeek = currentDate.getDay();
+// Hämta veckodagen (0-6)
+const dagIVeckan = currentDate.getDay();
 
-// Get the day, month, and year
-const day = currentDate.getDate();
-const month = currentDate.getMonth() + 1; // Months are zero-based
-const year = currentDate.getFullYear();
+// Hämta dag, månad och år
+const dag = currentDate.getDate();
+const månad = currentDate.getMonth() + 1; // Månader är nollbaserade
+const år = currentDate.getFullYear();
 
-// Format the date as "DD/MM - YYYY" in two lines
-const formattedDate = `${day}/${month} \n ${year}`;
+// Formatera datumet som "DD/MM - YYYY" i två rader
+const formateratDatum = `${dag}/${månad} \n ${år}`;
 
-// Update the #date element with the formatted date and day of the week
-document.getElementById("date").innerText = `${weekdays[dayOfWeek]} ${formattedDate}`;
+// Uppdatera elementet med id "date" med det formaterade datumet och veckodagen
+document.getElementById("date").innerText = `${veckodagar[dagIVeckan]} ${formateratDatum}`;
+
+// Uppdatera datumet en gång i timmen
+setInterval(() => {
+    const updatedDate = new Date();
+    const updatedDay = updatedDate.getDate();
+    const updatedMonth = updatedDate.getMonth() + 1;
+    const updatedYear = updatedDate.getFullYear();
+    const updatedFormattedDate = `${updatedDay}/${updatedMonth} \n ${updatedYear}`;
+    document.getElementById("date").innerText = `${veckodagar[updatedDate.getDay()]} ${updatedFormattedDate}`;
+}, 1000); // 1000 millisekunder = 1 sekund, 3600000 millisekunder = 1 timme
+
 
 
