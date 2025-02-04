@@ -81,7 +81,13 @@ function copyTextToClipboard(textToCopy) {
   
   document.getElementById("copyButton11").addEventListener("click", function () {
     var textToCopy11 =
-      "Bästa kund.\nDina reservdelar som du beställt har nu kommit till vårt lager och finns för avhämtning. \nVardagar 8.00-18.00 Lördagar 9.00-13.00 \nVälkommen \nSollenrunns Järhnhandel \n0322-40330";
+      "Bästa Kund.\nEr Högtryckstvätt är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
     copyTextToClipboard(textToCopy11);
+  });
+
+  document.getElementById("copyButton12").addEventListener("click", function () {
+    var textToCopy12 =
+      "Bästa kund.\nDina reservdelar som du beställt har nu kommit till vårt lager och finns för avhämtning. \nVardagar 8.00-18.00 Lördagar 9.00-13.00 \nVälkommen \nSollenrunns Järhnhandel \n0322-40330";
+    copyTextToClipboard(textToCopy12);
   });
   

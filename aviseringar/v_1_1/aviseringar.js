@@ -85,6 +85,12 @@ function copyTextToClipboard(textToCopy) {
       "Bästa Kund.\nEra Skridskor är nu klara i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
     copyTextToClipboard(textToCopy10);
   });
+
+  document.getElementById("copyButton12").addEventListener("click", function () {
+    var textToCopy10 =
+      "Bästa Kund.\nEr Högtryckstvätt är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
+    copyTextToClipboard(textToCopy10);
+  });
   
   document.getElementById("copyButton11").addEventListener("click", function () {
     var textToCopy11 =
