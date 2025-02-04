@@ -1,158 +1,131 @@
 * {
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
-  }
-  
-  body {
-    background-image: url("../images/b-m-back.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .flexCenter {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-  
-    div {
-      width: 100%;
-      min-height: 50vh;
-      flex-direction: column;
-    }
-  
-  nav {
-    background-color: #333; /* Add a dark background color to the top navigation */
-  }
-  
-  .navbar {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-  }
-  
-  .navbar li {
-    float: left;
-  }
-  
-  .navbar a {
-    display: block;
-    color: white;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-  }
-  
-  button {
-    display: inline-block;
-    width: 300px;
-    height: 133px;
-    background-image: url("button.png");
-    background-size: cover;
-    border: 2px solid black;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-left: 20px;
-    margin-top: 50px;
-    color: black;
-    font-size: 20px;
-  }
-   
-   button:hover {
-    background-color: #555;
-    transform: scale(1.1);
-    opacity: 0.8;
-    filter: grayscale(100%);
-  }
-  
-  
-  .navbar a:hover {
-    background-color: #555;
-  }
-  /* Style the header */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: "Trebuchet MS", Helvetica, sans-serif;
-  }
-  
-  /* Style the top navigation bar */
-  h1 {
-    text-align: center;
-    color: black;
-    background-position: 1;
-    background-color: #333; /* Add a dark background color to the top navigation */
-  }
-  
-  ul {
-    list-style-type: none;
-    padding: 0;
-    text-align: center;
-  }
-  
+  margin: 0;
+  font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+
+body {
+  background-image: url("../images/b-m-back.jpg");
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+.container {
+  margin: auto;
+  width: 80%;
+  padding: 50px;
+}
+
+/*  .flexCenter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  } */
+
+nav {
+  background-color: #333; 
+}
+
+.navbar {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.navbar li {
+  float: left;
+}
+
   /* Style the navigation bar links */
   li {
     margin: 10px 0;
   }
-  
-  a {
-    text-decoration: none;
-    color: blue; /* Adjust link color as needed */
-  }
-  
-  a:hover {
-    color: red; /* Change link color on hover as needed */
-  }
-  
-  .container {
-    margin: auto;
-    width: 100%;
-    padding: 10px;
-  }
-  
-  #clock {
-    font-size: 16rem;
-    color: white;
-  }
-  
-  .search-bar {
-    margin-top: 50px;
-    margin-left: 600px;
-  }
-  
-  .search-bar input[type="text"] {
-    padding: 10px;
-    font-size: 17px;
-    border: 1px solid grey;
-    float: left;
-    width: 400px;
-    height: 2rem;
-    background: #f1f1f1;
-    border-radius: 10px;
-    margin-left: 50px;
-    margin-top: 50px;
-  }
-  
-  .search-bar button {
-    float: left;
-    padding: 10px;
-    background: #2196f3;
-    color: white;
-    font-size: 17px;
-    border: 1px solid grey;
-    border-left: none;
-    cursor: pointer;
-    border-radius: 10px;
-    margin-left: 20px;
-    margin-top: 50px;
-    width: 5rem;
-    height: 3rem;
-  }
-  
-  
-  
+
+.navbar a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 1rem 1rem;
+  text-decoration: none;
+}
+
+.navbar a:hover {
+  background-color: #555;
+}
+
+a:hover {
+  color: red; /* Change link color on hover as needed */
+}
+
+button {
+  display: inline-block;
+  width: 300px;
+  height: 133px;
+  background-image: url("button.png");
+  background-size: cover;
+  border: 2px solid black;
+  border-radius: 10px;
+  cursor: pointer;
+  margin: 20px 20px;
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  vertical-align: top;
+}
+ 
+ button:hover {
+  background-color: #555;
+  transform: scale(1.1);
+  opacity: 0.8;
+  filter: grayscale(100%);
+}
+
+
+
+
+
+
+
+
+
+
+#clock {
+  font-size: 16rem;
+  color: white;
+}
+
+.search-bar {
+  margin-top: 50px;
+  margin-left: 600px;
+}
+
+.search-bar input[type="text"] {
+  padding: 10px;
+  font-size: 17px;
+  border: 1px solid grey;
+  float: left;
+  width: 400px;
+  height: 2rem;
+  background: #f1f1f1;
+  border-radius: 10px;
+  margin-left: 50px;
+  margin-top: 50px;
+}
+
+.search-bar button {
+  float: left;
+  padding: 10px;
+  background: #2196f3;
+  color: white;
+  font-size: 17px;
+  border: 1px solid grey;
+  border-left: none;
+  cursor: pointer;
+  border-radius: 10px;
+  margin-left: 20px;
+  margin-top: 50px;
+  width: 5rem;
+  height: 3rem;
+}
+
+
