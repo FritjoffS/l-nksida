@@ -19,75 +19,75 @@ function copyTextToClipboard(textToCopy) {
   }
   
   // Lägg till händelselyssnare för varje knapp
-  document.getElementById("copyButton1").addEventListener("click", function () {
-    var textToCopy1 =
+  document.getElementById("cykelButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa Kund.\nEr Cykel är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-    copyTextToClipboard(textToCopy1);
+    copyTextToClipboard(textToCopy);
   });
   
-  document.getElementById("copyButton2").addEventListener("click", function () {
-    var textToCopy2 =
+  document.getElementById("motorgräsklippareButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa Kund.\nEr Motorgräsklippare är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-    copyTextToClipboard(textToCopy2);
+    copyTextToClipboard(textToCopy);
   });
   
-  document.getElementById("copyButton3").addEventListener("click", function () {
-    var textToCopy3 =
+  document.getElementById("åkgräsklippareButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa Kund.\nEr Åkgräsklippare är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-    copyTextToClipboard(textToCopy3);
+    copyTextToClipboard(textToCopy);
   });
   
-  document.getElementById("copyButton4").addEventListener("click", function () {
-    var textToCopy4 =
+  document.getElementById("robotgräsklippareButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa Kund.\nEr Robotgräsklippare är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-    copyTextToClipboard(textToCopy4);
+    copyTextToClipboard(textToCopy);
   });
   
-  document.getElementById("copyButton5").addEventListener("click", function () {
-    var textToCopy5 =
+  document.getElementById("trimmerButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa Kund.\nEr Grästrimmer är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-    copyTextToClipboard(textToCopy5);
+    copyTextToClipboard(textToCopy);
   });
   
-  document.getElementById("copyButton6").addEventListener("click", function () {
-    var textToCopy6 =
+  document.getElementById("röjsågButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa Kund.\nEr Röjsåg är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-    copyTextToClipboard(textToCopy6);
+    copyTextToClipboard(textToCopy);
   });
   
-  document.getElementById("copyButton7").addEventListener("click", function () {
-    var textToCopy7 =
+  document.getElementById("motorsågButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa Kund.\nEr Motorsåg är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-    copyTextToClipboard(textToCopy7);
+    copyTextToClipboard(textToCopy);
   });
   
-  document.getElementById("copyButton8").addEventListener("click", function () {
-    var textToCopy8 =
+  document.getElementById("sågkedjaButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa Kund.\nEr Sågkedja är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-    copyTextToClipboard(textToCopy8);
+    copyTextToClipboard(textToCopy);
   });
   
-  document.getElementById("copyButton9").addEventListener("click", function () {
-    var textToCopy9 =
+  document.getElementById("däckButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa Kund.\nErat Däck är nu klart i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-    copyTextToClipboard(textToCopy9);
+    copyTextToClipboard(textToCopy);
   });
   
-  document.getElementById("copyButton10").addEventListener("click", function () {
-    var textToCopy10 =
+  document.getElementById("skridskorButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa Kund.\nEra Skridskor är nu klara i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-    copyTextToClipboard(textToCopy10);
+    copyTextToClipboard(textToCopy);
   });
   
-  document.getElementById("copyButton11").addEventListener("click", function () {
-    var textToCopy11 =
+  document.getElementById("högtryckstvättButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa Kund.\nEr Högtryckstvätt är nu klar i vår verkstad och finns för avhämtning. \nVälkommen \nVardagar 08.00-18.00 \nLördagar 09.00-13.00 \nSollebrunns Järnhandel AB \n0322-40330";
-    copyTextToClipboard(textToCopy11);
+    copyTextToClipboard(textToCopy);
   });
 
-  document.getElementById("copyButton12").addEventListener("click", function () {
-    var textToCopy12 =
+  document.getElementById("reservdelarButton").addEventListener("click", function () {
+    var textToCopy =
       "Bästa kund.\nDina reservdelar som du beställt har nu kommit till vårt lager och finns för avhämtning. \nVardagar 8.00-18.00 Lördagar 9.00-13.00 \nVälkommen \nSollenrunns Järhnhandel \n0322-40330";
-    copyTextToClipboard(textToCopy12);
+    copyTextToClipboard(textToCopy);
   });
   
