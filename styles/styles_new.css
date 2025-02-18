@@ -8,19 +8,19 @@
     background-attachment: fixed;
     background-repeat: no-repeat;
   }
-
+  
   .container {
     margin: auto;
     width: 80%;
     padding: 50px;
   }
   
- /*  .flexCenter {
+  /*  .flexCenter {
       display: flex;
       justify-content: center;
       align-items: center;
     } */
-
+  
   nav {
     background-color: #333; 
   }
@@ -35,7 +35,7 @@
   .navbar li {
     float: left;
   }
-
+  
     /* Style the navigation bar links */
     li {
       margin: 10px 0;
@@ -48,11 +48,11 @@
     padding: 1rem 1rem;
     text-decoration: none;
   }
-
+  
   .navbar a:hover {
     background-color: #555;
   }
-
+  
   a:hover {
     color: red; /* Change link color on hover as needed */
   }
@@ -61,7 +61,7 @@
     display: inline-block;
     width: 300px;
     height: 133px;
-    background-image: url("button.png");
+    background-image: url("../images/button.png");
     background-size: cover;
     border: 2px solid black;
     border-radius: 10px;
@@ -79,7 +79,7 @@
     opacity: 0.8;
     filter: grayscale(100%);
   }
-
+  /*
   #clock {
     font-size: 16rem;
     color: white;
@@ -119,5 +119,5 @@
     height: 3rem;
   }
   
-  
+  */
   
