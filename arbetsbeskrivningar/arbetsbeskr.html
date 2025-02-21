@@ -27,6 +27,7 @@
     <button id="autoclipButton" class="copyButton">Autoclip</button>
     <button id="automowerButton" class="copyButton">Automower</button>
     <button id="cykelButton" class="copyButton">Cykel</button>
+    <button id="cykelPunkteringButton" class="copyButton">Cykel Punktering<br>868921</button>
     <button id="imowButton" class="copyButton">IMow</button>
     <button id="trimmerButton" class="copyButton">Grästrimmer<br>868468</button>
     <button id="häcksaxButton" class="copyButton">Häcksax<br>820490</button>
@@ -156,8 +157,14 @@
       .addEventListener("click", function () {
         var textToCopy =
           "=== Service Motorsåg El/Batteri ===\n\n• Grundläggande regöring\n• Luftfilter Kontroll/Rengöring\n• Drivhjul Kontroll\n• Skärutrustning Kontroll\n• Elsystem KOntroll\n• Kylsystem Rengöring\n• Säkerhetskontroll\n• Funktionskontroll\n***** Provkörning *****";
-        copyTextToClipboard(textToCopy
-        );
+        copyTextToClipboard(textToCopy);
+      });
+      document
+      .getElementById("cykelPunkteringButton")
+      .addEventListener("click", function () {
+        var textToCopy =
+          "=== Punktering ===\n\n• Byte slang\n• Däcktryck - kontroll / justering\n\n***** Provkörning *****";
+        copyTextToClipboard(textToCopy);
       });
   </script>
 </body>
