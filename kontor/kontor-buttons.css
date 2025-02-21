@@ -104,15 +104,16 @@ button {
 .SmsConnectButton {
     display: inline-block;
     width: 10em;
-    background-color: rgb(9, 9, 109);
+    background-image: url("../images/smsconnect.png");
+    background-size: 10em;
+    background-position: center;
+    background-repeat: no-repeat;
     border: 2px solid black;
     border-radius: 10px;
     cursor: pointer;
     margin-left: 20px;
     margin-top: 50px;
-    color: white;
-    font-size: 20px;
-    text-align: center;
+    color: black;
 }
 
 .kundorder-button:hover {
