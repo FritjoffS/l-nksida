@@ -11,23 +11,30 @@
 </head>
 
 <body>
-  <header>
-    <nav>
-      <ul class="navbar">
-        <li><a href="../index.html"><img src="../icons/home.png" alt="Home Icon" style="width:16px;height:16px;filter: invert(1);"><br>Hem</a></li>
-        <li><a href="../verkstad/verkstad.html"><img src="../icons/tools.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Verkstad</a></li>
-        <li><a href="../kontor/kontor.html"><img src="../icons/office.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Kontor</a></li>
-        <li><a href="../aviseringar/aviseringar.html"><img src="../icons/email.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Aviseringar</a></li>
-        <li><a href="../arbetsbeskrivningar/arbetsbeskr.html"><img src="../icons/list.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Arbetsbeskrivningar</a></li>
-        <li><a href="../barcodeProject/index.html"><img src="../icons/barcode.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Streckkoder</a></li>
-        <li><a href="https://script.google.com/macros/s/AKfycbyvK0gD3Sd-Gg78qJ34IOi-kUakqgOKvxCHaLqTlbv9xPge0wzsh6yrjLBZGU3MQAau/exec"><img src="../icons/under-construction.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Testpage</a>
-        </li>
-      </ul>
-    </nav>
-  </header>
+  <nav>
+    <ul class="navbar">
+      <li><a href="../index.html"><img src="../icons/home.png" alt="Home Icon"
+            style="width:16px;height:16px;filter: invert(1);"><br>Hem</a></li>
+      <li><a href="../verkstad/verkstad.html"><img src="../icons/tools.png" alt="Verkstad Icon"
+            style="width:16px;height:16px;filter: invert(1);"><br>Verkstad</a></li>
+      <li><a href="../kontor/kontor.html"><img src="../icons/office.png" alt="Verkstad Icon"
+            style="width:16px;height:16px;filter: invert(1);"><br>Kontor</a></li>
+      <li><a href="../aviseringar/aviseringar.html"><img src="../icons/email.png" alt="Verkstad Icon"
+            style="width:16px;height:16px;filter: invert(1);"><br>Aviseringar</a></li>
+      <li><a href="../arbetsbeskrivningar/arbetsbeskr.html"><img src="../icons/list.png" alt="Verkstad Icon"
+            style="width:16px;height:16px;filter: invert(1);"><br>Arbetsbeskrivningar</a></li>
+      <li><a href="../barcodeProject/index.html"><img src="../icons/barcode.png" alt="Verkstad Icon"
+            style="width:16px;height:16px;filter: invert(1);"><br>Streckkoder</a></li>
+      <li><a
+          href="https://script.google.com/macros/s/AKfycbyvK0gD3Sd-Gg78qJ34IOi-kUakqgOKvxCHaLqTlbv9xPge0wzsh6yrjLBZGU3MQAau/exec"><img
+            src="../icons/under-construction.png" alt="Verkstad Icon"
+            style="width:16px;height:16px;filter: invert(1);"><br>Testpage</a>
+      </li>
+    </ul>
+  </nav>
 
   <div class="container">
-    
+
     <button id="autoclipButton" class="copyButton">Autoclip</button>
     <button id="automowerButton" class="copyButton">Automower</button>
     <button id="cykelButton" class="copyButton">Cykel</button>
@@ -156,14 +163,14 @@
           "=== Service Snöslunga ===\n\n• Byte Tändstift\n• Byte Motorolja\n• Rengöring Kylsystem\n• Kontroll kompression\n• Kontroll / Justering Varvtal\n• Kontroll Elsystem\n• Kontroll Drivsystem\n• Kontroll Inmatning/Utkast\n• Kontroll Startsystem\n• Smörjning\n• Säkerhetskontroll\n• Provkörning\n• Rengöring\n***** Provkörning *****";
         copyTextToClipboard(textToCopy);
       });
-      document
+    document
       .getElementById("motorsågElBatteriButton")
       .addEventListener("click", function () {
         var textToCopy =
           "=== Service Motorsåg El/Batteri ===\n\n• Grundläggande regöring\n• Luftfilter Kontroll/Rengöring\n• Drivhjul Kontroll\n• Skärutrustning Kontroll\n• Elsystem KOntroll\n• Kylsystem Rengöring\n• Säkerhetskontroll\n• Funktionskontroll\n***** Provkörning *****";
         copyTextToClipboard(textToCopy);
       });
-      document
+    document
       .getElementById("cykelPunkteringButton")
       .addEventListener("click", function () {
         var textToCopy =
