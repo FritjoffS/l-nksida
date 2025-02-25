@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- <link rel="stylesheet" href="kontor.css" /> -->
     <link rel="stylesheet" href="../styles/global.css" />
+    <link rel="stylesheet" href="../styles/navbar.css" />
     <link rel="stylesheet" href="kontor-buttons.css" />
     <title>Kontor</title>
 </head>
@@ -13,13 +14,16 @@
 <body>
     <nav>
         <ul class="navbar">
-            <li><a href="../index.html">Hem</a></li>
-            <li><a href="../verkstad/verkstad.html">Verkstad</a></li>
-            <li><a href="../kontor/kontor.html">Kontor</a></li>
-            <li><a href="../aviseringar/aviseringar.html">Aviseringar</a></li>
-            <li><a href="../arbetsbeskrivningar/arbetsbeskr.html">Arbetsbeskrivningar</a></li>
+          <li><a href="../index.html"><img src="../icons/home.png" alt="Home Icon" style="width:16px;height:16px;filter: invert(1);"><br>Hem</a></li>
+          <li><a href="../verkstad/verkstad.html"><img src="../icons/tools.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Verkstad</a></li>
+          <li><a href="../kontor/kontor.html"><img src="../icons/office.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Kontor</a></li>
+          <li><a href="../aviseringar/aviseringar.html"><img src="../icons/email.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Aviseringar</a></li>
+          <li><a href="../arbetsbeskrivningar/arbetsbeskr.html"><img src="../icons/list.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Arbetsbeskrivningar</a></li>
+          <li><a href="../barcodeProject/index.html"><img src="../icons/barcode.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Streckkoder</a></li>
+          <li><a href="https://script.google.com/macros/s/AKfycbyvK0gD3Sd-Gg78qJ34IOi-kUakqgOKvxCHaLqTlbv9xPge0wzsh6yrjLBZGU3MQAau/exec"><img src="../icons/under-construction.png" alt="Verkstad Icon" style="width:16px;height:16px;filter: invert(1);"><br>Testpage</a>
+          </li>
         </ul>
-    </nav>
+      </nav>
 
     <div class="container">
         <button class="logiq-button" onclick="openNewWindow('https://sso.logiq.no/auth/realms/Logiq-webApp/protocol/openid-connect/auth?client_id=customer-portal&redirect_uri=https%3A%2F%2Fconnect.logiq.no%2Fcustomer-portal-gui%2Fhome&state=09c9faa7-d940-4dd1-84f1-32d603beca55&response_mode=fragment&response_type=code&scope=openid&nonce=8048dacf-5110-4dba-88ec-ba5a7f6be3c3')"></button>

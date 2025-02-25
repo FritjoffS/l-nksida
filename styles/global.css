@@ -35,9 +35,10 @@
       justify-content: center;
       align-items: center;
     } */
+  /*
   
   nav {
-    background-color: #333; 
+    background-color: black;
   }
   
   .navbar {
@@ -51,14 +52,14 @@
     float: left;
   }
   
-    /* Style the navigation bar links */
     li {
       margin: 10px 0;
     }
   
   .navbar a {
     display: block;
-    color: white;
+    
+    color: black;
     text-align: center;
     padding: 1rem 1rem;
     text-decoration: none;
@@ -66,12 +67,13 @@
   
   .navbar a:hover {
     background-color: #555;
+    color: white;
   }
   
   a:hover {
-    color: red; /* Change link color on hover as needed */
+    color: red; 
   }
-  
+  */
   button {
     display: inline-block;
     width: 300px;
