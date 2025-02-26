@@ -1,5 +1,4 @@
     nav {
-    /* background-color: #333; */
     background-color: black;
   }
   
@@ -14,14 +13,12 @@
     float: left;
   }
   
-    /* Style the navigation bar links */
     li {
       margin: 10px 0;
     }
   
   .navbar a {
     display: block;
-    /* color: #333; */
     color: black;
     text-align: center;
     padding: 1rem 1rem;
