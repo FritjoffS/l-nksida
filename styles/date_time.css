@@ -1,5 +1,7 @@
 #clock {
     /* background-color: #333; */
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bolder;
     font-size: 16rem;
     color: white;
     text-align: center;
