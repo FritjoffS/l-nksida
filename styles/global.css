@@ -5,9 +5,9 @@
   
   body {
     background-color: #333;
-    background-image: url("../images/logo_rund.png");
-    background-size: 40%;
-    background-position: 50% 80%;    
+    background-image: url("../images/logo_rund_utan_räv.png");
+    background-size: 55%;
+    background-position: 50% 20%;    
     background-attachment: fixed;
     background-repeat: no-repeat;
   }
