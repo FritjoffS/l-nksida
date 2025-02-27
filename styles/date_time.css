@@ -1,11 +1,17 @@
 #clock {
     /* background-color: #333; */
-    font-family: 'Times New Roman', Times, serif;
-    font-weight: bolder;
+    font-family: "Prosto One", serif;
     font-size: 16rem;
     color: white;
     text-align: center;
   }
+
+  .prosto-one-regular {
+    font-family: "Prosto One", serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+  
   
   #date {
     background-color: rgba(51, 51, 51, 0.8);
