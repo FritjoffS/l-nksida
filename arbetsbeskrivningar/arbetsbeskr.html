@@ -33,23 +33,28 @@
     </ul>
   </nav>
 
+  <div class="container">    
+    <button id="autoclipButton" class="copyButton">Service<br>Autoclip</button>
+    <button id="automowerButton" class="copyButton">Service<br>Automower</button>
+    <button id="cykelButton" class="copyButton">Service<br>Cykel</button>
+    <button id="cykelPunkteringButton" class="copyButton">Cykel Punktering<br>868921</button>
+    <button id="imowButton" class="copyButton">Service<br>IMow</button>
+    <button id="trimmerButton" class="copyButton">Service<br>Grästrimmer<br>868468</button>
+    <button id="häcksaxButton" class="copyButton">Service<br>Häcksax<br>820490</button>
+    <button id="lövblåsButton" class="copyButton">Service<br>Lövblås</button>
+    <button id="motorgräsklippareButton" class="copyButton">Service<br>Motorgräsklippare<br>635593</button>
+    <button id="motorsågButton" class="copyButton">Service<br>Motorsåg<br>727114</button>
+    <button id="motorsågElBatteriButton" class="copyButton">Service<br>Motorsåg El / Batteri<br>1114227</button>
+    <button id="röjsågButton" class="copyButton">Service<br>Röjsåg<br>158870</button>
+    <button id="snöslungaButton" class="copyButton">Service<br>Snöslunga</button>
+    <button id="åkgräsklippareButton" class="copyButton">Service<br>Åkgräsklippare<br>635598</button>
+    <button id="åkgräsklippareHstButton" class="copyButton">Service<br>Åkgräsklippare HST<br>635598</button>
+  </div>
+
   <div class="container">
 
-    <button id="autoclipButton" class="copyButton">Autoclip</button>
-    <button id="automowerButton" class="copyButton">Automower</button>
-    <button id="cykelButton" class="copyButton">Cykel</button>
-    <button id="cykelPunkteringButton" class="copyButton">Cykel Punktering<br>868921</button>
-    <button id="imowButton" class="copyButton">IMow</button>
-    <button id="trimmerButton" class="copyButton">Grästrimmer<br>868468</button>
-    <button id="häcksaxButton" class="copyButton">Häcksax<br>820490</button>
-    <button id="lövblåsButton" class="copyButton">Lövblås</button>
-    <button id="motorgräsklippareButton" class="copyButton">Motorgräsklippare<br>635593</button>
-    <button id="motorsågButton" class="copyButton">Motorsåg<br>727114</button>
-    <button id="motorsågElBatteriButton" class="copyButton">Motorsåg El / Batteri<br>1114227</button>
-    <button id="röjsågButton" class="copyButton">Röjsåg<br>158870</button>
-    <button id="snöslungaButton" class="copyButton">Snöslunga</button>
-    <button id="åkgräsklippareButton" class="copyButton">Åkgräsklippare<br>635598</button>
-    <button id="åkgräsklippareHstButton" class="copyButton">Åkgräsklippare HST<br>635598</button>
+    <button id="felMotorsågButton" class="copyButton">Felsökning<br>Motorsåg</button>
+
   </div>
 
   <script>
@@ -175,6 +180,19 @@
       .addEventListener("click", function () {
         var textToCopy =
           "=== Punktering ===\n\n• Byte slang\n• Däcktryck - kontroll / justering\n\n***** Provkörning *****";
+        copyTextToClipboard(textToCopy);
+      });
+    document
+      .getElementById("felMotorsågButton")
+      .addEventListener("click", function () {
+        var textToCopy = `=== Felsökning ===
+
+      # Kompression kontroll - 
+      # Tändning kontroll - 
+      # Förgasare kontroll - 
+      # Cylinder kontroll - 
+      # Kolv kontroll - 
+      --------------------------------`;
         copyTextToClipboard(textToCopy);
       });
   </script>
