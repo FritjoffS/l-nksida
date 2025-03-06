@@ -38,6 +38,7 @@
     <button id="automowerButton" class="copyButton">Service<br>Automower</button>
     <button id="cykelButton" class="copyButton">Service<br>Cykel</button>
     <button id="cykelPunkteringButton" class="copyButton">Cykel Punktering<br>868921</button>
+    <button id="cykelDäckbyteButton" class="copyButton">Cykel Däckbyte<br>869978</button>
     <button id="imowButton" class="copyButton">Service<br>IMow</button>
     <button id="trimmerButton" class="copyButton">Service<br>Grästrimmer<br>868468</button>
     <button id="häcksaxButton" class="copyButton">Service<br>Häcksax<br>820490</button>
@@ -180,6 +181,13 @@
       .addEventListener("click", function () {
         var textToCopy =
           "=== Punktering ===\n\n• Byte slang\n• Däcktryck - kontroll / justering\n\n***** Provkörning *****";
+        copyTextToClipboard(textToCopy);
+      });
+    document
+      .getElementById("cykelDäckbyteButton")
+      .addEventListener("click", function () {
+        var textToCopy =
+          "=== Däckbyte ===\n\n# Byte däck - fram\n# Byte däck - bak\n# Däcktryck - kontroll / justering\n\n***** Provkörning *****";
         copyTextToClipboard(textToCopy);
       });
     document
