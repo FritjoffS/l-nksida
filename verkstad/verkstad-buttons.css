@@ -35,6 +35,9 @@
   .stihl_ssc-button {
     background-image: url("../images/stihl_ssc.png");
   }
+  .stihl_iot-button {
+    background-image: url("../images/iot_portal.png");
+  }
   
   .stiga-button {
     background-image: url("../images/stiga.png");
