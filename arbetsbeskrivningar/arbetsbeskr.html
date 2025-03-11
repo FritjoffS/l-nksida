@@ -73,8 +73,29 @@
       // Ta bort den temporära textarean
       document.body.removeChild(textarea);
 
-      // Meddela användaren om att texten har kopierats
-      alert("Texten har kopierats till urklippet:\n" + textToCopy);
+      
+      /*alert("Texten har kopierats till urklippet:\n" + textToCopy);*/
+
+      // Skapa ett meddelandeelement
+      var message = document.createElement("div");
+      /*message.textContent = "Texten har kopierats till urklippet:\n" + textToCopy;*/
+      message.textContent = "Texten har kopierats till urklippet";
+      message.style.position = "fixed";
+      message.style.bottom = "10px";
+      message.style.left = "50%";
+      message.style.transform = "translateX(-50%)";
+      message.style.backgroundColor = "#333";
+      message.style.color = "#fff";
+      message.style.padding = "10px";
+      message.style.borderRadius = "5px";
+      message.style.zIndex = "1000";
+      message.style.fontSize = "48px"; // Ändra storleken på texten
+      document.body.appendChild(message);
+
+      // Ta bort meddelandet efter 3 sekunder
+      setTimeout(function () {
+      document.body.removeChild(message);
+      }, 5000);
     }
 
     // Lägg till händelselyssnare för varje knapp
