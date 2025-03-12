@@ -83,13 +83,26 @@
     <div class="filter-section">
         <input type="text" id="searchInput" placeholder="Sök efter produkt eller artikelnummer...">
         <select id="mainCategory">
-            <option value="">Alla huvudkategorier</option>
+            <option value="">Alla Fabrikat</option>
+            <option value="Briggs & Stratton">Briggs & Stratton</option>
+            <option value="Stiga">Stiga</option>
+            <option value="Husqvarna">Husqvarna</option>
+            <option value="Klippo">Klippo</option>
+            <option value="Honda">Honda</option>
+            <option value="Kawasaki">Kawasaki</option>
+            <option value="Stihl">Stihl</option>
         </select>
+
         <select id="subCategory" disabled>
+            <option value="">Välj Produktkategori</option>
+        </select>
+
+        <select id="subType" disabled>
             <option value="">Välj underkategori</option>
         </select>
+
     </div>
-    
+
     <div id="productContainer" class="product-grid"></div>
 
     <script>
@@ -97,48 +110,76 @@
         const productsDB = {
             categories: [
                 {
-                    name: "Luftfilter",
-                    subgroups: ["Panel typ", "Oval typ", "Rund typ", "Skum typ"],
+                    name: "Briggs & Stratton",
+                    subgroups: [
+                        { name: "Luftfilter", subtypes: [] },
+                        { name: "Bränslefilter", subtypes: [] },
+                        { name: "Tändstift", subtypes: [] }
+                    ],
                     products: [
                         {
-                            name: "Stiga LF-200 Pro",
-                            subcategory: "Panel typ",
-                            image: "images/397795s.png",
-                            info: "Professionellt luftfilter för tunga förhållanden",
-                            productNumber: "STG-LF200-PRO",
+                            name: "B&S Luftfilter 795073",
+                            subcategory: "Luftfilter",
+                            image: "placeholder-luftfilter.jpg",
+                            info: "Luftfilter för B&S motorer",
+                            productNumber: "795073",
                             specs: {
-                                Dimensioner: "300x400x50 mm",
-                                Material: "Syntetfiber",
-                                Livslängd: "2000 timmar"
+                                Dimensioner: "150x100x25 mm"
                             }
                         },
                         {
-                            name: "Stiga LF-150 Basic",
-                            subcategory: "Skum typ",
-                            image: "placeholder-luftfilter2.jpg",
-                            info: "Standardluftfilter för generellt bruk",
-                            productNumber: "STG-LF150-BAS",
+                            name: "B&S Tändstift RJ19LM",
+                            subcategory: "Tändstift",
+                            image: "placeholder-tandstift.jpg",
+                            info: "Tändstift för B&S motorer",
+                            productNumber: "RJ19LM",
                             specs: {
-                                Dimensioner: "250x350x40 mm",
-                                Material: "Pappersfilter",
-                                Livslängd: "1000 timmar"
+                                Gänga: "14 mm"
                             }
                         }
                     ]
                 },
                 {
-                    name: "Bränslefilter",
-                    subgroups: ["Högflöde", "Standard", "Komposit"],
+                    name: "Stiga",
+                    subgroups: [
+                        {
+                            name: "Luftfilter",
+                            subtypes: ["Panel typ", "Oval typ", "Rund typ"]
+                        },
+                        { name: "Bränslefilter", subtypes: [] },
+                        { name: "Oljefilter", subtypes: [] }
+                    ],
                     products: [
                         {
-                            name: "Stiga BF-300 Diesel",
-                            image: "placeholder-branslefilter.jpg",
-                            info: "Avancerat dieselbränslefilter",
-                            productNumber: "STG-BF300-DSL",
+                            name: "Stiga Luftfilter LF-200 Panel Typ",
+                            subcategory: "Luftfilter",
+                            subtype: "Panel typ",
+                            image: "placeholder-luftfilter.jpg",
+                            info: "Luftfilter för Stiga åkgräsklippare",
+                            productNumber: "STG-LF200",
                             specs: {
-                                Flödeshastighet: "200 l/h",
-                                Filtrering: "5 µm",
-                                Temperaturintervall: "-40°C till +120°C"
+                                Dimensioner: "200x150x30 mm"
+                            }
+                        },
+                        {
+                            name: "Stiga Luftfilter LF-200 Oval Typ",
+                            subcategory: "Luftfilter",
+                            subtype: "Oval typ",
+                            image: "placeholder-luftfilter.jpg",
+                            info: "Luftfilter för Stiga åkgräsklippare",
+                            productNumber: "STG-LF200",
+                            specs: {
+                                Dimensioner: "200x150x30 mm"
+                            }
+                        },
+                        {
+                            name: "Stiga Oljefilter",
+                            subcategory: "Oljefilter",
+                            image: "placeholder-oljefilter.jpg",
+                            info: "Oljefilter för Stiga åkgräsklippare",
+                            productNumber: "STG-OF200",
+                            specs: {
+                                Dimensioner: "200x150x30 mm"
                             }
                         }
                     ]
@@ -148,21 +189,11 @@
 
         // Initiera gränssnittet
         function init() {
-            const mainCategorySelect = document.getElementById('mainCategory');
-            
-            // Fyll huvudkategorier
-            productsDB.categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category.name;
-                option.textContent = category.name;
-                mainCategorySelect.appendChild(option);
-            });
-
-            // Event listeners
             document.getElementById('searchInput').addEventListener('input', updateResults);
-            mainCategorySelect.addEventListener('change', updateSubcategories);
-            document.getElementById('subCategory').addEventListener('change', updateResults);
-            
+            document.getElementById('mainCategory').addEventListener('change', updateSubcategories);
+            document.getElementById('subCategory').addEventListener('change', updateSubtypes);
+            document.getElementById('subType').addEventListener('change', updateResults);
+
             updateResults();
         }
 
@@ -171,20 +202,54 @@
             const mainCategory = document.getElementById('mainCategory').value;
             const subCategorySelect = document.getElementById('subCategory');
             subCategorySelect.innerHTML = '<option value="">Välj underkategori</option>';
-            
-            if(mainCategory) {
+
+            if (mainCategory) {
                 const category = productsDB.categories.find(c => c.name === mainCategory);
-                category.subgroups.forEach(sub => {
-                    const option = document.createElement('option');
-                    option.value = sub;
-                    option.textContent = sub;
-                    subCategorySelect.appendChild(option);
-                });
-                subCategorySelect.disabled = false;
+
+                if (category && category.subgroups) {
+                    category.subgroups.forEach(subgroup => {
+                        const option = document.createElement('option');
+                        option.value = subgroup.name;
+                        option.textContent = subgroup.name;
+                        subCategorySelect.appendChild(option);
+                    });
+                    subCategorySelect.disabled = false;
+                } else {
+                    subCategorySelect.disabled = true;
+                }
             } else {
                 subCategorySelect.disabled = true;
             }
-            
+
+            updateResults();
+        }
+
+        // Uppdatera undergrupper
+        function updateSubtypes() {
+            const mainCategory = document.getElementById('mainCategory').value;
+            const subCategory = document.getElementById('subCategory').value;
+            const subTypeSelect = document.getElementById('subType');
+            subTypeSelect.innerHTML = '<option value="">Välj underkategori</option>';
+
+            if (mainCategory && subCategory) {
+                const category = productsDB.categories.find(c => c.name === mainCategory);
+                const subgroup = category.subgroups.find(sg => sg.name === subCategory);
+
+                if (subgroup && subgroup.subtypes) {
+                    subgroup.subtypes.forEach(subtype => {
+                        const option = document.createElement('option');
+                        option.value = subtype;
+                        option.textContent = subtype;
+                        subTypeSelect.appendChild(option);
+                    });
+                    subTypeSelect.disabled = false;
+                } else {
+                    subTypeSelect.disabled = true;
+                }
+            } else {
+                subTypeSelect.disabled = true;
+            }
+
             updateResults();
         }
 
@@ -193,18 +258,19 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const mainCategory = document.getElementById('mainCategory').value;
             const subCategory = document.getElementById('subCategory').value;
+            const subType = document.getElementById('subType').value;
 
             return productsDB.categories.flatMap(category => {
-                if(mainCategory && category.name !== mainCategory) return [];
-                
+                if (mainCategory && category.name !== mainCategory) return [];
+
                 return category.products.filter(product => {
-                    const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
-                                        product.productNumber.toLowerCase().includes(searchTerm);
-                    
-                    const matchesSubcategory = !subCategory || 
-                                             (category.subgroups.includes(subCategory));
-                    
-                    return matchesSearch && matchesSubcategory;
+                    const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
+                        product.productNumber.toLowerCase().includes(searchTerm);
+
+                    const matchesSubcategory = !subCategory || product.subcategory === subCategory;
+                    const matchesSubtype = !subType || product.subtype === subType;
+
+                    return matchesSearch && matchesSubcategory && matchesSubtype;
                 });
             });
         }
@@ -213,8 +279,8 @@
         function updateResults() {
             const filteredProducts = filterProducts();
             const container = document.getElementById('productContainer');
-            
-            if(filteredProducts.length === 0) {
+
+            if (filteredProducts.length === 0) {
                 container.innerHTML = '<div class="no-results">Inga produkter hittades med aktuella filter</div>';
                 return;
             }
