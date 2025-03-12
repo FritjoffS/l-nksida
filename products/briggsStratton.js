@@ -8,6 +8,7 @@ const briggsStratton = {
         { name: "Bränslefilter", subtypes: [] },
         { name: "Oljefilter", subtypes: [] },
         { name: "Tändstift", subtypes: [] },
+        { name: "Primerblåsor", subtypes: [] },
         {
             name: "Packningar",
             subtypes: ["Luftrenarpackningar", "Topplockspackningar", "Avgaspackninar"]
@@ -16,14 +17,14 @@ const briggsStratton = {
     ],
     products: [
         {
-            name: "B&S Luftfilter 399877SS",
+            name: "B&S Luftfilter 399877S",
             subcategory: "Luftfilter",
             subtype: "Panelfilter",
             image: "images/399877s.png",
             info: "Luftfilter för B&S motorer",
             productNumber: "399877S / 4103",
             specs: {
-                // Dimensioner: "150x100x25 mm"
+                Dimensioner: "150x100x25 mm"
             }
         },
         {
@@ -247,13 +248,156 @@ const briggsStratton = {
             }
         },
         {
-            name: "B&S Tändstift RJ19LM",
-            subcategory: "Tändstift",
-            image: "placeholder-tandstift.jpg",
-            info: "Tändstift för B&S motorer",
-            productNumber: "RJ19LM",
+            name: "B&S Bränslefilter 84001895",
+            subcategory: "Bränslefilter",
+            image: "images/84001895.png",
+            info: "Bränslefilter för B&S motorer",
+            productNumber: "84001895 / 84001895M",
             specs: {
-                Gänga: "14 mm"
+                // Gänga: "14 mm"
+            }
+        },
+        {
+            name: "B&S Bränslefilter 394358S",
+            subcategory: "Bränslefilter",
+            image: "images/394358s.png",
+            info: "Bränslefilter för B&S motorer",
+            productNumber: "394358S / 4112",
+            specs: {
+                // Gänga: "14 mm"
+            }
+        },
+        {
+            name: "B&S Bränslefilter 298090S",
+            subcategory: "Bränslefilter",
+            image: "images/298090s.png",
+            info: "Bränslefilter för B&S motorer",
+            productNumber: "298090S / 4105",
+            specs: {
+                // Gänga: "14 mm"
+            }
+        },
+        {
+            name: "B&S Bränslefilter 845125",
+            subcategory: "Bränslefilter",
+            image: "images/845125.png",
+            info: "Bränslefilter för B&S motorer",
+            productNumber: "845125 / 4266",
+            specs: {
+                // Gänga: "14 mm"
+            }
+        },
+        {
+            name: "B&S Oljefilter 492932S",
+            subcategory: "Oljefilter",
+            image: "images/492932s.png",
+            info: "Oljefilter för B&S motorer",
+            productNumber: "492932S / 4154",
+            specs: {
+                // Gänga: "14 mm"
+            }
+        },
+        {
+            name: "B&S Oljefilter 491056",
+            subcategory: "Oljefilter",
+            image: "images/491056.png",
+            info: "Oljefilter för B&S motorer",
+            productNumber: "491056 / 4153",
+            specs: {
+                // Gänga: "14 mm"
+            }
+        },
+        {
+            name: "B&S Tändstift BS-SV",
+            subcategory: "Tändstift",
+            image: "images/bs-sv.png",
+            info: "Tändstift för B&S motorer",
+            productNumber: "BS-SV",
+            specs: {
+                // Gänga: "14mm"
+            }
+        },
+        {
+            name: "B&S Tändstift BS-OHV",
+            subcategory: "Tändstift",
+            image: "images/bs-ohv.png",
+            info: "Tändstift för B&S motorer",
+            productNumber: "BS-OHV",
+            specs: {
+                // Gänga: "14mm"
+            }
+        },
+        {
+            name: "B&S Primerblåsa 694394",
+            subcategory: "Primerblåsor",
+            image: "images/694394.png",
+            info: "Primerblåsa för B&S motorer",
+            productNumber: "694394 / 4178",
+            specs: {
+                // Gänga: "14mm"
+            }
+        },
+        {
+            name: "B&S Primerblåsa 694395",
+            subcategory: "Primerblåsor",
+            image: "images/694395.png",
+            info: "Primerblåsa för B&S motorer",
+            productNumber: "694395 / 4180",
+            specs: {
+                // Gänga: "14mm"
+            }
+        },
+        {
+            name: "B&S Primerblåsa 793382",
+            subcategory: "Primerblåsor",
+            image: "images/793382.png",
+            info: "Primerblåsa för B&S motorer",
+            productNumber: "793382",
+            specs: {
+                // Gänga: "14mm"
+            }
+        },
+        {
+            name: "B&S Primerblåsa 594281",
+            subcategory: "Primerblåsor",
+            image: "images/594281.png",
+            info: "Primerblåsa för B&S motorer",
+            productNumber: "594281",
+            specs: {
+                // Gänga: "14mm"
+            }
+        },
+        {
+            name: "B&S Luftrenarpackning 795629",
+            subcategory: "Packningar",
+            subtype: "Luftrenarpackningar",
+            image: "images/795629.png",
+            info: "Luftrenarpackning för B&S motorer",
+            productNumber: "795629",
+            specs: {
+                // Gänga: "14mm"
+            }
+        },
+        {
+            name: "B&S Luftrenarpackning 692667",
+            subcategory: "Packningar",
+            subtype: "Luftrenarpackningar",
+            image: "images/692667.png",
+            info: "Luftrenarpackning för B&S motorer",
+            productNumber: "692667",
+            specs: {
+                // Gänga: "14mm"
+            }
+        },
+        {
+            name: "B&S Luftrenarpackning 691894",
+            subcategory: "Packningar",
+            subtype: "Luftrenarpackningar",
+            image: "images/691894.png",
+            info: "Luftrenarpackning för B&S motorer",
+            productNumber: "691894",
+            specs: {
+                // Gänga: "14mm"
             }
         },
     ]
