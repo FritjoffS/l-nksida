@@ -9,7 +9,8 @@ const husqvarna = {
             name: "Tanklock",
             subtypes: ["Bränsletank", "Oljetank"] },
 
-        { name: "Tändstift", subtypes: [] }
+        { name: "Tändstift", subtypes: [] },
+        { name: "Övrigt", subtypes: [] }
     ],
     products: [
         {
@@ -21,6 +22,17 @@ const husqvarna = {
             productNumber: "577864603",
             specs : {
                 Vårat_Produktnummer: "868983",
+            }
+        },
+        {
+            name: "KlippoDäck 502945101",
+            subcategory: "Övrigt",
+            // subtype: "Automower",
+            image: "images/502945101.png",
+            info: "KlippoDäck",
+            productNumber: "502945101",
+            specs : {
+                Vårat_Produktnummer: "498957",
             }
         },
  
