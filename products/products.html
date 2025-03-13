@@ -137,7 +137,9 @@
 
                 return category.products.filter(product => {
                     const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
-                        product.productNumber.toLowerCase().includes(searchTerm);
+                        product.productNumber.toLowerCase().includes(searchTerm) ||
+                        product.info.toLowerCase().includes(searchTerm) ||
+                        Object.values(product.specs).some(spec => spec.toLowerCase().includes(searchTerm));
 
                     const matchesSubcategory = !subCategory || product.subcategory === subCategory;
                     const matchesSubtype = !subType || product.subtype === subType;
