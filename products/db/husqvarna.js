@@ -13,14 +13,14 @@ const husqvarna = {
     ],
     products: [
         {
-            name: "Standardkniv Long Life för Automower 9 st 577864603",
+            name: "Standardkniv Long Life för Automower st",
             subcategory: "Knivar",
             subtype: "Automower",
             image: "images/577864603.png",
             info: "Standardkniv Long Life för Automower",
             productNumber: "577864603",
-            specs: {
-                // Dimensioner: "200x150x30 mm"
+            specs : {
+                Vårat_Produktnummer: "868983",
             }
         },
  
