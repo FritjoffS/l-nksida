@@ -1,4 +1,4 @@
-import briggsStratton from './briggsStratton.js';
+import briggsStratton from './db/briggsStratton.js';
 import stiga from './stiga.js';
 
 const productsDB = {
