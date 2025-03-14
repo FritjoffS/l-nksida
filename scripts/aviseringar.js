@@ -154,6 +154,17 @@ Sollebrunns Järnhandel AB
   copyTextToClipboard(textToCopy);
 });
 
+document.getElementById("maskinButton").addEventListener("click", function () {
+  var textToCopy = `Bästa Kund.
+Er Maskin är nu klar i vår verkstad och finns för avhämtning.
+Välkommen
+Vardagar 08.00-18.00
+Lördagar 09.00-13.00
+Sollebrunns Järnhandel AB
+0322-40330`;
+  copyTextToClipboard(textToCopy);
+});
+
 document.getElementById("reservdelarButton").addEventListener("click", function () {
   var textToCopy = `Bästa kund.
 Dina reservdelar som du beställt har nu kommit till vårt lager och finns för avhämtning.
