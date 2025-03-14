@@ -1,5 +1,4 @@
 
-
 .container {
     display: flex;
     flex-wrap: wrap;
@@ -82,7 +81,7 @@
   .kohler-button {
     background-image: url("../images/kohler.png");
   }
-  
+
   .tanaka-button {
     background-image: url("../images/tanaka.png");
   }
