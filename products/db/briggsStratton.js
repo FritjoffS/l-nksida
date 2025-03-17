@@ -24,7 +24,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "399877S / 4103",
             specs: {
-                Dimensioner: "150x100x25 mm"
+                Dimensioner: "150x100x25 mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -35,7 +36,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "397795S",
             specs: {
-                Förfilter: "399039"
+                Förfilter: "399039",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -46,7 +48,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "794422 / 4214",
             specs: {
-                Förfilter: "697015 / 4215"
+                Förfilter: "697015 / 4215",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -57,7 +60,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "794421 / 4213",
             specs: {
-                Förfilter: "697292 / 4212"
+                Förfilter: "697292 / 4212",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -68,7 +72,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "499486S",
             specs: {
-                Förfilter: "273638S"
+                Förfilter: "273638S",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -79,7 +84,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "792101",
             specs: {
-                Förfilter: "273638S"
+                Förfilter: "273638S",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -90,7 +96,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "593260",
             specs: {
-                // Förfilter: "273638S"
+                // Förfilter: "273638S",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -101,7 +108,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "792038 / 4245",
             specs: {
-                Förfilter: "793676 / 4267"
+                Förfilter: "793676 / 4267",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -112,7 +120,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "795066 / 4240",
             specs: {
-                Förfilter: "796254 / 261"
+                Förfilter: "796254 / 261",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -123,7 +132,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "697029 / 4207",
             specs: {
-                Förfilter: "273356S / 4201"
+                Förfilter: "273356S / 4201",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -134,7 +144,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "796970 / 4238",
             specs: {
-                // Förfilter: "273356S / 4201"
+                // Förfilter: "273356S / 4201",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -145,7 +156,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "590601",
             specs: {
-                Förfilter: "590602"
+                Förfilter: "590602",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -156,7 +168,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "496864S / 4139",
             specs: {
-                Förfilter: "272403S / 4142"
+                Förfilter: "272403S / 4142",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -167,7 +180,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "691667 / 4166",
             specs: {
-                Förfilter: "272477S / 4199"
+                Förfilter: "272477S / 4199",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -178,7 +192,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "594201 / 4243",
             specs: {
-                // Förfilter: "272477S / 4199"
+                // Förfilter: "272477S / 4199",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -189,7 +204,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "591583 / 4269",
             specs: {
-                // Förfilter: "272477S / 4199"
+                // Förfilter: "272477S / 4199",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -200,7 +216,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "394018S / 4135",
             specs: {
-                Förfilter: "272490S / 4111"
+                Förfilter: "272490S / 4111",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -211,7 +228,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "692519 / 4232",
             specs: {
-                Förfilter: "692520 / 4257"
+                Förfilter: "692520 / 4257",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -222,7 +240,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "698369 / 4216",
             specs: {
-                // Förfilter: "692520 / 4257"
+                // Förfilter: "692520 / 4257",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -233,7 +252,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "272235S / 4107",
             specs: {
-                // Förfilter: "692520 / 4257"
+                // Förfilter: "692520 / 4257",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -244,7 +264,8 @@ const briggsStratton = {
             info: "Luftfilter för B&S motorer",
             productNumber: "270579S / 4104",
             specs: {
-                // Förfilter: "692520 / 4257"
+                // Förfilter: "692520 / 4257",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -254,7 +275,8 @@ const briggsStratton = {
             info: "Bränslefilter för B&S motorer",
             productNumber: "84001895 / 84001895M",
             specs: {
-                // Gänga: "14 mm"
+                // Gänga: "14 mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -264,7 +286,8 @@ const briggsStratton = {
             info: "Bränslefilter för B&S motorer",
             productNumber: "394358S / 4112",
             specs: {
-                // Gänga: "14 mm"
+                // Gänga: "14 mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -274,7 +297,8 @@ const briggsStratton = {
             info: "Bränslefilter för B&S motorer",
             productNumber: "298090S / 4105",
             specs: {
-                // Gänga: "14 mm"
+                // Gänga: "14 mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -284,7 +308,8 @@ const briggsStratton = {
             info: "Bränslefilter för B&S motorer",
             productNumber: "845125 / 4266",
             specs: {
-                // Gänga: "14 mm"
+                // Gänga: "14 mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -294,7 +319,8 @@ const briggsStratton = {
             info: "Oljefilter för B&S motorer",
             productNumber: "492932S / 4154",
             specs: {
-                // Gänga: "14 mm"
+                // Gänga: "14 mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -304,7 +330,8 @@ const briggsStratton = {
             info: "Oljefilter för B&S motorer",
             productNumber: "491056 / 4153",
             specs: {
-                // Gänga: "14 mm"
+                // Gänga: "14 mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -314,7 +341,8 @@ const briggsStratton = {
             info: "Tändstift för B&S motorer",
             productNumber: "BS-SV",
             specs: {
-                // Gänga: "14mm"
+                // Gänga: "14mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -324,7 +352,8 @@ const briggsStratton = {
             info: "Tändstift för B&S motorer",
             productNumber: "BS-OHV",
             specs: {
-                // Gänga: "14mm"
+                // Gänga: "14mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -334,7 +363,8 @@ const briggsStratton = {
             info: "Primerblåsa för B&S motorer",
             productNumber: "694394 / 4178",
             specs: {
-                // Gänga: "14mm"
+                // Gänga: "14mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -344,7 +374,8 @@ const briggsStratton = {
             info: "Primerblåsa för B&S motorer",
             productNumber: "694395 / 4180",
             specs: {
-                // Gänga: "14mm"
+                // Gänga: "14mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -354,7 +385,8 @@ const briggsStratton = {
             info: "Primerblåsa för B&S motorer",
             productNumber: "793382",
             specs: {
-                // Gänga: "14mm"
+                // Gänga: "14mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -364,7 +396,8 @@ const briggsStratton = {
             info: "Primerblåsa för B&S motorer",
             productNumber: "594281",
             specs: {
-                // Gänga: "14mm"
+                // Gänga: "14mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -375,7 +408,8 @@ const briggsStratton = {
             info: "Luftrenarpackning för B&S motorer",
             productNumber: "795629",
             specs: {
-                // Gänga: "14mm"
+                // Gänga: "14mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -386,7 +420,8 @@ const briggsStratton = {
             info: "Luftrenarpackning för B&S motorer",
             productNumber: "692667",
             specs: {
-                // Gänga: "14mm"
+                // Gänga: "14mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
         {
@@ -397,7 +432,8 @@ const briggsStratton = {
             info: "Luftrenarpackning för B&S motorer",
             productNumber: "691894",
             specs: {
-                // Gänga: "14mm"
+                // Gänga: "14mm",
+                Fabrikat: "Briggs & Stratton"
             }
         },
     ]
