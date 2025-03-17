@@ -171,9 +171,27 @@
                                 <p><strong>${key}:</strong> ${value}</p>
                             `).join('')}
                         </div>
+                        <button class="copy-button" data-product-number="${product.productNumber}">Kopiera Produktnummer</button>
                     </div>
                 </div>
             `).join('');
+
+            // Lägg till event listeners för kopieringsknapparna
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const productNumber = button.getAttribute('data-product-number');
+                    copyTextToClipboard(productNumber);
+                });
+            });
+        }
+
+        // Funktion för att kopiera text till urklipp
+        function copyTextToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Produktnummer kopierat till urklipp: ' + text);
+            }).catch(err => {
+                console.error('Kunde inte kopiera texten: ', err);
+            });
         }
 
         // Starta applikationen
