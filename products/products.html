@@ -164,14 +164,18 @@
                     <img src="${product.image}" class="product-image" alt="${product.name}">
                     <div class="product-info">
                         <h3>${product.name}</h3>
-                        <p class="product-number">${product.productNumber}</p>
+                        <div class="product-number-container" style="display: flex; align-items: center;">
+                            <p class="product-number" style="margin-right: 8px;">${product.productNumber}</p>
+                            <button class="copy-button" data-product-number="${product.productNumber}" style="background-image: url('../icons/copy.png'); background-size: contain; background-repeat: no-repeat; width: 32px; height: 32px; border: none; cursor: pointer;"></button>
+                        </div>
                         <p>${product.info}</p>
                         <div class="specs">
                             ${Object.entries(product.specs).map(([key, value]) => `
                                 <p><strong>${key}:</strong> ${value}</p>
                             `).join('')}
                         </div>
-                        <button class="copy-button" data-product-number="${product.productNumber}">Kopiera Produktnummer</button>
+                    </div>
+                        
                     </div>
                 </div>
             `).join('');
