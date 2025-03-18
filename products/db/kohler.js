@@ -3,17 +3,17 @@ const kohler = {
     subgroups: [
         {
             name: "Knivar",
-            subtypes: ["WBH", "Robotgräsklippare", "Rider"]
+            subtypes: ["WBH", "Rider"]
         },
     ],
     products: [
         {
-            name: "Kniv Imow 5/5EVO, 6/6EVO, 7/7EVO series",
+            name: "Kniv",
             subcategory: "Knivar",
-            subtype: "Robotgräsklippare",
-            image: "images/STIA000074201.png",
-            info: "Standardkniv för Stihl Imow 5/5EVO, 6/6EVO, 7/7EVO series 3 st",
-            productNumber: "STIA000074201",
+            subtype: "Rider",
+            image: "images/kohler/1096642.png",
+            info: "Standardkniv för ",
+            productNumber: "",
             specs: {
                 Vårat_Produktnummer: "1096642",
                 Antal: "3 st"

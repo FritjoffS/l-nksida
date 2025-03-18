@@ -17,7 +17,7 @@ const husqvarna = {
             name: "Standardkniv Long Life för Automower st",
             subcategory: "Knivar",
             subtype: "Automower",
-            image: "images/577864603.png",
+            image: "images/husqvarna/577864603.png",
             info: "Standardkniv Long Life för Automower",
             productNumber: "577864603",
             specs : {
@@ -28,7 +28,7 @@ const husqvarna = {
             name: "KlippoDäck 502945101",
             subcategory: "Övrigt",
             // subtype: "Automower",
-            image: "images/502945101.png",
+            image: "images/husqvarna/502945101.png",
             info: "KlippoDäck",
             productNumber: "502945101",
             specs : {
