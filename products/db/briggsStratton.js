@@ -376,7 +376,7 @@ const briggsStratton = {
             subcategory: "Tändstift",
             image: "images/briggs/bs-ohv.png",
             info: "Tändstift för B&S motorer",
-            productNumber: "992306",
+            productNumber: "992304",
             specs: {
                 // Gänga: "14mm",
                 Multipack: "992340",

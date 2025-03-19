@@ -11,9 +11,9 @@ const stihl = {
             name: "Kniv Imow MI / RMI 4 series",
             subcategory: "Knivar",
             subtype: "Robotgräsklippare",
-            image: "images/6301702010.png",
+            image: "images/63017020101.png",
             info: "Standardkniv för Stihl Imow MI/RMI 4 series",
-            productNumber: "6301702010",
+            productNumber: "63017020101",
             specs: {
                 Vårat_Produktnummer: "820515",
                 Längd: "24 cm"
