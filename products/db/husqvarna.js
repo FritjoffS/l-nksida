@@ -62,6 +62,30 @@ const husqvarna = {
             }
         },
         {
+            name: "Ovankniv med muttrar",
+            subcategory: "Knivar",
+            subtype: "WBH",
+            image: "images/husqvarna/503097301.webp",
+            info: "BLADE 1 par ovanknivar skinpackade med muttrar. För Klippo",
+            productNumber: "503097301",
+            specs : {
+                // Längd: "31 cm",
+                // Fabrikat: "Husqvarna",
+            }
+        },
+        {
+            name: "Skärtungor 2 par",
+            subcategory: "Knivar",
+            subtype: "WBH",
+            image: "images/husqvarna/548358301.webp",
+            info: "CUTTING BLADE (2PAIR) 2 par skärtungor skinpackade. För Klippo",
+            productNumber: "548358301",
+            specs : {
+                // Längd: "31 cm",
+                // Fabrikat: "Husqvarna",
+            }
+        },
+        {
             name: "Fiberbricka D61",
             subcategory: "Knivar",
             subtype: "Tillbehör",
