@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <title>Lägg till Produkter</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJgsd6MrTGIWOJG2E8wlwWEy4lMW98bEY",
+            authDomain: "l-nksida.firebaseapp.com",
+            databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "l-nksida",
+            storageBucket: "l-nksida.firebasestorage.app",
+            messagingSenderId: "258147870107",
+            appId: "1:258147870107:web:789d527e362310de8cad3e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        async function addProduct(event) {
+            event.preventDefault();
+
+            const category = document.getElementById('category').value;
+            const subgroup = document.getElementById('subgroup').value;
+            const name = document.getElementById('name').value;
+            const productNumber = document.getElementById('productNumber').value;
+            const info = document.getElementById('info').value;
+            const specs = document.getElementById('specs').value;
+            const image = document.getElementById('image').value;
+
+            if (!category || !subgroup || !name || !productNumber) {
+                alert("Alla fält markerade med * måste fyllas i.");
+                return;
+            }
+
+            const product = {
+                name,
+                productNumber,
+                info,
+                specs: JSON.parse(specs || "{}"),
+                image,
+                subcategory: subgroup
+            };
+
+            console.log("Product to add:", product);
+
+            try {
+                const categoryRef = ref(db, `products/${category}/subgroups/${subgroup}/products`);
+                console.log("Database reference:", categoryRef);
+                await push(categoryRef, product);
+                alert("Produkten har lagts till!");
+                document.getElementById('productForm').reset();
+            } catch (error) {
+                console.error("Error adding product:", error);
+                alert("Ett fel uppstod vid tillägg av produkten.");
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Lägg till Produkter</h1>
+    <form id="productForm" onsubmit="addProduct(event)">
+        <label for="category">Kategori *</label>
+        <input type="text" id="category" placeholder="Ex: Briggs & Stratton" required><br><br>
+
+        <label for="subgroup">Underkategori *</label>
+        <input type="text" id="subgroup" placeholder="Ex: Motordelar" required><br><br>
+
+        <label for="name">Produktnamn *</label>
+        <input type="text" id="name" placeholder="Ex: Tändstift B&S" required><br><br>
+
+        <label for="productNumber">Produktnummer *</label>
+        <input type="text" id="productNumber" placeholder="Ex: 12345" required><br><br>
+
+        <label for="info">Produktinformation</label>
+        <textarea id="info" placeholder="Ex: Högkvalitativt tändstift för Briggs & Stratton-motorer."></textarea><br><br>
+
+        <label for="specs">Specifikationer (JSON-format)</label>
+        <textarea id="specs" placeholder='Ex: {"Typ": "Tändstift", "Material": "Keramik och metall"}'></textarea><br><br>
+
+        <label for="image">Bild-URL</label>
+        <input type="text" id="image" placeholder="Ex: path/to/image.jpg"><br><br>
+
+        <button type="submit">Lägg till Produkt</button>
+    </form>
+</body>
+</html>
