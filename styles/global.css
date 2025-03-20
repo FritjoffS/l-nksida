@@ -4,6 +4,7 @@
   }
   
   body {
+    padding-top: 100px;
     background-color: #333;
     background-image: url("../images/logo_rund_utan_räv.png");
     background-size: 55%;
