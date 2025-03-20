@@ -1,5 +1,9 @@
     nav {
     background-color: black;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
   }
   
   .navbar {
@@ -29,3 +33,7 @@
     background-color: #555;
     color: white;
   }
+
+
+
+/* Add padding to the body to prevent content overlap */
