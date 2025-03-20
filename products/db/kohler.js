@@ -28,6 +28,18 @@ const kohler = {
             }
         },
         {
+            name: "Luftfilter Kohler 2008306S",
+            subcategory: "Luftfilter",
+            subtype: "Panel typ",
+            image: "images/kohler/2008306s.avif",
+            info: "Luftfilter för Rider",
+            productNumber: "2008306S",
+            specs: {
+                Fabrikat: "Kohler",
+                Dimensioner: "196x135x35 mm",
+            }
+        },
+        {
             name: "Förfilter Kohler 1408302S",
             subcategory: "Luftfilter",
             subtype: "Förfilter",
@@ -37,6 +49,32 @@ const kohler = {
             specs: {
                 Fabrikat: "Kohler",
                 // Dimensioner: "145x90x26 mm"
+            }
+        },
+        {
+            name: "Oljefilter Kohler 1205001S",
+            subcategory: "Oljefilter",
+            image: "images/kohler/1205001s.avif",
+            info: "Förfilter för 1205001S",
+            productNumber: "1205001S",
+            specs: {
+                Fabrikat: "Kohler",
+                Gänga: "3/4 in",
+                Höjd: "70 mm",
+                Diameter: "75 mm"
+            }
+        },
+        {
+            name: "Oljefilter Kohler 5205002S",
+            subcategory: "Oljefilter",
+            image: "images/kohler/5205002s.avif",
+            info: "Oljefilter 5205002S",
+            productNumber: "5205002S",
+            specs: {
+                Fabrikat: "Kohler",
+                Gänga: "3/4 in",
+                Höjd: "71,4 mm",
+                Diameter: "76 mm"
             }
         },
         {
