@@ -21,6 +21,17 @@ const stiga = {
             }
         },
         {
+            name: "Stiga Luftfilter 118550199/0",
+            subcategory: "Luftfilter",
+            subtype: "Oval typ",
+            image: "images/stiga/1185501990.png",
+            info: "Luftfilter för Stiga Rider",
+            productNumber: "118550199/0",
+            specs: {
+                // Dimensioner: "200x150x30 mm"
+            }
+        },
+        {
             name: "Stiga Luftfilter 118550946/0",
             subcategory: "Luftfilter",
             subtype: "Skumfilter",
