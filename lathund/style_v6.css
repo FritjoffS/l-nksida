@@ -1,0 +1,160 @@
+body {
+    margin: 0px;
+    /* background-image: url("../img/b-m-back.jpg"); */
+    background-color: slategray;
+    /* background-attachment: fixed; */
+}
+
+#sidenav {
+    display: inline-block;
+    /* flex-direction: column; */
+    padding: 10px 10px;
+    width: 300px;
+    margin: 20px 20px;
+    vertical-align: top;
+    background-color: slategray;
+    border: black solid 2px;
+    text-align: center;
+}
+
+.sidenav {
+  /*   display: flex; */
+    width: 250px;
+    height: 40px;
+    background-color: aqua;
+    font-size: 1.2rem;
+}
+
+/* nav {
+    background-color: #333;
+ }
+
+.navbar {
+    display: flex;
+    flex-direction: column;
+    width: 10%;
+         text-align: center;
+    list-style-type: none;
+    margin: 0;
+    padding: 10px 20px;
+    overflow: hidden;
+    background-color: #333;
+    font-size: 1.5rem;
+    color: white;
+    
+}
+
+.navbar li {
+     float: left;
+} */
+
+.formcontainer {
+    display: inline-block;
+    justify-content: center;
+    width: 800px;
+    margin: 20px 180px;
+    background-color: white;
+}
+
+.header {
+   /*  display: block; */
+    color: black;
+    text-align: center;
+    width: 600px;
+    margin: 20px auto 0px;
+    border: black solid 2px;
+    background-color: white;
+}
+
+#titleInput {
+    width: 100%;
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 5px 0px;
+    margin: 0px;
+    text-align: center;
+    border: none;
+
+}
+
+.formulär section {
+    /* box-sizing: content-box; */
+    padding: 0px 0px;
+    width: 600px;
+    margin: 0 auto;
+    border-left: black solid 2px;
+    border-right: black solid 2px;
+    border-bottom: black solid 2px;
+    background-color: white;
+}
+
+.formulär input[name="produkt"] {
+    width: 50%;
+    height: 20px;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    border: none;
+}
+
+.formulär input[name="produktNummer"] {
+    width: 17%;
+    height: 20px;
+    padding: 10px 10px;
+    font-size: 1rem;
+    border-left: black solid 2px;
+    border-right: black solid 2px;
+    border-top: none;
+    border-bottom: none;
+}
+
+.formulär .barcode {
+    max-width: 100%;
+    /* Ensure the barcode image does not exceed the width of its container */
+    height: 50px;
+    /* Maintain the aspect ratio of the barcode image */
+    margin-top: 0px;
+    /* Adjust the margin between the ProduktNummer input and barcode */
+    margin-left: 5px;
+    /* Adjust the margin between the ProduktNummer input and barcode */
+    vertical-align: middle;
+    text-align: left;
+    padding-left: 10px;
+
+}
+
+#savedTitlesDropdown {
+    width: 250px;
+    height: 40px;
+    font-size: 1.2rem;
+    padding: 5px 0px;
+    margin: 0px;
+    border: black solid 1px;
+    background-color: white;
+}
+
+@media print {
+    ::placeholder {
+        color: transparent !important;
+    }
+
+    .buttons {
+        display: none;
+    }
+
+    br {
+        display: none;
+    }
+
+    .sidenav {
+        display: none;
+    }
+
+    #sidenav {
+        display: none;
+    }
+
+    #savedTitlesDropdown {
+        display: none;
+    }
+}
+    

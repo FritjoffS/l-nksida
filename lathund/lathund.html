@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/search.css">
+    <link rel="stylesheet" href="../styles/navbar.css">
+    <link rel="stylesheet" href="style_v6.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    
+    <nav>
+        <ul class="navbar">
+          <li><a href="../index/index.html"><img src="../icons/home.png" alt="Home Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Hem</a></li>
+          <li><a href="../verkstad/verkstad.html"><img src="../icons/tools.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Verkstad</a></li>
+          <li><a href="../kontor/kontor.html"><img src="../icons/office.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Kontor</a></li>
+          <li><a href="../aviseringar/aviseringar.html"><img src="../icons/email.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Aviseringar</a></li>
+          <li><a href="../arbetsbeskrivningar/arbetsbeskr.html"><img src="../icons/list.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Arbetsbeskrivningar</a></li>
+          <li><a href="../lathund/lathund.html"><img src="../icons/list.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Lathund</a></li>
+          <li><a href="../products/products.html"><img src="../icons/under-construction.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Produkter</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div id="sidenav">
+            <button class="sidenav" id="insertButton">Spara sidan</button>
+            <button class="sidenav" id="updateButton">Uppdatera sparad sida</button>
+            <button class="sidenav" id="deleteButton">Radera sparad sida</button>
+            <button class="sidenav" id="printButton">Skriv ut sidan</button>
+            <button class="sidenav" id="clearButton">Rensa formuläret</button>
+            <button class="sidenav" id="exportButton">Exportera data</button>
+            <button class="sidenav" id="importButton">Importera data</button>
+            <select id="savedTitlesDropdown"></select>
+    
+        </div>
+
+        <div class="formcontainer">
+
+            <br>
+            <header class="header">
+    
+                <input type="text" id="titleInput" placeholder="Överskrift">
+    
+            </header>
+    
+            <div>
+                <form class="formulär" id="productForm">
+                    <!-- Container for dynamic sections -->
+                </form>
+                <br><br>
+            </div>
+        </div>
+    
+        <br>
+    
+        <!-- //-----------------------Start of firebase-----------------------// -->
+    
+        <script type="module">
+    
+            // Import the functions you need from the SDKs you need
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+            // TODO: Add SDKs for Firebase products that you want to use
+            // https://firebase.google.com/docs/web/setup#available-libraries
+    
+            // Your web app's Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyC1JyGvWi8P8SjbvEq0Qg3-WuNqA4_8b84",
+                authDomain: "lathund-c2fc4.firebaseapp.com",
+                databaseURL: "https://lathund-c2fc4-default-rtdb.europe-west1.firebasedatabase.app",
+                projectId: "lathund-c2fc4",
+                storageBucket: "lathund-c2fc4.appspot.com",
+                messagingSenderId: "471459551227",
+                appId: "1:471459551227:web:1b05e833f496850091dd5e"
+            };
+    
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+    
+            import { getDatabase, ref, get, set, child, update, remove, push } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js";
+    
+            const db = getDatabase(); // Get a reference to the database service
+            const numberRows = 25; // Number of rows to generate
+    
+            var titleInput = document.querySelector("#titleInput"); // Get the title input element
+    
+            var products = []; // Array to store product input elements
+            var produktNumbers = []; // Array to store product number input elements
+    
+            // Loop through the number of rows and store the input elements in the arrays
+            for (var i = 1; i <= numberRows; i++) {
+                products.push(document.querySelector("#produkt" + i));
+                produktNumbers.push(document.querySelector("#produktNummer" + i));
+            }
+    
+            var insertButton = document.querySelector("#insertButton");
+            var updateButton = document.querySelector("#updateButton");
+            var deleteButton = document.querySelector("#deleteButton");
+            var findButton = document.querySelector("#findButton");
+            var listItemsButton = document.getElementById("listItemsButton");
+            var printButton = document.querySelector("#printButton");
+            var clearButton = document.querySelector("#clearButton");
+            var exportButton = document.querySelector("#exportButton");
+            var importButton = document.querySelector("#importButton");
+    
+    
+    
+    
+            function InsertData() {
+                // Check if the title input is not empty
+                if (titleInput.value.trim() === "") {
+                    alert("Överskrift måste fyllas i");
+                    return;
+                }
+    
+                var dataObject = {
+                    title: titleInput.value,
+                };
+    
+                var products = [];
+                var produktNumbers = [];
+    
+                for (var i = 1; i <= numberRows; i++) {
+                    products.push(document.querySelector("#produkt" + i));
+                    produktNumbers.push(document.querySelector("#produktNummer" + i));
+    
+                    dataObject["produkt" + i] = products[i - 1].value;
+                    dataObject["produktNummer" + i] = produktNumbers[i - 1].value;
+                }
+    
+                if (Object.keys(dataObject).length > 1) {
+                    const newPostRef = push(ref(db, "products")); // Use push to generate a unique key
+                    set(newPostRef, dataObject)
+                        .then(() => {
+                            alert("Sidan sparad som: " + titleInput.value);
+    
+                            // Fetch and display the updated titles after adding a new post
+                            displaySavedTitles();
+                        })
+                        .catch((error) => {
+                            alert(error);
+                        });
+                } else {
+                    alert("Minst en produkt och dess produktnummer måste fyllas i");
+                }
+            }
+    
+            function FindData() {
+                const dbref = ref(db);
+    
+                get(child(dbref, "products/" + titleInput.value))
+                    .then((snapshot) => {
+                        if (snapshot.exists()) {
+                            var data = snapshot.val();
+                            titleInput.value = data.title;
+    
+                            var products = [];
+                            var produktNumbers = [];
+    
+                            for (var i = 1; i <= numberRows; i++) {
+                                products.push(document.querySelector("#produkt" + i));
+                                produktNumbers.push(document.querySelector("#produktNummer" + i));
+    
+                                products[i - 1].value = data["produkt" + i];
+                                produktNumbers[i - 1].value = data["produktNummer" + i];
+    
+                                // Trigger barcode generation manually
+                                handleInputChange({ target: produktNumbers[i - 1] });
+                            }
+    
+                        } else {
+                            alert("Sidan finns inte");
+                        }
+                    })
+                    .catch((error) => {
+                        alert(error);
+                    });
+            }
+    
+            function UpdateData() {
+                const selectedIdentifier = document.getElementById('savedTitlesDropdown').value;
+    
+                if (selectedIdentifier === "") {
+                    alert("Välj en sida att uppdatera");
+                    return;
+                }
+    
+                var dataObject = {
+                    title: titleInput.value,
+                };
+    
+                var products = [];
+                var produktNumbers = [];
+    
+                for (var i = 1; i <= numberRows; i++) {
+                    products.push(document.querySelector("#produkt" + i));
+                    produktNumbers.push(document.querySelector("#produktNummer" + i));
+    
+                    dataObject["produkt" + i] = products[i - 1].value;
+                    dataObject["produktNummer" + i] = produktNumbers[i - 1].value;
+                }
+    
+                update(ref(db, "products/" + selectedIdentifier), dataObject)
+                    .then(() => {
+                        alert("Sidan uppdaterad");
+    
+                        // Fetch and display the updated titles after updating a record
+                        displaySavedTitles();
+                    })
+                    .catch((error) => {
+                        alert(error);
+                    });
+            }
+    
+            function DeleteData() {
+                const selectedIdentifier = document.getElementById('savedTitlesDropdown').value;
+    
+                if (selectedIdentifier === "") {
+                    alert("Välj en sida att ta bort");
+                    return;
+                }
+    
+                // Ask for confirmation
+                var confirmation = window.confirm("Vill du ta bort dennna sidan?");
+    
+                // If the user confirms, proceed with deletion
+                if (confirmation) {
+                    remove(ref(db, "products/" + selectedIdentifier))
+                        .then(() => {
+                            alert("Sidan borttagen");
+                            location.reload();
+    
+                            // Fetch and display the updated titles after deleting a record
+                            displaySavedTitles();
+                        })
+                        .catch((error) => {
+                            alert(error);
+                        });
+                } else {
+                    alert("Sidan ej raderad");
+                }
+            }
+    
+             // Modify the displaySavedTitles function
+            function displaySavedTitles() {
+                const dbref = ref(db);
+    
+                get(child(dbref, "products"))
+                    .then((snapshot) => {
+                        if (snapshot.exists()) {
+                            var data = snapshot.val();
+                            var entries = Object.entries(data);
+    
+                            // Extract identifiers and titles
+                            var identifiers = entries.map(([key, value]) => key);
+                            var titles = entries.map(([key, value]) => value.title);
+    
+                            // Populate dropdown with titles and associate each title with its identifier
+                            populateDropdownList(identifiers, titles);
+                        } else {
+                            populateDropdownList([], []);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });
+            }
+    
+            // Modify the populateDropdownList function
+            function populateDropdownList(identifiers, titles) {
+                const dropdown = document.getElementById('savedTitlesDropdown');
+    
+                // Clear existing options
+                dropdown.innerHTML = '<option value="">Välj en sida</option>';
+    
+                // Add titles to the dropdown
+                titles.forEach((title, index) => {
+                    const option = document.createElement('option');
+                    option.value = identifiers[index]; // Use the corresponding identifier as the value
+                    option.textContent = title;
+                    dropdown.appendChild(option);
+                });
+            }
+    
+            // Function to fill the form with data for the selected title
+            function findDataForSelectedTitle() {
+                const selectedTitle = document.getElementById('savedTitlesDropdown').value;
+                document.getElementById('titleInput').value = selectedTitle;
+    
+                // Trigger the FindData function to fetch and fill the data from the database
+                FindData();
+            }
+    
+            // Call the function to display saved titles on page load
+            displaySavedTitles();
+    
+            // Attach event listener to the dropdown list to trigger data retrieval on selection change
+            document.getElementById('savedTitlesDropdown').addEventListener('change', findDataForSelectedTitle);
+    
+    
+    
+            insertButton.addEventListener("click", function () {
+                if (titleInput.value.trim() !== "") {
+                    InsertData();
+                } else {
+                    alert("Överskrift måste fyllas i");
+                }
+            });
+    
+            updateButton.addEventListener("click", function () {
+                if (titleInput.value.trim() !== "") {
+                    UpdateData();
+                } else {
+                    alert("Hämta sidan du vill uppdatera.");
+                }
+            });
+    
+            deleteButton.addEventListener("click", function () {
+                if (titleInput.value.trim() !== "") {
+                    DeleteData();
+                } else {
+                    alert("Hämta sidan du vill radera.");
+                }
+            });
+    
+            printButton.addEventListener("click", function () {
+                window.print();
+            });
+    
+            clearButton.addEventListener("click", function () {
+                location.reload();
+            });
+    
+            exportButton.addEventListener("click", function () {
+                exportData();
+            });
+    
+            importButton.addEventListener("click", function () {
+                importData();
+            });
+    
+            function generateBarcode(produktNummer, barcodeImg) {
+                if (produktNummer) {
+                    JsBarcode(barcodeImg, produktNummer, {
+                        format: "CODE128",
+                        displayValue: false,
+                    });
+                } else {
+                    // Clear the barcode image if the produktNummer is empty
+                    barcodeImg.src = '';
+                }
+            }
+    
+            function handleInputChange(event) {
+                const section = event.target.closest('section');
+                const produktNummerInput = section.querySelector('[name="produktNummer"]');
+                const barcodeImg = section.querySelector('.barcode');
+    
+                generateBarcode(produktNummerInput.value, barcodeImg);
+            }
+    
+            const form = document.getElementById('productForm');
+            for (let i = 1; i <= numberRows; i++) {
+                const section = document.createElement('section');
+                section.id = `produktSection${i}`;
+    
+                const produktInput = document.createElement('input');
+                produktInput.type = 'text';
+                produktInput.id = `produkt${i}`;
+                produktInput.name = 'produkt';
+                produktInput.placeholder = 'Produkt';
+    
+                const produktNummerInput = document.createElement('input');
+                produktNummerInput.type = 'text';
+                produktNummerInput.id = `produktNummer${i}`;
+                produktNummerInput.name = 'produktNummer';
+                produktNummerInput.placeholder = 'Produktnummer';
+    
+                const barcodeImg = document.createElement('img');
+                barcodeImg.className = 'barcode';
+    
+                section.appendChild(produktInput);
+                section.appendChild(produktNummerInput);
+                section.appendChild(barcodeImg);
+    
+                form.appendChild(section);
+    
+                // Attach event listener to input elements
+                produktNummerInput.addEventListener('input', handleInputChange);
+            }
+    
+            // Initial barcode generation on page load
+            document.querySelectorAll('[name="produktNummer"]').forEach(input => {
+                const section = input.closest('section');
+                const barcodeImg = section.querySelector('.barcode');
+                generateBarcode(input.value, barcodeImg);
+            });
+    
+            // Function to convert a string to an ArrayBuffer, used by export function
+            function s2ab(s) {
+                var buf = new ArrayBuffer(s.length);
+                var view = new Uint8Array(buf);
+                for (var i = 0; i < s.length; i++) {
+                    view[i] = s.charCodeAt(i) & 0xFF;
+                }
+                return buf;
+            }
+    
+            
+            function exportData() {
+                const selectedTitle = document.getElementById('savedTitlesDropdown').value;
+    
+                // Check if a title is selected
+                if (!selectedTitle) {
+                    alert("Välj en sida att exportera");
+                    return;
+                }
+    
+                var dataObject = {
+                    title: titleInput.value,
+                };
+    
+                var products = [];
+                var produktNumbers = [];
+    
+                for (var i = 1; i <= numberRows; i++) {
+                    products.push(document.querySelector("#produkt" + i));
+                    produktNumbers.push(document.querySelector("#produktNummer" + i));
+    
+                    dataObject["produkt" + i] = products[i - 1].value;
+                    dataObject["produktNummer" + i] = produktNumbers[i - 1].value;
+                }
+    
+                // Convert the object data to an array of objects
+                var dataArray = [dataObject];
+    
+                // Create an array for the headers
+                var headers = ["Produkter", "prodNr"];
+    
+                // Create an array for the transposed data
+                var transposedData = [headers];
+    
+                // Loop through the dataArray and push the values to transposedData
+                dataArray.forEach(function (row) {
+                    for (var i = 1; i <= 25; i++) {
+                        var rowData = [row['produkt' + i], row['produktNummer' + i]];
+                        transposedData.push(rowData);
+                    }
+                });
+    
+                // Convert the transposed data to XLSX format using SheetJS
+                var workbook = XLSX.utils.book_new();
+                var worksheet = XLSX.utils.aoa_to_sheet(transposedData);
+    
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Exported Data");
+    
+                // Use XLSX.write to create a binary string
+                var binaryString = XLSX.write(workbook, {
+                    bookType: "xlsx",
+                    mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    bookSST: false,
+                    type: "binary"
+                });
+    
+                // Convert the binary string to a Blob
+                var blob = new Blob([s2ab(binaryString)], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                });
+    
+                var link = document.createElement("a");
+    
+                // Set the exported file name based on the title
+                link.download = titleInput.value + ".xlsx";
+    
+                link.href = window.URL.createObjectURL(blob);
+                link.click();
+            }
+    
+    
+            /*   function exportData() {
+          const selectedTitle = document.getElementById('savedTitlesDropdown').value;
+      
+          // Check if a title is selected
+          if (!selectedTitle) {
+              alert("Välj en sida att exportera");
+              return;
+          }
+      
+          var dataObject = {
+              title: titleInput.value,
+          };
+      
+          var products = [];
+          var produktNumbers = [];
+      
+          for (var i = 1; i <= numberRows; i++) {
+              products.push(document.querySelector("#produkt" + i));
+              produktNumbers.push(document.querySelector("#produktNummer" + i));
+      
+              dataObject["produkt" + i] = products[i - 1].value;
+              dataObject["produktNummer" + i] = produktNumbers[i - 1].value;
+          }
+      
+          // Convert the object data to an array of objects
+          var dataArray = [dataObject];
+      
+          // Create an array for the headers
+          var headers = ["Produkter", "prodNr"];
+      
+          // Create an array for the transposed data
+          var transposedData = [headers];
+      
+          // Loop through the dataArray and push the values to transposedData
+          dataArray.forEach(function (row) {
+              for (var i = 1; i <= 25; i++) {
+                  var rowData = [row['produkt' + i], row['produktNummer' + i]];
+                  transposedData.push(rowData);
+              }
+          });
+      
+          // Convert the transposed data to XLSX format using SheetJS
+          var workbook = XLSX.utils.book_new();
+          var worksheet = XLSX.utils.aoa_to_sheet(transposedData);
+      
+          XLSX.utils.book_append_sheet(workbook, worksheet, "Exported Data");
+      
+          // Use XLSX.write to create a binary string
+          var binaryString = XLSX.write(workbook, {
+              bookType: "xlsx",
+              mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              bookSST: false,
+              type: "binary"
+          });
+      
+          // Convert the binary string to a Blob
+          var blob = new Blob([s2ab(binaryString)], {
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          });
+      
+          var link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = "exported_data.xlsx";
+          link.click();
+      } */
+    
+    
+    
+    
+            function importData() {
+                var input = document.createElement("input");
+                input.type = "file";
+                input.accept = ".xlsx";
+    
+                input.addEventListener("change", function () {
+                    var file = input.files[0];
+    
+                    if (file) {
+                        var reader = new FileReader();
+    
+                        reader.onload = function (e) {
+                            try {
+                                var workbook = XLSX.read(e.target.result, { type: 'binary' });
+    
+                                // Assuming the first sheet is the one you want to import
+                                var jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+    
+                                // You may want to validate the structure of the imported data here
+    
+                                // Extract the filename (excluding extension) and use it as the title
+                                var filenameWithoutExtension = file.name.replace(/\.[^/.]+$/, "");
+                                const newPostRef = push(ref(db, "products"));
+                                set(child(newPostRef, "title"), filenameWithoutExtension);
+    
+                                // Set the data to the new post
+                                jsonData.forEach((row, index) => {
+                                    set(child(newPostRef, "produkt" + (index + 1)), row.Produkter);
+                                    set(child(newPostRef, "produktNummer" + (index + 1)), row.prodNr);
+                                    // Add more fields as needed
+                                });
+    
+                                alert("Data imported successfully");
+                                displaySavedTitles();
+                            } catch (error) {
+                                alert("Invalid XLSX file");
+                            }
+                        };
+    
+                        reader.readAsBinaryString(file);
+                    }
+                });
+    
+                input.click();
+            }
+    
+    
+            /*   function importData() {
+                  var input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = ".xlsx";
+      
+                  input.addEventListener("change", function () {
+                      var file = input.files[0];
+      
+                      if (file) {
+                          var reader = new FileReader();
+      
+                          reader.onload = function (e) {
+                              try {
+                                  var workbook = XLSX.read(e.target.result, { type: 'binary' });
+      
+                                  // Assuming the first sheet is the one you want to import
+                                  var jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+      
+                                  // You may want to validate the structure of the imported data here
+      
+                                  // Create a new post with the title "import"
+                                  const newPostRef = push(ref(db, "products"));
+      
+                                  // Set the title
+                                  set(child(newPostRef, "title"), "import");
+      
+                                  // Set the data to the new post
+                                  jsonData.forEach((row, index) => {
+                                      set(child(newPostRef, "produkt" + (index + 1)), row.Produkter);
+                                      set(child(newPostRef, "produktNummer" + (index + 1)), row.prodNr);
+                                      // Add more fields as needed
+                                  });
+      
+                                  alert("Data imported successfully");
+                                  displaySavedTitles();
+                              } catch (error) {
+                                  alert("Invalid XLSX file");
+                              }
+                          };
+      
+                          reader.readAsBinaryString(file);
+                      }
+                  });
+      
+                  input.click();
+              } */
+    
+    
+    
+        </script>
+
+</body>
+</html>

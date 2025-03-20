@@ -14,24 +14,24 @@
 
     <nav>
         <ul class="navbar">
-            <li><a href="../index/index.html"><img src="../icons/home.png" alt="Home Icon"
-                        style="width:16px;height:16px;filter: invert(1);"><br>Hem</a></li>
-            <li><a href="../verkstad/verkstad.html"><img src="../icons/tools.png" alt="Verkstad Icon"
-                        style="width:16px;height:16px;filter: invert(1);"><br>Verkstad</a></li>
-            <li><a href="../kontor/kontor.html"><img src="../icons/office.png" alt="Verkstad Icon"
-                        style="width:16px;height:16px;filter: invert(1);"><br>Kontor</a></li>
-            <li><a href="../aviseringar/aviseringar.html"><img src="../icons/email.png" alt="Verkstad Icon"
-                        style="width:16px;height:16px;filter: invert(1);"><br>Aviseringar</a></li>
-            <li><a href="../arbetsbeskrivningar/arbetsbeskr.html"><img src="../icons/list.png" alt="Verkstad Icon"
-                        style="width:16px;height:16px;filter: invert(1);"><br>Arbetsbeskrivningar</a></li>
-            <!-- <li><a href="../barcodeProject/index.html"><img src="../icons/barcode.png" alt="Verkstad Icon"
-                        style="width:16px;height:16px;filter: invert(1);"><br>Streckkoder</a></li> -->
-            <li><a href="../products/products.html"><img src="../icons/under-construction.png" alt="Verkstad Icon"
-                        style="width:16px;height:16px;filter: invert(1);"><br>Produkter</a>
-            </li>
+          <li><a href="../index/index.html"><img src="../icons/home.png" alt="Home Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Hem</a></li>
+          <li><a href="../verkstad/verkstad.html"><img src="../icons/tools.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Verkstad</a></li>
+          <li><a href="../kontor/kontor.html"><img src="../icons/office.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Kontor</a></li>
+          <li><a href="../aviseringar/aviseringar.html"><img src="../icons/email.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Aviseringar</a></li>
+          <li><a href="../arbetsbeskrivningar/arbetsbeskr.html"><img src="../icons/list.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Arbetsbeskrivningar</a></li>
+          <li><a href="../lathund/lathund.html"><img src="../icons/list.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Lathund</a></li>
+          <li><a href="../products/products.html"><img src="../icons/under-construction.png" alt="Verkstad Icon"
+                style="width:16px;height:16px;filter: invert(1);"><br>Produkter</a>
+          </li>
         </ul>
-    </nav>
-
+      </nav>
+      
     <div class="filter-section">
         <input type="text" id="searchInput" placeholder="Sök efter produkt eller artikelnummer...">
         <select id="mainCategory">
@@ -43,6 +43,8 @@
             <option value="Honda">Honda</option>
             <option value="Kawasaki">Kawasaki</option>
             <option value="Stihl">Stihl</option>
+            <option value="Kohler">Kohler</option>
+            
         </select>
 
         <select id="subCategory" disabled>
@@ -164,7 +166,10 @@
                     <img src="${product.image}" class="product-image" alt="${product.name}">
                     <div class="product-info">
                         <h3>${product.name}</h3>
-                        <p class="product-number">${product.productNumber}</p>
+                        <div class="product-number-container" style="display: flex; align-items: center;">
+                            <p class="product-number" style="margin-right: 8px;">${product.productNumber}</p>
+                            <button class="copy-button" data-product-number="${product.productNumber}" style="background-image: url('../images/copy.jpg'); background-size: contain; background-repeat: no-repeat; width: 24px; height: 24px; border: none; cursor: pointer;"></button>
+                        </div>                        
                         <p>${product.info}</p>
                         <div class="specs">
                             ${Object.entries(product.specs).map(([key, value]) => `
@@ -172,8 +177,50 @@
                             `).join('')}
                         </div>
                     </div>
+                        
+                    </div>
                 </div>
             `).join('');
+
+            // Lägg till event listeners för kopieringsknapparna
+            document.querySelectorAll('.copy-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const productNumber = button.getAttribute('data-product-number');
+                    copyTextToClipboard(productNumber);
+                });
+            });
+        }
+
+        // Funktion för att kopiera text till urklipp
+        function copyTextToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                var message = document.createElement("div");
+                message.textContent = "Produktnumret har kopierats";
+                message.style.position = "fixed";
+                message.style.backgroundColor = "#333";
+                message.style.bottom = "10px";
+                message.style.left = "50%";
+                message.style.transform = "translateX(-50%)";
+                message.style.color = "#fff";
+                message.style.padding = "10px";
+                message.style.borderRadius = "5px";
+                message.style.zIndex = "1000";
+                message.style.fontSize = "48px";
+                message.style.transition = "opacity 1s";
+                message.style.opacity = "1";
+          
+                document.body.appendChild(message);
+          
+                // Ta bort meddelandet efter 3 sekunder
+                setTimeout(function () {
+                    message.style.opacity = "0";
+                    setTimeout(function () {
+                        document.body.removeChild(message);
+                    }, 1000); // Vänta på att övergången ska slutföras
+                }, 3000);
+            }).catch(function(err) {
+                console.error('Kunde inte kopiera texten: ', err);
+            });
         }
 
         // Starta applikationen
