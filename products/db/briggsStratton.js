@@ -68,7 +68,7 @@ const briggsStratton = {
             }
         },
         {
-            name: "B&S Luftfilter 499486S",
+            name: "B&S Luftfilter 499486s",
             subcategory: "Luftfilter",
             subtype: "Panelfilter",
             image: "images/briggs/499486S.png",
