@@ -2,10 +2,11 @@
 <html>
 <head>
   <title>Login Page</title>
+  <link rel="stylesheet" href="../styles/global.css" />
   <!-- Add Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
-
+  
   <script>
     // Initialize Firebase with your project's config
     var firebaseConfig = {
@@ -61,6 +62,8 @@
     <input type="password" id="password" required><br><br>
     <button type="button" onclick="login()">Login</button>
   </form>
+  <!-- Add a note for users redirected after logout -->
+  <p>If you were logged out, please log in again to continue.</p>
 </body>
 </html>
 

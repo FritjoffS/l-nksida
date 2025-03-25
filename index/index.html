@@ -36,6 +36,17 @@
           }
         });
       }
+
+      // Function to log out the user
+      function logout() {
+        firebase.auth().signOut().then(function() {
+          // Sign-out successful, redirect to login page
+          window.location.href = "login.html";
+        }).catch(function(error) {
+          // Handle errors here
+          console.error("Logout error:", error);
+        });
+      }
     </script>
   
 </head>
@@ -52,6 +63,11 @@
       <input type="text" name="q" placeholder="Search Google">
       <button class="search-bar button" type="submit">Search</button>
     </form>
+  </div>
+
+  <!-- Add a logout button -->
+  <div class="flexCenter">
+    <button onclick="logout()">Logout</button>
   </div>
 
   <script src="../scripts/script.js"></script>
