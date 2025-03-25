@@ -1,4 +1,4 @@
-    nav {
+nav {
     background-color: black;
     position: fixed;
     top: 0;
@@ -34,6 +34,24 @@
     color: white;
   }
 
+.logout-button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 12px; /* Reduced from 24px to 12px */
+  text-align: center;
+  cursor: pointer;
+  padding: 2.5px; /* Reduced from 5px to 2.5px */
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5%; /* Adjusted to half size */
+  height: 5%; /* Maintain aspect ratio */
+}
 
+.logout-button:hover {
+  text-decoration: underline;
+}
 
 /* Add padding to the body to prevent content overlap */
