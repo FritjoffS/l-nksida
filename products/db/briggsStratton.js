@@ -68,10 +68,10 @@ const briggsStratton = {
             }
         },
         {
-            name: "B&S Luftfilter 499486s",
+            name: "B&S Luftfilter 499486S",
             subcategory: "Luftfilter",
             subtype: "Panelfilter",
-            image: "images/briggs/499486S.png",
+            image: "images/briggs/499486s.png",
             info: "Luftfilter för B&S motorer",
             productNumber: "499486S",
             specs: {
