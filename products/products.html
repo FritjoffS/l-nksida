@@ -8,9 +8,48 @@
     <link rel="stylesheet" href="../styles/navbar.css">
     <link rel="stylesheet" href="../styles/products.css">
 
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+
+    <script>
+        // Initialize Firebase with your project's config
+        var firebaseConfig = {
+            apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
+            authDomain: "l-nksida.firebaseapp.com",
+            databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "l-nksida",
+            storageBucket: "l-nksida.firebasestorage.app",
+            messagingSenderId: "258147870107",
+            appId: "1:258147870107:web:ce637517bc30b7578cad3e"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Function to check if a user is logged in or not
+        function checkAuthState() {
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (!user) {
+                    // User is not signed in, redirect to the login page
+                    window.location.href = "../index/login.html";
+                }
+            });
+        }
+
+        // Function to log out the user
+        function logout() {
+            firebase.auth().signOut().then(function () {
+                // Sign-out successful, redirect to login page
+                window.location.href = "../index/login.html";
+            }).catch(function (error) {
+                // Handle errors here
+                console.error("Logout error:", error);
+            });
+        }
+    </script>
+
 </head>
 
-<body>
+<body onload="checkAuthState()">
 
 
     <div id="navbar"></div> <!-- Placeholder for the navbar -->
@@ -26,7 +65,7 @@
             <option value="Kawasaki">Kawasaki</option>
             <option value="Stihl">Stihl</option>
             <option value="Kohler">Kohler</option>
-            
+
         </select>
 
         <select id="subCategory" disabled>
@@ -191,9 +230,9 @@
                 message.style.fontSize = "48px";
                 message.style.transition = "opacity 1s";
                 message.style.opacity = "1";
-          
+
                 document.body.appendChild(message);
-          
+
                 // Ta bort meddelandet efter 3 sekunder
                 setTimeout(function () {
                     message.style.opacity = "0";
@@ -201,7 +240,7 @@
                         document.body.removeChild(message);
                     }, 1000); // Vänta på att övergången ska slutföras
                 }, 3000);
-            }).catch(function(err) {
+            }).catch(function (err) {
                 console.error('Kunde inte kopiera texten: ', err);
             });
         }
