@@ -31,7 +31,9 @@
           // User is signed in, proceed to the website
           window.location.href = "index.html";
         } else {
-          // No user is signed in, stay on the login page
+          // No user is signed in, clear input fields
+          document.getElementById("email").value = "";
+          document.getElementById("password").value = "";
         }
       });
     }
