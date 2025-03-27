@@ -2,8 +2,19 @@ const stihl = {
     name: "Stihl",
     subgroups: [
         {
-            name: "Knivar",
-            subtypes: ["WBH", "Robotgräsklippare", "Rider"]
+            name: "Knivar", subtypes: ["WBH", "Robotgräsklippare", "Rider"],
+        },
+        {
+            name: "Luftfilter", subtypes: ["Panel typ", "Oval typ", "Rund typ", "Skumfilter", "Förfilter"],
+        },
+        {
+            name: "Tändstift", //subtypes: ["WBH", "Rider"],
+        },
+        {
+            name: "Oljefilter",
+        },
+        {
+            name: "Motorsåg", subtypes: ["Tanklock", "Oljelock", "Bränslefilter", "Luftfilter"],
         },
     ],
     products: [
@@ -42,7 +53,81 @@ const stihl = {
                 Vårat_Produktnummer: "1096642",
                 Antal: "3 st"
             }
-        }
+        },
+        {
+            name: "Luftfilter Kohler 0002-140-4400",
+            subcategory: "Luftfilter",
+            subtype: "Panel typ",
+            image: "images/kohler/1408319s.avif",
+            info: "Luftfilter för WBH. Passande Förfilter 0002-124-1500",
+            productNumber: "0002-140-4400",
+            specs: {
+                Fabrikat: "Kohler",
+                Dimensioner: "145x90x26 mm",
+                Alternativ: "MTD 75110298, Honda 17211-ZG9-M00, Kohler 1408319S"
+
+            }
+        },
+        {
+            name: "Förfilter Kohler 0002-124-1500",
+            subcategory: "Luftfilter",
+            subtype: "Förfilter",
+            image: "images/kohler/1408302s.avif",
+            info: "Förfilter för 0002-140-4400",
+            productNumber: "0002-124-1500",
+            specs: {
+                Fabrikat: "Kohler",
+                Alternativ: "Kohler 1408302S, Stihl 0002-124-1500"
+            }
+        },
+        {
+            name: "Oljelock Stihl 0000-350-0536",
+            subcategory: "Motorsåg",
+            subtype: "Oljelock",
+            image: "images/stihl/0000-350-0536.webp",
+            info: "Oljelock för Stihl motorsåg",
+            productNumber: "0000-350-0536",
+            specs: {
+                Fabrikat: "Stihl",
+                PassarTill: "MS 150, MS 151, MS 161, MS 201,"
+            }
+        },
+        {
+            name: "Oljelock Stihl 0000-350-0537",
+            subcategory: "Motorsåg",
+            subtype: "Oljelock",
+            image: "images/stihl/0000 350 0527.jpg",
+            info: "Oljelock för Stihl motorsåg",
+            productNumber: "0000-350-0537",
+            specs: {
+                Fabrikat: "Stihl",
+                PassarTill: "MS 171, MS 181, MS 192, MS 193, MS 194, MS 200, MS 210, MS 211, MS 230, MS 231, MS 241, MS 250, MS 251, MS 260, MS 261, MS 360"
+            }
+        },
+        {
+            name: "Oljelock Stihl 0000-350-0532",
+            subcategory: "Motorsåg",
+            subtype: "Oljelock",
+            image: "images/stihl/0000-350-0532.webp",
+            info: "Oljelock för Stihl motorsåg",
+            productNumber: "0000-350-0532",
+            specs: {
+                Fabrikat: "Stihl",
+                PassarTill: "MS 271, MS 291"
+            }
+        },
+        {
+            name: "Tanklock Stihl 0000-350-0532",
+            subcategory: "Motorsåg",
+            subtype: "Tanklock",
+            image: "images/stihl/0000-350-0532.webp",
+            info: "Oljelock för Stihl motorsåg",
+            productNumber: "0000-350-0532",
+            specs: {
+                Fabrikat: "Stihl",
+                PassarTill: "MS 261"
+            }
+        },
     ]
 };
 
