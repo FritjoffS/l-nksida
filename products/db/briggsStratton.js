@@ -16,6 +16,7 @@ const briggsStratton = {
         { name: "Primerblåsor", subtypes: [] },
     ],
     products: [
+        // ***************************Luftfilter************************************
         {
             name: "B&S Luftfilter 399877S",
             subcategory: "Luftfilter",
@@ -287,6 +288,9 @@ const briggsStratton = {
                 Fabrikat: "Briggs & Stratton"
             }
         },
+
+        // ***************************Bränslefilter************************************
+
         {
             name: "B&S Bränslefilter 84001895",
             subcategory: "Bränslefilter",
@@ -335,6 +339,9 @@ const briggsStratton = {
                 Fabrikat: "Briggs & Stratton"
             }
         },
+
+        // ***************************Oljefilter************************************
+
         {
             name: "B&S Oljefilter 492932S",
             subcategory: "Oljefilter",
@@ -359,30 +366,38 @@ const briggsStratton = {
                 Fabrikat: "Briggs & Stratton"
             }
         },
+
+        // ***************************Tändstift************************************
+
         {
             name: "B&S Tändstift BS-SV",
             subcategory: "Tändstift",
             image: "images/briggs/bs-sv.png",
-            info: "Tändstift för B&S motorer",
+            info: "Tändstift för B&S Sidventil motorer",
             productNumber: "992300C",
             specs: {
                 // Gänga: "14mm",
                 Multipack: "992301C",
-                Fabrikat: "Briggs & Stratton"
+                Fabrikat: "Briggs & Stratton",
+                Alternativ: "Champion RJ19LM, NGK BR2LM, Bosch WR11E0"
             }
         },
         {
             name: "B&S Tändstift BS-OHV",
             subcategory: "Tändstift",
             image: "images/briggs/bs-ohv.png",
-            info: "Tändstift för B&S motorer",
+            info: "Tändstift för B&S Toppventil motorer",
             productNumber: "992304",
             specs: {
                 // Gänga: "14mm",
                 Multipack: "992340",
-                Fabrikat: "Briggs & Stratton"
+                Fabrikat: "Briggs & Stratton",
+                Alternativ: "Champion RC12YC, NGK BCPR5ES, Bosch FR9DC"
             }
         },
+
+        // ***************************Primerblåsor************************************
+
         {
             name: "B&S Primerblåsa 694394",
             subcategory: "Primerblåsor",
@@ -429,6 +444,9 @@ const briggsStratton = {
                 Fabrikat: "Briggs & Stratton"
             }
         },
+
+        // ***************************Packningar************************************
+
         {
             name: "B&S Luftrenarpackning 795629",
             subcategory: "Packningar",
