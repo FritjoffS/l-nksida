@@ -81,6 +81,78 @@ const stihl = {
             }
         },
         {
+            name: "Oljelock Stihl 0000-350-0532",
+            subcategory: "Motorsåg",
+            subtype: "Oljelock",
+            image: "images/stihl/0000-350-0532.webp",
+            info: "Oljelock för Stihl motorsåg",
+            productNumber: "0000-350-0532",
+            specs: {
+                Fabrikat: "Stihl",
+                PassarTill: "MS 271, MS 291"
+            }
+        },
+        {
+            name: "Tanklock Stihl 0000-350-0532",
+            subcategory: "Motorsåg",
+            subtype: "Tanklock",
+            image: "images/stihl/0000-350-0532.webp",
+            info: "Tanklock för Stihl motorsåg",
+            productNumber: "0000-350-0532",
+            specs: {
+                Fabrikat: "Stihl",
+                PassarTill: "MS 261, MS 271"
+            }
+        },
+        {
+            name: "Oljelock Stihl 0000-350-0533",
+            subcategory: "Motorsåg",
+            subtype: "Oljelock",
+            image: "images/stihl/0000-350-0533.jpg",
+            info: "Oljelock för Stihl motorsåg",
+            productNumber: "0000-350-0533",
+            specs: {
+                Fabrikat: "Stihl",
+                PassarTill: "MS 171, MS 181, MS 181 C-BE, MS 192 C-E, MS 192 T, MS 193 C-E, MS 193 T, MS 194 C-E, MS 194 T, MS 194 TC-E, MS 210 C-B, MS 210 C-BE, MS 211, MS 211 C-BE, MS 230, MS 230 C-B, MS 230 C-BE, MS 250, MS 250 C-B, MS 250 C-BE, MS 290, MS 310, MS 390, MS 391"
+            }
+        },
+        {
+            name: "Tanklock Stihl 0000-350-0533",
+            subcategory: "Motorsåg",
+            subtype: "Tanklock",
+            image: "images/stihl/0000-350-0533.jpg",
+            info: "Tanklock för Stihl motorsåg",
+            productNumber: "0000-350-0533",
+            specs: {
+                Fabrikat: "Stihl",
+                PassarTill: "MS 200, MS 231, MS 241, MS 251, MS 260, MS 270, MS 280, MS 341, MS 360, MS 362, MS 461, MS 462, MS 881"
+            }
+        },
+        {
+            name: "Oljelock Stihl 0000-350-0534",
+            subcategory: "Motorsåg",
+            subtype: "Oljelock",
+            image: "images/stihl/0000-350-0534.webp",
+            info: "OLjelock för Stihl motorsåg",
+            productNumber: "0000-350-0534",
+            specs: {
+                Fabrikat: "Stihl",
+                PassarTill: "MS 150, MS 151"
+            }
+        },
+        {
+            name: "Tanklock Stihl 0000-350-0534",
+            subcategory: "Motorsåg",
+            subtype: "Tanklock",
+            image: "images/stihl/0000-350-0534.webp",
+            info: "Tanklock för Stihl motorsåg",
+            productNumber: "0000-350-0534",
+            specs: {
+                Fabrikat: "Stihl",
+                PassarTill: "MS 201, MS 400.1"
+            }
+        },
+        {
             name: "Oljelock Stihl 0000-350-0536",
             subcategory: "Motorsåg",
             subtype: "Oljelock",
@@ -102,30 +174,6 @@ const stihl = {
             specs: {
                 Fabrikat: "Stihl",
                 PassarTill: "MS 171, MS 181, MS 192, MS 193, MS 194, MS 200, MS 210, MS 211, MS 230, MS 231, MS 241, MS 250, MS 251, MS 260, MS 261, MS 360"
-            }
-        },
-        {
-            name: "Oljelock Stihl 0000-350-0532",
-            subcategory: "Motorsåg",
-            subtype: "Oljelock",
-            image: "images/stihl/0000-350-0532.webp",
-            info: "Oljelock för Stihl motorsåg",
-            productNumber: "0000-350-0532",
-            specs: {
-                Fabrikat: "Stihl",
-                PassarTill: "MS 271, MS 291"
-            }
-        },
-        {
-            name: "Tanklock Stihl 0000-350-0532",
-            subcategory: "Motorsåg",
-            subtype: "Tanklock",
-            image: "images/stihl/0000-350-0532.webp",
-            info: "Oljelock för Stihl motorsåg",
-            productNumber: "0000-350-0532",
-            specs: {
-                Fabrikat: "Stihl",
-                PassarTill: "MS 261"
             }
         },
     ]
