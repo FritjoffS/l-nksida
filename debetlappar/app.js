@@ -1,20 +1,34 @@
+const db = firebase.database();
+const lastNumberRef = db.ref('lastNumber');
+
 let lastNumber = 0;
 let pdfDoc = null;
 let lastGeneratedPdfUrl = null; // Store the URL of the last generated PDF
 
-function updateLastNumber(num) {
-    lastNumber = num;
+// Fetch lastNumber from Firebase
+async function fetchLastNumber() {
     try {
-        localStorage.setItem('lastNumber', num.toString());
-    } catch (e) {
-        console.error('LocalStorage error:', e);
+        const snapshot = await lastNumberRef.once('value');
+        lastNumber = snapshot.exists() ? snapshot.val() : 0;
+        console.log('Fetched lastNumber from Firebase:', lastNumber);
+    } catch (error) {
+        console.error('Error fetching lastNumber from Firebase:', error);
     }
 }
 
-window.addEventListener('load', () => {
-    const savedNumber = localStorage.getItem('lastNumber');
-    lastNumber = savedNumber ? parseInt(savedNumber) : 0;
+// Update lastNumber in Firebase
+async function updateLastNumberInFirebase(num) {
+    try {
+        await lastNumberRef.set(num);
+        lastNumber = num;
+        console.log('Updated lastNumber in Firebase:', num);
+    } catch (error) {
+        console.error('Error updating lastNumber in Firebase:', error);
+    }
+}
 
+window.addEventListener('load', async () => {
+    await fetchLastNumber();
     // Ladda PDF-filen när sidan öppnas
     loadPdf();
 });
@@ -84,7 +98,7 @@ document.getElementById('processButton').addEventListener('click', async () => {
         const pdfBlob = outputPdf.output('blob');
         lastGeneratedPdfUrl = URL.createObjectURL(pdfBlob); // Save the blob URL
         outputPdf.save('numbered_document.pdf');
-        updateLastNumber(lastNumber + copies);
+        await updateLastNumberInFirebase(lastNumber + copies); // Update Firebase
         status.textContent = 'Klar! PDF har laddats ner.';
         
     } catch (error) {
