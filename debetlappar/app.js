@@ -83,9 +83,9 @@ document.getElementById('processButton').addEventListener('click', async () => {
             await page.render({ canvasContext: context, viewport: viewport }).promise;
 
             // Lägg till numrering
-            context.font = '16px Arial';
+            context.font = '24px Arial';
             context.fillStyle = 'black';
-            context.fillText(`ID: ${lastNumber + i + 1}`, 50 * scale, 50 * scale);
+            context.fillText(`B  ${lastNumber + i + 1}`, 480 * scale, 50 * scale);
 
             const imgData = canvas.toDataURL('image/jpeg', 1.0); // Högsta kvalitet
             outputPdf.addImage(imgData, 'JPEG', 0, 0, viewport.width / scale, viewport.height / scale);
