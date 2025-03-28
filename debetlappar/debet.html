@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="sv">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,22 +9,28 @@
     <link rel="stylesheet" href="../styles/global.css" />
     <link rel="stylesheet" href="../styles/navbar.css" />
 </head>
+
 <body onload="checkAuthState()">
     <div id="navbar"></div> <!-- Placeholder for the navbar -->
+    <div class="container">
 
-    <div class="debet_container">
-        <h1>Skriv Ut Debetlappar</h1>
-        <h2>Välj antal:</h2>
-        <input type="number" id="copies" min="1" value="1">
-        <div class="button-group">
-            <button class="processButton" id="processButton">Bearbeta och Ladda ner</button>
-            <button id="openLastPdfButton">Öppna senaste PDF</button>
+
+        <div class="debet_container">
+            <h1>Skriv Ut Debetlappar</h1>
+            <h2>Välj antal:</h2>
+            <input type="number" id="copies" min="1" value="1">
+            <div class="button-group">
+                <button class="processButton" id="processButton">Bearbeta och Ladda ner</button>
+                <button id="openLastPdfButton">Öppna senaste PDF</button>
+            </div>
+            <div id="status"></div>
         </div>
-        <div id="status"></div>
+
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="app.js"></script>
     <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
 </body>
+
 </html>
