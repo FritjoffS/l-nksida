@@ -110,7 +110,7 @@ body {
 .formulär .barcode {
     max-width: 100%;
     /* Ensure the barcode image does not exceed the width of its container */
-    height: 50px;
+    height: 40px;
     /* Maintain the aspect ratio of the barcode image */
     margin-top: 0px;
     /* Adjust the margin between the ProduktNummer input and barcode */
@@ -137,24 +137,24 @@ body {
         color: transparent !important;
     }
 
-    .buttons {
-        display: none;
+    body * {
+        visibility: hidden;
     }
 
-    br {
-        display: none;
+    .formcontainer {
+        visibility: visible;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0; /* Decrease margins for the print container */
     }
 
-    .sidenav {
-        display: none;
+    .formcontainer * {
+        visibility: visible;
     }
 
-    #sidenav {
-        display: none;
-    }
-
-    #savedTitlesDropdown {
+    .buttons, br, .sidenav, #sidenav, #savedTitlesDropdown {
         display: none;
     }
 }
-    
