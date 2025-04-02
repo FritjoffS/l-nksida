@@ -1,5 +1,5 @@
 const db = firebase.database();
-const lastNumberRef = db.ref('debetlappar/lastNumber'); // Firebase reference for lastNumber
+const lastNumberRef = db.ref('lastNumber'); // Firebase reference for lastNumber
 
 let lastNumber = 0;
 let pdfDoc = null;
