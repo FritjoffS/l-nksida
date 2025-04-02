@@ -39,16 +39,16 @@ async function loadPdf() {
         const loadingTask = pdfjsLib.getDocument(pdfUrl);
         pdfDoc = await loadingTask.promise;
         console.log('PDF laddad:', pdfDoc);
-        document.getElementById('status').textContent = 'PDF laddad och redo';
+        document.getElementById('status').textContent = 'PDF mallen laddad och redo';
     } catch (error) {
         console.error('Fel vid laddning av PDF:', error);
-        document.getElementById('status').textContent = 'Fel vid laddning av PDF';
+        document.getElementById('status').textContent = 'Fel vid laddning av PDF mall';
     }
 }
 
 document.getElementById('processButton').addEventListener('click', async () => {
     if (!pdfDoc) {
-        alert('PDF är inte laddad ännu. Vänta lite och försök igen.');
+        alert('PDF mallen är inte laddad ännu. Vänta lite och försök igen.');
         return;
     }
 
