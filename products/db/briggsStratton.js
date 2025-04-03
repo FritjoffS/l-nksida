@@ -484,6 +484,22 @@ const briggsStratton = {
                 Fabrikat: "Briggs & Stratton"
             }
         },
+
+        //********************************Övrigt************************************
+
+        {
+            name: "B&S Slangklämma 791850",
+            subcategory: "Övrigt",
+            image: "images/briggs/791850.avif",
+            info: "Slangklämma för B&S motorer",
+            productNumber: "791850",
+            specs: {
+                // Gänga: "14mm",
+                Multipack: "4171",
+                Fabrikat: "Briggs & Stratton"
+            }
+        },
+        
     ]
 };
 
