@@ -13,7 +13,7 @@ const briggsStratton = {
             name: "Packningar",
             subtypes: ["Luftrenarpackningar", "Topplockspackningar", "Avgaspackninar"]
         },
-        { name: "Primerblåsor", subtypes: [] },
+        { name: "Övrigt", subtypes: [] }
     ],
     products: [
         // ***************************Luftfilter************************************
