@@ -18,6 +18,7 @@ const stihl = {
         },
     ],
     products: [
+        //**************************Knivar****************************
         {
             name: "Kniv Imow MI / RMI 4 series",
             subcategory: "Knivar",
@@ -54,6 +55,7 @@ const stihl = {
                 Antal: "3 st"
             }
         },
+        //**************************Luftfilter****************************
         {
             name: "Luftfilter Kohler 0002-140-4400",
             subcategory: "Luftfilter",
@@ -104,6 +106,7 @@ const stihl = {
                 PassarTill: "MS 261, MS 271"
             }
         },
+        //**************************Tanklock/Oljelock****************************
         {
             name: "Oljelock Stihl 0000-350-0533",
             subcategory: "Motorsåg",
@@ -174,6 +177,18 @@ const stihl = {
             specs: {
                 Fabrikat: "Stihl",
                 PassarTill: "MS 171, MS 181, MS 192, MS 193, MS 194, MS 200, MS 210, MS 211, MS 230, MS 231, MS 241, MS 250, MS 251, MS 260, MS 261, MS 360"
+            }
+        },
+        {
+            name: "Tanklock Stihl 0000-350-0527",
+            subcategory: "Motorsåg",
+            subtype: "Oljelock",
+            image: "images/stihl/0000 350 0527.jpg",
+            info: "Oljelock för Stihl motorsåg",
+            productNumber: "0000-350-0527",
+            specs: {
+                Fabrikat: "Stihl",
+                PassarTill: "BR 600"
             }
         },
     ]
