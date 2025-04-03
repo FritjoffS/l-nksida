@@ -182,9 +182,9 @@ const stihl = {
         {
             name: "Tanklock Stihl 0000-350-0527",
             subcategory: "Motorsåg",
-            subtype: "Oljelock",
+            subtype: "Tanklock",
             image: "images/stihl/0000 350 0527.jpg",
-            info: "Oljelock för Stihl motorsåg",
+            info: "Tanklock för Stihl",
             productNumber: "0000-350-0527",
             specs: {
                 Fabrikat: "Stihl",
