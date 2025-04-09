@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta author="Name" content="Fredrik Söderberg">
     <title>Presentkortshantering</title>
-    <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/navbar.css">
     <link rel="stylesheet" href="presentkort.css">
+    <link rel="stylesheet" href="../styles/global.css">
 
     <!-- Add Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
@@ -57,24 +57,36 @@
     <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
     <div id="presentkortContainer">
+
         <h1>Presentkortshantering</h1>
-        <div>
+
+        <div id="inputCard">
             <label for="serialNumber">Serienummer:</label>
             <input type="text" id="serialNumber" placeholder="Ange serienummer">
             <button id="checkCard">Kontrollera</button>
         </div>
+
         <div id="cardInfo" style="display: none;">
+            <h2>Presentkort Information</h2>
             <p id="cardValue"></p>
             <label for="redeemAmount">Belopp att lösa in:</label>
             <input type="number" id="redeemAmount" placeholder="Ange belopp">
             <button id="redeemCard">Lös in</button>
         </div>
+
         <div id="activateCard" style="display: none;">
-            <label for="cardValueInput">Värde på presentkort:</label>
-            <input type="number" id="cardValueInput" placeholder="Ange värde">
-            <label for="sellerName">Säljare:</label>
-            <input type="text" id="sellerName" placeholder="Ange ditt namn">
-            <button id="activateCardButton">Aktivera</button>
+            <h2>Sälj Nytt Presentkort</h2>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div>
+                    <label for="cardValueInput">Värde på presentkort:</label>
+                    <input type="number" id="cardValueInput" placeholder="Ange värde">
+                </div>
+                <div>
+                    <label for="sellerName">Säljare:</label>
+                    <input type="text" id="sellerName" placeholder="Ange ditt namn">
+                </div>
+            </div>
+            <button id="activateCardButton">Ladda Presentkort</button>
         </div>
     </div>
 

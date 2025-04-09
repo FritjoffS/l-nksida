@@ -38,7 +38,7 @@ checkCardButton.addEventListener("click", async () => {
 
     if (snapshot.exists()) {
         const cardData = snapshot.val();
-        cardValueParagraph.textContent = `Värde: ${cardData.value} kr`;
+        cardValueParagraph.textContent = `Aktuellt Saldo: ${cardData.value} kr`;
         cardInfoDiv.style.display = "block";
         activateCardDiv.style.display = "none";
     } else {
@@ -65,7 +65,7 @@ redeemCardButton.addEventListener("click", async () => {
 
         await update(cardRef, { value: newValue });
         alert("Beloppet har lösts in!");
-        cardValueParagraph.textContent = `Värde: ${newValue} kr`;
+        cardValueParagraph.textContent = `Aktuellt Saldo: ${newValue} kr`;
     }
 });
 

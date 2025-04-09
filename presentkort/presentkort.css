@@ -1,14 +1,88 @@
 body {
     font-family: Arial, sans-serif;
-    /* margin: 20px; */
 }
 
-h1 {
+#presentkortContainer {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: 750px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+    text-align: center;
+    margin-top: 10px;
     color: #333;
 }
 
+#inputCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: #333 2px solid;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#cardValue {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* justify-content: center; */
+    margin-top: 20px;
+    /* padding: 20px; */
+}
+#cardInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* justify-content: center; */
+    margin-top: 20px;
+    border: #333 2px solid;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#activateCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: #333 2px solid;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+#activateCard div {
+    justify-content: center;
+    /* gap: 10px; */
+    margin: 10px 0;
+}
+
+#activateCard div > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* #checkCard {
+    padding: 10px 15px;
+    color: white;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+
+} */
+
 div {
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
 }
 
 label {
@@ -16,47 +90,33 @@ label {
     margin-bottom: 5px;
 }
 
-input {
+input{
     padding: 8px;
-    width: 100%;
+    width: 200px;
     margin-bottom: 10px;
     box-sizing: border-box;
-}
-
-button {
-    padding: 10px 15px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: block;
-    margin: 0 auto;
 }
 
 button:hover {
     background-color: #0056b3;
 }
 
-#cardInfo, #activateCard {
-    border: 1px solid #ccc;
-    padding: 15px;
+#activateCard button, #checkCard, #redeemCard {
+    padding: 5px 10px; /* Reduced padding */
+    font-size: 14px;  /* Smaller font size */
+    background-color: rgb(85, 85, 85);
+    color: white;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+    width: 150px; /* Set a fixed width */
+    height: 50px; /* Set a fixed height */
+    background-image: none;
     border-radius: 5px;
 }
 
-#presentkortContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 700px;
-    height: 600px;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+#activateCard button:hover {
+    background-color: #218838;
 }
+
+
