@@ -63,7 +63,10 @@
         <div id="inputCard">
             <label for="serialNumber">Presentkortets Serienummer:</label>
             <input type="text" id="serialNumber" placeholder="Ange serienummer">
-            <button id="checkCard">Kontrollera</button>
+            <div style="display: flex; gap: 10px;">
+                <button id="checkCard">Kontrollera</button>
+                <button id="listAllCards">Lista Alla Presentkort</button> <!-- New button -->
+            </div>
         </div>
 
         <div id="cardInfo" style="display: none;">
@@ -95,6 +98,11 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
     <script src="presentkort.js" type="module"></script>
     <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
+    <script>
+        document.getElementById("listAllCards").addEventListener("click", () => {
+            window.location.href = "listPresentkort.html";
+        });
+    </script>
 </body>
 
 </html>
