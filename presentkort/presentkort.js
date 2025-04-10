@@ -97,12 +97,24 @@ activateCardButton.addEventListener("click", async () => {
 
     const newCardData = {
         value: cardValue,
+        addedValue: cardValue,
         seller: sellerName,
         date: activationDate.toISOString(),
         expirationDate: expirationDate.toISOString() // Save expiration date
     };
 
     await set(cardRef, newCardData);
+
+    // Save activation history
+    const historyRef = ref(db, `presentkort/${serialNumber}/history`);
+    const activationHistoryEntry = {
+        // action: "Aktivering",
+        addedValue: cardValue,
+        timestamp: activationDate.toISOString(),
+        // seller: sellerName
+    };
+    await push(historyRef, activationHistoryEntry);
+
     alert("Presentkortet har aktiverats!");
     activateCardDiv.style.display = "none";
 });
