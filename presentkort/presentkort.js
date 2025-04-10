@@ -27,6 +27,7 @@ const activateCardDiv = document.getElementById("activateCard");
 const cardValueInput = document.getElementById("cardValueInput");
 const sellerNameInput = document.getElementById("sellerName");
 const activateCardButton = document.getElementById("activateCardButton");
+const viewHistoryButton = document.getElementById("viewHistory");
 
 // Check card
 checkCardButton.addEventListener("click", async () => {
@@ -96,4 +97,11 @@ activateCardButton.addEventListener("click", async () => {
     await set(cardRef, newCardData);
     alert("Presentkortet har aktiverats!");
     activateCardDiv.style.display = "none";
+});
+
+// View history
+viewHistoryButton.addEventListener("click", () => {
+    const serialNumber = serialNumberInput.value.trim();
+    if (!serialNumber) return alert("Ange ett serienummer!");
+    window.location.href = `historik.html?serialNumber=${encodeURIComponent(serialNumber)}`;
 });
