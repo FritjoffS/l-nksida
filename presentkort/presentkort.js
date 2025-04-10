@@ -39,7 +39,10 @@ checkCardButton.addEventListener("click", async () => {
 
     if (snapshot.exists()) {
         const cardData = snapshot.val();
-        cardValueParagraph.textContent = `Aktuellt Saldo: ${cardData.value} kr`;
+        const expirationDate = new Date(cardData.expirationDate);
+        const formattedExpirationDate = `${expirationDate.getFullYear()}-${String(expirationDate.getMonth() + 1).padStart(2, '0')}-${String(expirationDate.getDate()).padStart(2, '0')}`;
+
+        cardValueParagraph.innerHTML = `Aktuellt Saldo: ${cardData.value} kr<br>Utgångsdatum: ${formattedExpirationDate}`;
         cardInfoDiv.style.display = "block";
         activateCardDiv.style.display = "none";
     } else {
@@ -88,10 +91,15 @@ activateCardButton.addEventListener("click", async () => {
     if (!serialNumber || isNaN(cardValue) || !sellerName) return alert("Ange giltiga värden!");
 
     const cardRef = ref(db, `presentkort/${serialNumber}`);
+    const activationDate = new Date();
+    const expirationDate = new Date(activationDate); // Clone activation date
+    expirationDate.setFullYear(expirationDate.getFullYear() + 2); // Add 2 years
+
     const newCardData = {
         value: cardValue,
         seller: sellerName,
-        date: new Date().toISOString()
+        date: activationDate.toISOString(),
+        expirationDate: expirationDate.toISOString() // Save expiration date
     };
 
     await set(cardRef, newCardData);
