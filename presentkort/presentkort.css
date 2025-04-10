@@ -121,7 +121,7 @@ button:hover {
     background-color: #0056b3;
 }
 
-#activateCard button, #checkCard, #redeemCard {
+#activateCard button, #checkCard, #redeemCard, #viewHistory, #backToPresentkort {
     padding: 5px 10px; /* Reduced padding */
     font-size: 14px;  /* Smaller font size */
     background-color: rgb(85, 85, 85);
@@ -133,6 +133,14 @@ button:hover {
     height: 50px; /* Set a fixed height */
     background-image: none;
     border-radius: 5px;
+}
+
+#viewHistory {
+    margin-top: 10px;
+}
+
+#backToPresentkort {
+    margin-top: 10px;
 }
 
 /* #activateCard button:hover {
