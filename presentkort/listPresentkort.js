@@ -30,11 +30,13 @@ const fetchAllCards = async () => {
             Object.entries(cards).forEach(([serialNumber, cardData]) => {
                 const activationDate = new Date(cardData.date).toLocaleDateString();
                 const expirationDate = new Date(cardData.expirationDate).toLocaleDateString();
+                const addedValue = cardData.addedValue || "N/A"; // Fetch addedValue or fallback to "N/A"
 
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${serialNumber}</td>
                     <td>${cardData.value}</td>
+                    <td>${addedValue}</td> <!-- New column -->
                     <td>${activationDate}</td>
                     <td>${expirationDate}</td>
                     <td>${cardData.seller}</td>
@@ -42,11 +44,11 @@ const fetchAllCards = async () => {
                 cardTableBody.appendChild(row);
             });
         } else {
-            cardTableBody.innerHTML = "<tr><td colspan='5' style='text-align: center;'>Inga presentkort hittades.</td></tr>";
+            cardTableBody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>Inga presentkort hittades.</td></tr>";
         }
     } catch (error) {
         console.error("Error fetching cards:", error);
-        cardTableBody.innerHTML = "<tr><td colspan='5' style='text-align: center;'>Kunde inte hämta presentkort.</td></tr>";
+        cardTableBody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>Kunde inte hämta presentkort.</td></tr>";
     }
 };
 
