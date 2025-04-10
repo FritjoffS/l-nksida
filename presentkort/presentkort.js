@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -64,6 +64,15 @@ redeemCardButton.addEventListener("click", async () => {
         if (newValue < 0) return alert("Otillräckligt saldo!");
 
         await update(cardRef, { value: newValue });
+
+        // Save redeem history
+        const historyRef = ref(db, `presentkort/${serialNumber}/history`);
+        const newHistoryEntry = {
+            redeemedAmount: redeemAmount,
+            timestamp: new Date().toISOString(),
+        };
+        await push(historyRef, newHistoryEntry);
+
         alert("Beloppet har lösts in!");
         cardValueParagraph.textContent = `Aktuellt Saldo: ${newValue} kr`;
     }
