@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale: 1.0">
     <meta author="Name" content="Fredrik Söderberg">
     <title>Lista Presentkort</title>
     <link rel="stylesheet" href="../styles/navbar.css">
@@ -14,21 +14,22 @@
 <body>
     <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
-    <div id="presentkortContainer">
+    <div id="listaPresentkortContainer">
         <h1>Lista Presentkort</h1>
         <table id="cardTable" border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead>
                 <tr>
-                    <th>Serienummer</th>
+                    <th>Serie nummer</th>
                     <th>Saldo (kr)</th>
-                    <th>Aktiveringsdatum</th>
+                    <th>Ursprungligt värde</th> <!-- New column -->
+                    <th>Aktiverings datum</th>
                     <th>Utgångsdatum</th>
                     <th>Säljare</th>
                 </tr>
             </thead>
             <tbody id="cardTableBody">
                 <tr>
-                    <td colspan="5" style="text-align: center;">Hämtar presentkort...</td>
+                    <td colspan="6" style="text-align: center;">Hämtar presentkort...</td>
                 </tr>
             </tbody>
         </table>
