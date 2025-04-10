@@ -16,6 +16,20 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);    
 }
 
+#listaPresentkortContainer {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 570px;
+    padding: 20px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);    
+}
+
 h1, h2 {
     text-align: center;
     margin-top: 10px;
@@ -121,7 +135,7 @@ button:hover {
     background-color: #0056b3;
 }
 
-#activateCard button, #checkCard, #redeemCard, #viewHistory, #backToPresentkort {
+#activateCard button, #checkCard, #redeemCard, #viewHistory, #backToPresentkort, #listAllCards {
     padding: 5px 10px; /* Reduced padding */
     font-size: 14px;  /* Smaller font size */
     background-color: rgb(85, 85, 85);
@@ -146,5 +160,26 @@ button:hover {
 /* #activateCard button:hover {
     background-color: #218838;
 } */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #333;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+td {
+    background-color: #fff;
+}
 
 
