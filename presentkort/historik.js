@@ -59,7 +59,7 @@ if (serialNumber) {
                 });
             } else {
                 const noHistoryDiv = document.createElement("div");
-                noHistoryDiv.textContent = "Ingen historik hittades.";
+                noHistoryDiv.textContent = "Ingen försäljning registrerad.";
                 historyList.appendChild(noHistoryDiv);
             }
         }).catch(error => {
