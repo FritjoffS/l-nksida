@@ -136,7 +136,7 @@ button:hover {
     background-color: #0056b3;
 }
 
-#activateCard button, #checkCard, #redeemCard, #viewHistory, #backToPresentkort, #listAllCards {
+#getNextSerialNumber, #activateCard button, #checkCard, #redeemCard, #viewHistory, #backToPresentkort, #listAllCards {
     padding: 5px 10px; /* Reduced padding */
     font-size: 14px;  /* Smaller font size */
     background-color: rgb(85, 85, 85);
