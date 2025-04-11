@@ -16,61 +16,67 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Function to format timestamp
-function formatTimestamp(timestamp) {
-    const date = new Date(timestamp);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-
-// Get serial number from query parameters
+// Get query parameters
 const urlParams = new URLSearchParams(window.location.search);
-const serialNumber = urlParams.get("serialNumber");
+const activatedFrom = urlParams.get("activatedFrom");
+const activatedTo = urlParams.get("activatedTo");
+const showActive = urlParams.get("showActive") === "true";
+const showExpired = urlParams.get("showExpired") === "true";
 
-if (serialNumber) {
-    const historyRef = ref(db, `presentkort/${serialNumber}/history`);
-    const historyList = document.getElementById("historyList");
+// DOM elements
+const historyList = document.getElementById("historyList");
 
-    // Fetch activation date from the card data
-    const cardRef = ref(db, `presentkort/${serialNumber}`);
-    get(cardRef).then(cardSnapshot => {
-        if (cardSnapshot.exists()) {
-            const cardData = cardSnapshot.val();
-            const activationDate = formatTimestamp(cardData.date);
-            historyList.innerHTML = `<h2>Historik</h2><div>Aktiveringsdatum: ${activationDate}</div>`;
-        } else {
-            historyList.innerHTML = "<p>Ingen information om presentkortet hittades.</p>";
-        }
+// Fetch and display presentkort based on filters
+const fetchFilteredCards = async () => {
+    const cardsRef = ref(db, "presentkort");
+    try {
+        const snapshot = await get(cardsRef);
+        if (snapshot.exists()) {
+            const cards = snapshot.val();
+            historyList.innerHTML = "<h2>Presentkort Historik</h2>";
 
-        // Fetch and append history entries
-        get(historyRef).then(snapshot => {
-            if (snapshot.exists()) {
-                const historyData = snapshot.val();
-                Object.entries(historyData).forEach(([key, entry]) => {
-                    const entryDiv = document.createElement("div");
-                    const formattedDate = formatTimestamp(entry.timestamp);
-                    entryDiv.textContent = `Datum: ${formattedDate}, Belopp: ${entry.redeemedAmount} kr`;
-                    historyList.appendChild(entryDiv);
-                });
-            } else {
-                const noHistoryDiv = document.createElement("div");
-                noHistoryDiv.textContent = "Ingen försäljning registrerad.";
-                historyList.appendChild(noHistoryDiv);
+            Object.entries(cards).forEach(([serialNumber, cardData]) => {
+                const activationDate = new Date(cardData.date);
+                const expirationDate = new Date(cardData.expirationDate);
+
+                // Adjust activatedFrom and activatedTo to include the entire day
+                const activatedFromDate = activatedFrom ? new Date(activatedFrom) : null;
+                if (activatedFromDate) activatedFromDate.setHours(0, 0, 0, 0);
+
+                const activatedToDate = activatedTo ? new Date(activatedTo) : null;
+                if (activatedToDate) activatedToDate.setHours(23, 59, 59, 999);
+
+                // Check if the card matches the activated date range
+                const isWithinDateRange =
+                    (!activatedFromDate || activationDate >= activatedFromDate) &&
+                    (!activatedToDate || activationDate <= activatedToDate);
+
+                // Determine if the card is active or expired
+                const isActive = expirationDate > new Date();
+                const isExpired = expirationDate <= new Date();
+
+                // Apply filters
+                if (
+                    isWithinDateRange &&
+                    ((showActive && isActive) || (showExpired && isExpired) || (showActive && showExpired))
+                ) {
+                    const cardDiv = document.createElement("div");
+                    cardDiv.textContent = `Serienummer: ${serialNumber}, Saldo: ${cardData.value} kr, Aktiveringsdatum: ${activationDate.toLocaleDateString()}, Utgångsdatum: ${expirationDate.toLocaleDateString()}`;
+                    historyList.appendChild(cardDiv);
+                }
+            });
+
+            // If no cards match the filters
+            if (historyList.children.length === 1) {
+                historyList.innerHTML += "<p>Inga presentkort matchar filtren.</p>";
             }
-        }).catch(error => {
-            console.error("Error fetching history:", error);
-            historyList.innerHTML += "<p>Kunde inte hämta historik.</p>";
-        });
-    }).catch(error => {
-        console.error("Error fetching card data:", error);
-        historyList.innerHTML = "<p>Kunde inte hämta information om presentkortet.</p>";
-    });
-} else {
-    alert("Inget serienummer angivet!");
-    window.location.href = "presentkort.html";
-}
+        } else {
+            historyList.innerHTML = "<p>Inga presentkort hittades.</p>";
+        }
+    } catch (error) {
+        console.error("Error fetching cards:", error);
+        historyList.innerHTML = "<p>Kunde inte hämta presentkort.</p>";
+    }
+};
+
+fetchFilteredCards();

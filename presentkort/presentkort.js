@@ -29,6 +29,9 @@ const sellerNameInput = document.getElementById("sellerName");
 const activateCardButton = document.getElementById("activateCardButton");
 const viewHistoryButton = document.getElementById("viewHistory");
 const getNextSerialNumberButton = document.getElementById("getNextSerialNumber");
+const listCardsButton = document.getElementById("listCards");
+const filterDialog = document.getElementById("filterDialog");
+const applyFiltersButton = document.getElementById("applyFilters");
 
 // Check card
 checkCardButton.addEventListener("click", async () => {
@@ -149,4 +152,33 @@ getNextSerialNumberButton.addEventListener("click", async () => {
         console.error("Error fetching serial numbers:", error);
         alert("Kunde inte hämta nästa lediga serienummer.");
     }
+});
+
+// Show filter dialog
+listCardsButton.addEventListener("click", () => {
+    // Toggle the visibility of the filter dialog
+    if (filterDialog.style.display === "none" || filterDialog.style.display === "") {
+        filterDialog.style.display = "block"; // Show the dialog
+    } else {
+        filterDialog.style.display = "none"; // Hide the dialog
+    }
+});
+
+// Apply filters and redirect to listPresentkort.html with query parameters
+applyFiltersButton.addEventListener("click", () => {
+    const showActive = document.getElementById("showActiveCards").checked;
+    const showExpired = document.getElementById("showExpiredCards").checked;
+    const activatedFrom = document.getElementById("activatedFrom").value;
+    const activatedTo = document.getElementById("activatedTo").value;
+
+    // Build query parameters
+    const queryParams = new URLSearchParams({
+        showActive,
+        showExpired,
+        activatedFrom,
+        activatedTo,
+    });
+
+    // Redirect to listPresentkort.html with filters applied
+    window.location.href = `listPresentkort.html?${queryParams.toString()}`;
 });

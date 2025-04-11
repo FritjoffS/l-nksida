@@ -136,7 +136,7 @@ button:hover {
     background-color: #0056b3;
 }
 
-#getNextSerialNumber, #activateCard button, #checkCard, #redeemCard, #viewHistory, #backToPresentkort, #listAllCards {
+#getNextSerialNumber, #activateCard button, #checkCard, #redeemCard, #viewHistory, #backToPresentkort, #listCards, #applyFilters {
     padding: 5px 10px; /* Reduced padding */
     font-size: 14px;  /* Smaller font size */
     background-color: rgb(85, 85, 85);
@@ -181,6 +181,17 @@ th {
 
 td {
     background-color: #fff;
+}
+
+.dateRange {
+    display: flex;
+    gap: 20px; /* Add spacing between the fields */
+    align-items: center;
+}
+
+.dateRange div {
+    display: flex;
+    flex-direction: column;
 }
 
 

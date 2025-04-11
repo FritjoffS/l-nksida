@@ -65,9 +65,36 @@
             <input type="text" id="serialNumber" placeholder="Ange serienummer">
             <div style="display: flex; gap: 10px;">
                 <button id="checkCard">Lös in / Kontrollera Presentkort</button>
-                <button id="getNextSerialNumber">Sälj Presentkort</button> <!-- New button -->
-                <button id="listAllCards">Lista Alla Presentkort</button>
+                <button id="getNextSerialNumber">Sälj Presentkort</button>
+                <button id="listCards">Lista Presentkort</button> <!-- Updated button -->
             </div>
+        </div>
+
+        <div id="filterDialog"
+            style="display: none; margin-top: 20px; border: 2px solid #333; padding: 20px; border-radius: 10px;">
+
+            <h2>Filtrera Presentkort</h2>
+
+            <div class="filterElements">
+                <div>
+                    <label>Visa Aktiva Presentkort<input type="checkbox" id="showActiveCards"></label>
+                </div>
+                <div>
+                    <label>Visa Utgångna Presentkort<input type="checkbox" id="showExpiredCards"></label>
+                </div>
+                <div class="dateRange">
+                    <div>
+                        <label>Försäljningsdatum Från:</label>
+                        <input type="date" id="activatedFrom">
+                    </div>
+                    <div>
+                        <label>Försäljningsdatum Till:</label>
+                        <input type="date" id="activatedTo">
+                    </div>
+                </div>
+            </div>
+
+            <button id="applyFilters">Tillämpa Filter</button>
         </div>
 
         <div id="cardInfo" style="display: none;">
@@ -100,9 +127,10 @@
     <script src="presentkort.js" type="module"></script>
     <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
     <script>
-        document.getElementById("listAllCards").addEventListener("click", () => {
-            window.location.href = "listPresentkort.html";
-        });
+        // Ta bort omdirigeringen här
+        // document.getElementById("listCards").addEventListener("click", () => {
+        //     window.location.href = "listPresentkort.html";
+        // });
     </script>
 </body>
 
