@@ -28,6 +28,7 @@ const cardValueInput = document.getElementById("cardValueInput");
 const sellerNameInput = document.getElementById("sellerName");
 const activateCardButton = document.getElementById("activateCardButton");
 const viewHistoryButton = document.getElementById("viewHistory");
+const getNextSerialNumberButton = document.getElementById("getNextSerialNumber");
 
 // Check card
 checkCardButton.addEventListener("click", async () => {
@@ -44,10 +45,9 @@ checkCardButton.addEventListener("click", async () => {
 
         cardValueParagraph.innerHTML = `Aktuellt Saldo: ${cardData.value} kr<br>Utgångsdatum: ${formattedExpirationDate}`;
         cardInfoDiv.style.display = "block";
-        activateCardDiv.style.display = "none";
     } else {
+        alert("Presentkortet hittades inte!");
         cardInfoDiv.style.display = "none";
-        activateCardDiv.style.display = "block";
     }
 });
 
@@ -124,4 +124,29 @@ viewHistoryButton.addEventListener("click", () => {
     const serialNumber = serialNumberInput.value.trim();
     if (!serialNumber) return alert("Ange ett serienummer!");
     window.location.href = `historik.html?serialNumber=${encodeURIComponent(serialNumber)}`;
+});
+
+// Get next available serial number
+getNextSerialNumberButton.addEventListener("click", async () => {
+    const cardsRef = ref(db, "presentkort");
+    try {
+        const snapshot = await get(cardsRef);
+        if (snapshot.exists()) {
+            const cards = snapshot.val();
+            const serialNumbers = Object.keys(cards).map(Number).sort((a, b) => a - b);
+            const nextSerialNumber = serialNumbers.length > 0 ? Math.max(...serialNumbers) + 1 : 1;
+            serialNumberInput.value = nextSerialNumber.toString().padStart(6, "0"); // Format as 6-digit number
+            alert(`Nästa lediga serienummer är: ${serialNumberInput.value}`);
+        } else {
+            serialNumberInput.value = "000001"; // Start from 000001 if no cards exist
+            alert(`Nästa lediga serienummer är: ${serialNumberInput.value}`);
+        }
+
+        // Show activateCard section
+        cardInfoDiv.style.display = "none";
+        activateCardDiv.style.display = "block";
+    } catch (error) {
+        console.error("Error fetching serial numbers:", error);
+        alert("Kunde inte hämta nästa lediga serienummer.");
+    }
 });
