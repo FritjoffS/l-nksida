@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -15,6 +16,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 
 // DOM elements
 const serialNumberInput = document.getElementById("serialNumber");
@@ -35,22 +37,27 @@ const applyFiltersButton = document.getElementById("applyFilters");
 
 // Check card
 checkCardButton.addEventListener("click", async () => {
-    const serialNumber = serialNumberInput.value.trim();
-    if (!serialNumber) return alert("Ange ett serienummer!");
+    try {
+        const serialNumber = serialNumberInput.value.trim();
+        if (!serialNumber) return alert("Ange ett serienummer!");
 
-    const cardRef = ref(db, `presentkort/${serialNumber}`);
-    const snapshot = await get(cardRef);
+        const cardRef = ref(db, `presentkort/${serialNumber}`);
+        const snapshot = await get(cardRef);
 
-    if (snapshot.exists()) {
-        const cardData = snapshot.val();
-        const expirationDate = new Date(cardData.expirationDate);
-        const formattedExpirationDate = `${expirationDate.getFullYear()}-${String(expirationDate.getMonth() + 1).padStart(2, '0')}-${String(expirationDate.getDate()).padStart(2, '0')}`;
+        if (snapshot.exists()) {
+            const cardData = snapshot.val();
+            const expirationDate = new Date(cardData.expirationDate);
+            const formattedExpirationDate = `${expirationDate.getFullYear()}-${String(expirationDate.getMonth() + 1).padStart(2, '0')}-${String(expirationDate.getDate()).padStart(2, '0')}`;
 
-        cardValueParagraph.innerHTML = `Aktuellt Saldo: ${cardData.value} kr<br>Utgångsdatum: ${formattedExpirationDate}`;
-        cardInfoDiv.style.display = "block";
-    } else {
-        alert("Presentkortet hittades inte!");
-        cardInfoDiv.style.display = "none";
+            cardValueParagraph.innerHTML = `Aktuellt Saldo: ${cardData.value} kr<br>Utgångsdatum: ${formattedExpirationDate}`;
+            cardInfoDiv.style.display = "block";
+        } else {
+            alert("Presentkortet hittades inte!");
+            cardInfoDiv.style.display = "none";
+        }
+    } catch (error) {
+        console.error("Error fetching card:", error);
+        alert("Ett fel uppstod vid hämtning av presentkort.");
     }
 });
 
@@ -111,10 +118,8 @@ activateCardButton.addEventListener("click", async () => {
     // Save activation history
     const historyRef = ref(db, `presentkort/${serialNumber}/history`);
     const activationHistoryEntry = {
-        // action: "Aktivering",
         addedValue: cardValue,
         timestamp: activationDate.toISOString(),
-        // seller: sellerName
     };
     await push(historyRef, activationHistoryEntry);
 
