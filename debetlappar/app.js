@@ -5,6 +5,9 @@ let lastNumber = 0;
 let pdfDoc = null;
 let lastGeneratedPdfUrl = null; // Store the URL of the last generated PDF
 
+// Set the worker source for PDF.js (ensure the version matches the library version)
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
+
 // Fetch lastNumber from Firebase
 async function fetchLastNumber() {
     try {
@@ -12,7 +15,12 @@ async function fetchLastNumber() {
         lastNumber = snapshot.exists() ? snapshot.val() : 0;
         console.log('Fetched lastNumber from Firebase:', lastNumber);
     } catch (error) {
-        console.error('Error fetching lastNumber from Firebase:', error);
+        if (error.code === 'PERMISSION_DENIED') {
+            console.error('Permission denied when accessing Firebase. Check your database rules.');
+            alert('Kunde inte hämta senaste serienumret. Kontrollera behörigheterna i Firebase.');
+        } else {
+            console.error('Error fetching lastNumber from Firebase:', error);
+        }
     }
 }
 
@@ -63,6 +71,9 @@ document.getElementById('processButton').addEventListener('click', async () => {
     status.textContent = 'Bearbetar...';
 
     try {
+        // Fetch the latest lastNumber from Firebase
+        await fetchLastNumber();
+
         const page = await pdfDoc.getPage(1);
         const scale = 2; // Öka skalan för bättre upplösning
         const viewport = page.getViewport({ scale: scale });
