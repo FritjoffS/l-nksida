@@ -95,16 +95,15 @@
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
 
-    // Your web app's Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyC1JyGvWi8P8SjbvEq0Qg3-WuNqA4_8b84",
-      authDomain: "lathund-c2fc4.firebaseapp.com",
-      databaseURL: "https://lathund-c2fc4-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "lathund-c2fc4",
-      storageBucket: "lathund-c2fc4.appspot.com",
-      messagingSenderId: "471459551227",
-      appId: "1:471459551227:web:1b05e833f496850091dd5e"
-    };
+      apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
+      authDomain: "l-nksida.firebaseapp.com",
+      databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "l-nksida",
+      storageBucket: "l-nksida.firebasestorage.app",
+      messagingSenderId: "258147870107",
+      appId: "1:258147870107:web:ce637517bc30b7578cad3e"
+  };
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
@@ -158,7 +157,7 @@
       }
 
       if (Object.keys(dataObject).length > 1) {
-        const newPostRef = push(ref(db, "products")); // Use push to generate a unique key
+        const newPostRef = push(ref(db, "lathund/products")); // Use push to generate a unique key
         set(newPostRef, dataObject)
           .then(() => {
             alert("Sidan sparad som: " + titleInput.value);
@@ -174,10 +173,12 @@
       }
     }
 
+// ********** Function to find data based on the title input ************
+
     function FindData() {
       const dbref = ref(db);
 
-      get(child(dbref, "products/" + titleInput.value))
+      get(child(dbref, "lathund/products/" + titleInput.value))
         .then((snapshot) => {
           if (snapshot.exists()) {
             var data = snapshot.val();
@@ -206,6 +207,8 @@
         });
     }
 
+// ********** Function to update data based on the selected title ************
+
     function UpdateData() {
       const selectedIdentifier = document.getElementById('savedTitlesDropdown').value;
 
@@ -229,7 +232,7 @@
         dataObject["produktNummer" + i] = produktNumbers[i - 1].value;
       }
 
-      update(ref(db, "products/" + selectedIdentifier), dataObject)
+      update(ref(db, "lathund/products/" + selectedIdentifier), dataObject)
         .then(() => {
           alert("Sidan uppdaterad");
 
@@ -240,6 +243,8 @@
           alert(error);
         });
     }
+
+    // ********** Function to delete data based on the selected title ************
 
     function DeleteData() {
       const selectedIdentifier = document.getElementById('savedTitlesDropdown').value;
@@ -254,7 +259,7 @@
 
       // If the user confirms, proceed with deletion
       if (confirmation) {
-        remove(ref(db, "products/" + selectedIdentifier))
+        remove(ref(db, "lathund/products/" + selectedIdentifier))
           .then(() => {
             alert("Sidan borttagen");
             location.reload();
@@ -274,7 +279,7 @@
     function displaySavedTitles() {
       const dbref = ref(db);
 
-      get(child(dbref, "products"))
+      get(child(dbref, "lathund/products"))
         .then((snapshot) => {
           if (snapshot.exists()) {
             var data = snapshot.val();
@@ -525,7 +530,7 @@
 
               // Extract the filename (excluding extension) and use it as the title
               var filenameWithoutExtension = file.name.replace(/\.[^/.]+$/, "");
-              const newPostRef = push(ref(db, "products"));
+              const newPostRef = push(ref(db, "lathund/products"));
               set(child(newPostRef, "title"), filenameWithoutExtension);
 
               // Set the data to the new post
