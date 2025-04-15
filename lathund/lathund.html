@@ -86,6 +86,9 @@
       });
     }
 
+    // Attach logout to the global window object
+    window.logout = logout;
+
     // Call checkAuthState on page load
     checkAuthState();
 
