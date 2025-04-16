@@ -34,7 +34,7 @@ function copyTextToClipboard(textToCopy) {
 // Function to fetch text from Firebase and copy it to the clipboard
 function fetchAndCopyText(buttonId) {
     var database = firebase.database();
-    database.ref('texts/' + buttonId).once('value').then(function(snapshot) {
+    database.ref('arbetsbeskr/' + buttonId).once('value').then(function(snapshot) {
         var textToCopy = snapshot.val();
         if (textToCopy) {
             copyTextToClipboard(textToCopy);
