@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Arbetsbeskrivningar</title>
+  <!-- <link rel="stylesheet" href="../styles/global.css" /> -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+
+  <script>
+    // Initialize Firebase
+    var firebaseConfig = {
+      apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
+      authDomain: "l-nksida.firebaseapp.com",
+      databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "l-nksida",
+      storageBucket: "l-nksida.firebasestorage.app",
+      messagingSenderId: "258147870107",
+      appId: "1:258147870107:web:ce637517bc30b7578cad3e"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    // Function to fetch and display all database entries
+    function loadEntries() {
+      const database = firebase.database();
+      const tableBody = document.getElementById("entriesTableBody");
+      tableBody.innerHTML = ""; // Clear existing rows
+
+      database.ref("arbetsbeskr").once("value").then(snapshot => {
+        snapshot.forEach(childSnapshot => {
+          const key = childSnapshot.key;
+          const value = childSnapshot.val();
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${key}</td>
+            <td>${value}</td>
+            <td>
+              <button onclick="editEntry('${key}', '${value.replace(/'/g, "\\'")}')">Edit</button>
+              <button onclick="deleteEntry('${key}')">Delete</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      });
+    }
+
+    // Function to add a new entry
+    function addEntry() {
+      const key = document.getElementById("newKey").value.trim();
+      const value = document.getElementById("newValue").value.trim();
+
+      if (key && value) {
+        const database = firebase.database();
+        database.ref("arbetsbeskr/" + key).set(value).then(() => {
+          alert("Entry added successfully!");
+          loadEntries();
+        }).catch(error => {
+          console.error("Error adding entry:", error);
+        });
+      } else {
+        alert("Both key and value are required.");
+      }
+    }
+
+    // Function to delete an entry
+    function deleteEntry(key) {
+      if (confirm(`Are you sure you want to delete "${key}"?`)) {
+        const database = firebase.database();
+        database.ref("arbetsbeskr/" + key).remove().then(() => {
+          alert("Entry deleted successfully!");
+          loadEntries();
+        }).catch(error => {
+          console.error("Error deleting entry:", error);
+        });
+      }
+    }
+
+    // Function to edit an entry
+    function editEntry(key, value) {
+      const newValue = prompt(`Edit value for "${key}":`, value);
+      if (newValue !== null) {
+        const database = firebase.database();
+        database.ref("arbetsbeskr/" + key).set(newValue).then(() => {
+          alert("Entry updated successfully!");
+          loadEntries();
+        }).catch(error => {
+          console.error("Error updating entry:", error);
+        });
+      }
+    }
+
+    // Load entries on page load
+    window.onload = loadEntries;
+  </script>
+</head>
+
+<body>
+  <h1>Admin - Arbetsbeskrivningar</h1>
+
+  <h2>Add New Entry</h2>
+  <div>
+    <label for="newKey">Key:</label>
+    <input type="text" id="newKey" placeholder="Enter key" />
+    <br />
+    <label for="newValue">Value:</label>
+    <textarea id="newValue" placeholder="Enter value"></textarea>
+    <br />
+    <button onclick="addEntry()">Add Entry</button>
+  </div>
+
+  <h2>Existing Entries</h2>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Key</th>
+        <th>Value</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="entriesTableBody">
+      <!-- Entries will be dynamically loaded here -->
+    </tbody>
+  </table>
+</body>
+
+</html>
