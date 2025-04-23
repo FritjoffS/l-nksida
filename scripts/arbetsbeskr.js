@@ -31,70 +31,40 @@ function copyTextToClipboard(textToCopy) {
     });
 }
 
-// Function to fetch text from Firebase and copy it to the clipboard
-function fetchAndCopyText(buttonId) {
-    var database = firebase.database();
-    database.ref('arbetsbeskr/' + buttonId).once('value').then(function(snapshot) {
-        var textToCopy = snapshot.val();
-        if (textToCopy) {
-            copyTextToClipboard(textToCopy);
-        } else {
-            console.error('Text not found for button:', buttonId);
-        }
-    }).catch(function(error) {
-        console.error('Error fetching text from database:', error);
+// Function to load buttons dynamically and attach event listeners
+function loadButtons() {
+    const database = firebase.database();
+    const container = document.querySelector(".container");
+
+    database.ref("arbetsbeskr").once("value").then(snapshot => {
+        snapshot.forEach(childSnapshot => {
+            const buttonId = childSnapshot.key;
+            const textToCopy = childSnapshot.val();
+
+            // Create a button dynamically
+            const button = document.createElement("button");
+            button.id = buttonId;
+            button.className = "copyButton";
+            button.innerHTML = buttonId.replace(/Button$/, ""); // Remove "Button" suffix for display
+
+            // Attach event listener to the button
+            button.addEventListener("click", function () {
+                if (textToCopy) {
+                    copyTextToClipboard(textToCopy);
+                } else {
+                    console.error(`Text not found for button: ${buttonId}`);
+                }
+            });
+
+            // Append the button to the container
+            container.appendChild(button);
+        });
+    }).catch(error => {
+        console.error("Error loading buttons from database:", error);
     });
 }
 
-// Update event listeners to use fetchAndCopyText
-document.getElementById("autoclipButton").addEventListener("click", function () {
-    fetchAndCopyText("autoclipButton");
-});
-document.getElementById("automowerButton").addEventListener("click", function () {
-    fetchAndCopyText("automowerButton");
-});
-document.getElementById("imowButton").addEventListener("click", function () {
-    fetchAndCopyText("imowButton");
-});
-document.getElementById("motorgräsklippareButton").addEventListener("click", function () {
-    fetchAndCopyText("motorgräsklippareButton");
-});
-document.getElementById("åkgräsklippareButton").addEventListener("click", function () {
-    fetchAndCopyText("åkgräsklippareButton");
-});
-document.getElementById("åkgräsklippareHstButton").addEventListener("click", function () {
-    fetchAndCopyText("åkgräsklippareHstButton");
-});
-document.getElementById("trimmerButton").addEventListener("click", function () {
-    fetchAndCopyText("trimmerButton");
-});
-document.getElementById("häcksaxButton").addEventListener("click", function () {
-    fetchAndCopyText("häcksaxButton");
-});
-document.getElementById("röjsågButton").addEventListener("click", function () {
-    fetchAndCopyText("röjsågButton");
-});
-document.getElementById("motorsågButton").addEventListener("click", function () {
-    fetchAndCopyText("motorsågButton");
-});
-document.getElementById("lövblåsButton").addEventListener("click", function () {
-    fetchAndCopyText("lövblåsButton");
-});
-document.getElementById("cykelButton").addEventListener("click", function () {
-    fetchAndCopyText("cykelButton");
-});
-document.getElementById("snöslungaButton").addEventListener("click", function () {
-    fetchAndCopyText("snöslungaButton");
-});
-document.getElementById("motorsågElBatteriButton").addEventListener("click", function () {
-    fetchAndCopyText("motorsågElBatteriButton");
-});
-document.getElementById("cykelPunkteringButton").addEventListener("click", function () {
-    fetchAndCopyText("cykelPunkteringButton");
-});
-document.getElementById("cykelDäckbyteButton").addEventListener("click", function () {
-    fetchAndCopyText("cykelDäckbyteButton");
-});
-document.getElementById("felMotorsågButton").addEventListener("click", function () {
-    fetchAndCopyText("felMotorsågButton");
-});
+// Call loadButtons on page load
+window.onload = function () {
+    loadButtons();
+};

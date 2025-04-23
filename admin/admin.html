@@ -31,7 +31,8 @@
       database.ref("arbetsbeskr").once("value").then(snapshot => {
         snapshot.forEach(childSnapshot => {
           const key = childSnapshot.key;
-          const value = childSnapshot.val();
+          const data = childSnapshot.val();
+          const value = data && data.label ? data.label : ""; // Ensure value is a string
 
           const row = document.createElement("tr");
           row.innerHTML = `
@@ -44,6 +45,8 @@
           `;
           tableBody.appendChild(row);
         });
+      }).catch(error => {
+        console.error("Error loading entries:", error);
       });
     }
 
@@ -83,7 +86,8 @@
       const newValue = prompt(`Edit value for "${key}":`, value);
       if (newValue !== null) {
         const database = firebase.database();
-        database.ref("arbetsbeskr/" + key).set(newValue).then(() => {
+        const buttonData = { label: newValue, id: key }; // Update button data structure
+        database.ref("arbetsbeskr/" + key).set(buttonData).then(() => {
           alert("Entry updated successfully!");
           loadEntries();
         }).catch(error => {

@@ -46,36 +46,40 @@
         console.error("Logout error:", error);
       });
     }
+
+    // Load buttons dynamically from the database
+    function loadButtons() {
+      const database = firebase.database();
+      const container = document.querySelector(".container");
+
+      database.ref("arbetsbeskr").once("value").then(snapshot => {
+        snapshot.forEach(childSnapshot => {
+          const key = childSnapshot.key;
+          const value = childSnapshot.val(); // Value is a string in the old structure
+
+          const button = document.createElement("button");
+          button.id = key;
+          button.className = "copyButton";
+          button.innerHTML = key.replace(/Button$/, ""); // Remove "Button" suffix for display
+          button.onclick = () => alert(value); // Display the value on button click
+          container.appendChild(button);
+        });
+      });
+    }
+
+    // Load buttons on page load
+    window.onload = function () {
+      checkAuthState();
+      loadButtons();
+    };
   </script>
 
 </head>
 
-<body onload="checkAuthState()">
+<body>
   <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
   <div class="container">
-    <button id="autoclipButton" class="copyButton">Service<br>Autoclip</button>
-    <button id="automowerButton" class="copyButton">Service<br>Automower</button>
-    <button id="cykelButton" class="copyButton">Service<br>Cykel</button>
-    <button id="cykelPunkteringButton" class="copyButton">Cykel Punktering<br>868921</button>
-    <button id="cykelDäckbyteButton" class="copyButton">Cykel Däckbyte<br>869978</button>
-    <button id="imowButton" class="copyButton">Service<br>IMow</button>
-    <button id="trimmerButton" class="copyButton">Service<br>Grästrimmer<br>868468</button>
-    <button id="häcksaxButton" class="copyButton">Service<br>Häcksax<br>820490</button>
-    <button id="lövblåsButton" class="copyButton">Service<br>Lövblås</button>
-    <button id="motorgräsklippareButton" class="copyButton">Service<br>Motorgräsklippare<br>635593</button>
-    <button id="motorsågButton" class="copyButton">Service<br>Motorsåg<br>727114</button>
-    <button id="motorsågElBatteriButton" class="copyButton">Service<br>Motorsåg El / Batteri<br>1114227</button>
-    <button id="röjsågButton" class="copyButton">Service<br>Röjsåg<br>158870</button>
-    <button id="snöslungaButton" class="copyButton">Service<br>Snöslunga</button>
-    <button id="åkgräsklippareButton" class="copyButton">Service<br>Åkgräsklippare<br>635598</button>
-    <button id="åkgräsklippareHstButton" class="copyButton">Service<br>Åkgräsklippare HST<br>635598</button>
-  </div>
-
-  <div class="container">
-
-    <button id="felMotorsågButton" class="copyButton">Felsökning<br>Motorsåg</button>
-
   </div>
 
   <script src="../scripts/arbetsbeskr.js"></script>
