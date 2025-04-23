@@ -82,18 +82,28 @@
     }
 
     // Function to edit an entry
-    function editEntry(key, value) {
-      const newValue = prompt(`Edit value for "${key}":`, value);
-      if (newValue !== null) {
-        const database = firebase.database();
-        const buttonData = { label: newValue, id: key }; // Update button data structure
-        database.ref("arbetsbeskr/" + key).set(buttonData).then(() => {
-          alert("Entry updated successfully!");
-          loadEntries();
-        }).catch(error => {
-          console.error("Error updating entry:", error);
-        });
-      }
+    function editEntry(key) {
+      const database = firebase.database();
+
+      // Fetch the current value from the database
+      database.ref("arbetsbeskr/" + key).once("value").then(snapshot => {
+        const currentValue = snapshot.val();
+
+        // Prompt the user to edit the current value
+        const newValue = prompt(`Edit value for "${key}":`, currentValue);
+
+        if (newValue !== null) {
+          // Save the updated value back to the database
+          database.ref("arbetsbeskr/" + key).set(newValue).then(() => {
+            alert("Entry updated successfully!");
+            loadEntries();
+          }).catch(error => {
+            console.error("Error updating entry:", error);
+          });
+        }
+      }).catch(error => {
+        console.error("Error fetching current value for editing:", error);
+      });
     }
 
     // Load entries on page load
