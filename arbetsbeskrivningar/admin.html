@@ -7,6 +7,7 @@
   <title>Admin - Arbetsbeskrivningar</title>
   <!-- Adjusted relative paths -->
   <!-- <link rel="stylesheet" href="../../styles/global.css" /> -->
+  <link rel="stylesheet" href="../styles/navbar.css" />
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
@@ -148,6 +149,7 @@
 </head>
 
 <body>
+  <div id="navbar"></div> <!-- Placeholder for the navbar -->
   <h1>Admin - Arbetsbeskrivningar</h1>
 
   <h2>Add New Entry</h2>
@@ -187,6 +189,9 @@
     <button onclick="closeModal()">Cancel</button>
   </div>
   <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;" onclick="closeModal()"></div>
+
+  <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
+
 </body>
 
 </html>
