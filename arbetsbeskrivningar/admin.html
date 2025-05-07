@@ -41,7 +41,7 @@
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${key}</td>
-            <td>${value}</td>
+            <!-- <td>${value}</td> -->
             <td>
               <button onclick="editEntry('${key}', '${value.replace(/'/g, "\\'")}')">Edit</button>
               <button onclick="deleteEntry('${key}')">Delete</button>
@@ -154,36 +154,48 @@
 
   <div class="mainContainer">
 
-  <div class="container">
+    <div class="container">
 
-    <div class="innerContainer">
+      <div class="innerContainer">
 
-      <h1>Admin - Arbetsbeskrivningar</h1>
+        <div class="topContainer">
 
-      <h2>Add New Entry</h2>
-      <div>
-        <label for="newKey">Key:</label>
-        <input type="text" id="newKey" placeholder="Enter key" />
-        <br />
-        <label for="newValue">Value:</label>
-        <textarea id="newValue" placeholder="Enter value"></textarea>
-        <br />
-        <button onclick="addEntry()">Add Entry</button>
-      </div>
+          <h1>Arbetsbeskrivningar</h1>
+          <h2>Administration</h2>          
 
-      <h2>Existing Entries</h2>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>Key</th>
-            <th>Value</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="entriesTableBody">
-          <!-- Entries will be dynamically loaded here -->
-        </tbody>
-      </table>
+          <h2>Lägg Upp Ny Post</h2>
+
+          <div>
+            <label for="newKey">Benämning:</label>
+            <br>
+            <input type="text" id="newKey" placeholder="Benämning" />
+            <br />
+            <label for="newValue">Beskrivning:</label>
+            <br>
+            <textarea id="newValue" placeholder="Text"></textarea>
+            <br />
+            <button onclick="addEntry()">Spara Post</button>
+          </div>
+
+        </div>
+
+        <div class="bottomContainer">
+
+          <h2>Existing Entries</h2>
+          <table border="1">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <!-- <th>Value</th> -->
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="entriesTableBody">
+              <!-- Entries will be dynamically loaded here -->
+            </tbody>
+          </table>
+
+        </div>
 
       </div>
 
