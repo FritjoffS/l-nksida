@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin - Arbetsbeskrivningar</title>
   <!-- Adjusted relative paths -->
-  <!-- <link rel="stylesheet" href="../../styles/global.css" /> -->
+  <link rel="stylesheet" href="../styles/global.css" />
+  <link rel="stylesheet" href="../arbetsbeskrivningar/styles.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
@@ -150,35 +151,49 @@
 
 <body>
   <div id="navbar"></div> <!-- Placeholder for the navbar -->
-  <h1>Admin - Arbetsbeskrivningar</h1>
 
-  <h2>Add New Entry</h2>
-  <div>
-    <label for="newKey">Key:</label>
-    <input type="text" id="newKey" placeholder="Enter key" />
-    <br />
-    <label for="newValue">Value:</label>
-    <textarea id="newValue" placeholder="Enter value"></textarea>
-    <br />
-    <button onclick="addEntry()">Add Entry</button>
+  <div class="mainContainer">
+
+  <div class="container">
+
+    <div class="innerContainer">
+
+      <h1>Admin - Arbetsbeskrivningar</h1>
+
+      <h2>Add New Entry</h2>
+      <div>
+        <label for="newKey">Key:</label>
+        <input type="text" id="newKey" placeholder="Enter key" />
+        <br />
+        <label for="newValue">Value:</label>
+        <textarea id="newValue" placeholder="Enter value"></textarea>
+        <br />
+        <button onclick="addEntry()">Add Entry</button>
+      </div>
+
+      <h2>Existing Entries</h2>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Value</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="entriesTableBody">
+          <!-- Entries will be dynamically loaded here -->
+        </tbody>
+      </table>
+
+      </div>
+
+    </div>
+
   </div>
 
-  <h2>Existing Entries</h2>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>Key</th>
-        <th>Value</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="entriesTableBody">
-      <!-- Entries will be dynamically loaded here -->
-    </tbody>
-  </table>
-
   <!-- Modal for editing text -->
-  <div id="editModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border: 1px solid #ccc; z-index: 1000; width: 600px; height: 450px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+  <div id="editModal"
+    style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border: 1px solid #ccc; z-index: 1000; width: 600px; height: 450px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
     <h3>Edit Entry</h3>
     <label for="editKeyInput">Key:</label>
     <input id="editKeyInput" type="text" style="width: 100%; margin-bottom: 10px;" />
@@ -188,7 +203,9 @@
     <button onclick="saveEdit()">Save</button>
     <button onclick="closeModal()">Cancel</button>
   </div>
-  <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;" onclick="closeModal()"></div>
+  <div id="modalOverlay"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"
+    onclick="closeModal()"></div>
 
   <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
 
