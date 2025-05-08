@@ -1,9 +1,8 @@
-
-// Funktion för att kopiera texten
+// Function to copy text to clipboard
 function copyTextToClipboard(textToCopy) {
-  // Använd Clipboard API för att kopiera texten
+  // Use Clipboard API to copy the text
   navigator.clipboard.writeText(textToCopy).then(function() {
-      // Meddela användaren om att texten har kopierats
+      // Notify the user that the text has been copied
       var message = document.createElement("div");
       message.textContent = "Texten har kopierats till urklippet";
       message.style.position = "fixed";
@@ -20,158 +19,52 @@ function copyTextToClipboard(textToCopy) {
 
       document.body.appendChild(message);
 
-      // Ta bort meddelandet efter 3 sekunder
+      // Remove the message after 3 seconds
       setTimeout(function () {
           message.style.opacity = "0";
           setTimeout(function () {
               document.body.removeChild(message);
-          }, 1000); // Vänta på att övergången ska slutföras
+          }, 1000); // Wait for the transition to complete
       }, 3000);
   }).catch(function(err) {
       console.error('Kunde inte kopiera texten: ', err);
   });
 }
 
-// Lägg till händelselyssnare för varje knapp
-document.getElementById("cykelButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Er Cykel är nu klar i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
+// Function to load buttons dynamically and attach event listeners
+function loadButtons() {
+  const database = firebase.database();
+  const container = document.querySelector(".container");
 
-document.getElementById("motorgräsklippareButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Er Motorgräsklippare är nu klar i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
+  database.ref("aviseringar").once("value").then(snapshot => {
+    snapshot.forEach(childSnapshot => {
+      const buttonId = childSnapshot.key;
+      const textToCopy = childSnapshot.val();
 
-document.getElementById("åkgräsklippareButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Er Åkgräsklippare är nu klar i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
+      // Create a button dynamically
+      const button = document.createElement("button");
+      button.id = buttonId;
+      button.className = "copyButton";
+      button.innerHTML = buttonId.replace(/Button$/, ""); // Remove "Button" suffix for display
 
-document.getElementById("robotgräsklippareButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Er Robotgräsklippare är nu klar i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
+      // Attach event listener to the button
+      button.addEventListener("click", function () {
+        if (textToCopy) {
+          copyTextToClipboard(textToCopy);
+        } else {
+          console.error(`Text not found for button: ${buttonId}`);
+        }
+      });
 
-document.getElementById("trimmerButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Er Grästrimmer är nu klar i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
+      // Append the button to the container
+      container.appendChild(button);
+    });
+  }).catch(error => {
+    console.error("Error loading buttons from database:", error);
+  });
+}
 
-document.getElementById("röjsågButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Er Röjsåg är nu klar i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
-
-document.getElementById("motorsågButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Er Motorsåg är nu klar i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
-
-document.getElementById("sågkedjaButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Er Sågkedja är nu klar i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
-
-document.getElementById("däckButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Erat Däck är nu klart i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
-
-document.getElementById("skridskorButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Era Skridskor är nu klara i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
-
-document.getElementById("högtryckstvättButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Er Högtryckstvätt är nu klar i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
-
-document.getElementById("maskinButton").addEventListener("click", function () {
-  var textToCopy = `Bästa Kund.
-Er Maskin är nu klar i vår verkstad och finns för avhämtning.
-Välkommen
-Vardagar 08.00-18.00
-Lördagar 09.00-13.00
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
-
-document.getElementById("reservdelarButton").addEventListener("click", function () {
-  var textToCopy = `Bästa kund.
-Dina reservdelar som du beställt har nu kommit till vårt lager och finns för avhämtning.
-Vardagar 8.00-18.00
-Lördagar 9.00-13.00
-Välkommen
-Sollebrunns Järnhandel AB
-0322-40330`;
-  copyTextToClipboard(textToCopy);
-});
+// Call loadButtons on page load
+window.onload = function () {
+  loadButtons();
+};
