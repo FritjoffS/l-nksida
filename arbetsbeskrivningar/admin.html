@@ -161,7 +161,7 @@
         <div class="topContainer">
 
           <h1>Arbetsbeskrivningar</h1>
-          <h2>Administration</h2>          
+          <h2>Administration</h2>
 
           <h2>Lägg Upp Ny Post</h2>
 
@@ -204,20 +204,18 @@
   </div>
 
   <!-- Modal for editing text -->
-  <div id="editModal"
-    style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border: 1px solid #ccc; z-index: 1000; width: 600px; height: 450px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
-    <h3>Edit Entry</h3>
-    <label for="editKeyInput">Key:</label>
-    <input id="editKeyInput" type="text" style="width: 100%; margin-bottom: 10px;" />
-    <label for="editTextarea">Value:</label>
-    <textarea id="editTextarea" style="width: 100%; height: 300px; font-size: 16px;"></textarea>
+  <div id="editModal">
+    <h3>Redigera Arbetsbeskrivning</h3>
+    <label for="editKeyInput">Benämning:</label>
+    <input id="editKeyInput" type="text" />
+    <label for="editTextarea">Beskrivning:</label>
+    <textarea id="editTextarea"></textarea>
     <br />
-    <button onclick="saveEdit()">Save</button>
-    <button onclick="closeModal()">Cancel</button>
+    <button class="saveButton" onclick="saveEdit()">Spara</button>
+    <button class="closeButton" onclick="closeModal()">Avbryt</button>
   </div>
-  <div id="modalOverlay"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"
-    onclick="closeModal()"></div>
+
+  <div id="modalOverlay" onclick="closeModal()"></div>
 
   <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
 
