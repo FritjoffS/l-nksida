@@ -11,6 +11,7 @@
   <!-- Add Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
 
   <script>
     // Initialize Firebase with your project's config
@@ -45,27 +46,39 @@
         console.error("Logout error:", error);
       });
     }
+
+    // Load buttons dynamically from the database
+    function loadButtons() {
+      const database = firebase.database();
+      const container = document.querySelector(".container");
+
+      database.ref("aviseringar").once("value").then(snapshot => {
+        snapshot.forEach(childSnapshot => {
+          const key = childSnapshot.key;
+          const value = childSnapshot.val();
+
+          const button = document.createElement("button");
+          button.id = key;
+          button.className = "copyButton";
+          button.innerHTML = key.replace(/Button$/, ""); // Remove "Button" suffix for display
+          button.onclick = () => alert(value); // Display the value on button click
+          container.appendChild(button);
+        });
+      });
+    }
+
+    // Load buttons on page load
+    window.onload = function () {
+      checkAuthState();
+      loadButtons();
+    };
   </script>
 
 </head>
 
-<body onload="checkAuthState()">
+<body>
   <div id="navbar"></div> <!-- Placeholder for the navbar -->
   <div class="container">
-
-    <button id="cykelButton" class="copyButton">Cykel Klar</button>
-    <button id="däckButton" class="copyButton">Däck Klart</button>
-    <button id="trimmerButton" class="copyButton">Grästrimmer Klar</button>
-    <button id="högtryckstvättButton" class="copyButton">Högtryckstvätt Klar</button>
-    <button id="motorgräsklippareButton" class="copyButton">Motorgräsklippare Klar</button>
-    <button id="motorsågButton" class="copyButton">Motorsåg Klar</button>
-    <button id="robotgräsklippareButton" class="copyButton">Robotgräsklippare Klar</button>
-    <button id="röjsågButton" class="copyButton">Röjsåg Klar</button>
-    <button id="skridskorButton" class="copyButton">Skridskor Klara</button>
-    <button id="sågkedjaButton" class="copyButton">Sågkedja Klar</button>
-    <button id="åkgräsklippareButton" class="copyButton">Åkgräsklippare Klar</button>
-    <button id="maskinButton" class="copyButton">Maskin Klar</button>
-    <button id="reservdelarButton" class="copyButton">Reservdelar Kommit</button>
   </div>
 
   <script src="../scripts/aviseringar.js"></script>
