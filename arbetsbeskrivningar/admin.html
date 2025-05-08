@@ -43,8 +43,8 @@
             <td>${key}</td>
             <!-- <td>${value}</td> -->
             <td>
-              <button onclick="editEntry('${key}', '${value.replace(/'/g, "\\'")}')">Ändra</button>
-              <button onclick="deleteEntry('${key}')">Radera</button>
+              <button onclick="editEntry('${key}', '${value.replace(/'/g, "\\'")}')">Ändra Post</button>
+              <button onclick="deleteEntry('${key}')">Radera Post</button>
             </td>
           `;
           tableBody.appendChild(row);
@@ -181,13 +181,13 @@
 
         <div class="bottomContainer">
 
-          <h2>Existing Entries</h2>
+          <h2>SPARADE ARBETSBESKRIVNINGAR</h2>
           <table border="1">
             <thead>
               <tr>
-                <th>Key</th>
+                <th>Benämning</th>
                 <!-- <th>Value</th> -->
-                <th>Actions</th>
+                <th>Åtgärd</th>
               </tr>
             </thead>
             <tbody id="entriesTableBody">
