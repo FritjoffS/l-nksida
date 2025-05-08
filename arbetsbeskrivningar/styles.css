@@ -247,3 +247,10 @@ td {
     background: rgba(0, 0, 0, 0.5);
     z-index: 999;
 }
+
+.copyButton {
+    margin: 5px;
+    padding: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+}
