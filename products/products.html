@@ -2,252 +2,150 @@
 <html lang="sv">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Produktsök - Lokal Databas</title>
-    <link rel="stylesheet" href="../styles/global.css">
-    <link rel="stylesheet" href="../styles/navbar.css">
-    <link rel="stylesheet" href="../styles/products.css">
+  <meta charset="UTF-8">
+  <title>Produktsök - Firebase Databas</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <link rel="stylesheet" href="../styles/navbar.css">
+  <link rel="stylesheet" href="../styles/products.css">
 
-    <!-- Add Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+  <!-- Add Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
 
-    <script>
-        // Initialize Firebase with your project's config
-        var firebaseConfig = {
-            apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
-            authDomain: "l-nksida.firebaseapp.com",
-            databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "l-nksida",
-            storageBucket: "l-nksida.firebasestorage.app",
-            messagingSenderId: "258147870107",
-            appId: "1:258147870107:web:ce637517bc30b7578cad3e"
-        };
-        firebase.initializeApp(firebaseConfig);
+  <script>
+    // Initialize Firebase with your project's config
+    var firebaseConfig = {
+      apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
+      authDomain: "l-nksida.firebaseapp.com",
+      databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "l-nksida",
+      storageBucket: "l-nksida.firebasestorage.app",
+      messagingSenderId: "258147870107",
+      appId: "1:258147870107:web:ce637517bc30b7578cad3e"
+    };
+    firebase.initializeApp(firebaseConfig);
 
-        // Function to check if a user is logged in or not
-        function checkAuthState() {
-            firebase.auth().onAuthStateChanged(function (user) {
-                if (!user) {
-                    // User is not signed in, redirect to the login page
-                    window.location.href = "../index/login.html";
-                }
-            });
-        }
+    // Function to fetch and display products from Firebase
+    function loadProducts() {
+      const database = firebase.database();
+      const container = document.getElementById("productContainer");
+      container.innerHTML = ""; // Clear existing products
 
-        // Function to log out the user
-        function logout() {
-            firebase.auth().signOut().then(function () {
-                // Sign-out successful, redirect to login page
-                window.location.href = "../index/login.html";
-            }).catch(function (error) {
-                // Handle errors here
-                console.error("Logout error:", error);
-            });
-        }
-    </script>
+      database.ref("products").once("value").then(snapshot => {
+        snapshot.forEach(childSnapshot => {
+          const product = childSnapshot.val();
 
+          // Create product card
+          const productCard = document.createElement("div");
+          productCard.className = "product-card";
+          productCard.innerHTML = `
+            <img src="${product.image}" class="product-image" alt="${product.name}">
+            <div class="product-info">
+              <h3>${product.name}</h3>
+              <p class="product-number">${product.productNumber}</p>
+              <p>${product.info}</p>
+              <div class="specs">
+                ${Object.entries(product.specs || {}).map(([key, value]) => `
+                  <p><strong>${key}:</strong> ${value}</p>
+                `).join("")}
+              </div>
+            </div>
+          `;
+          container.appendChild(productCard);
+        });
+      }).catch(error => {
+        console.error("Error loading products:", error);
+      });
+    }
+
+    // Function to filter products dynamically
+    function filterProducts() {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      const mainCategory = document.getElementById("mainCategory").value;
+      const subCategory = document.getElementById("subCategory").value;
+      const subType = document.getElementById("subType").value;
+
+      const database = firebase.database();
+      const container = document.getElementById("productContainer");
+      container.innerHTML = ""; // Clear existing products
+
+      database.ref("products").once("value").then(snapshot => {
+        snapshot.forEach(childSnapshot => {
+          const product = childSnapshot.val();
+
+          const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
+            product.productNumber.toLowerCase().includes(searchTerm) ||
+            product.info.toLowerCase().includes(searchTerm) ||
+            Object.values(product.specs || {}).some(spec => spec.toLowerCase().includes(searchTerm));
+
+          const matchesCategory = !mainCategory || product.category === mainCategory;
+          const matchesSubcategory = !subCategory || product.subcategory === subCategory;
+          const matchesSubtype = !subType || product.subtype === subType;
+
+          if (matchesSearch && matchesCategory && matchesSubcategory && matchesSubtype) {
+            const productCard = document.createElement("div");
+            productCard.className = "product-card";
+            productCard.innerHTML = `
+              <img src="${product.image}" class="product-image" alt="${product.name}">
+              <div class="product-info">
+                <h3>${product.name}</h3>
+                <p class="product-number">${product.productNumber}</p>
+                <p>${product.info}</p>
+                <div class="specs">
+                  ${Object.entries(product.specs || {}).map(([key, value]) => `
+                    <p><strong>${key}:</strong> ${value}</p>
+                  `).join("")}
+                </div>
+              </div>
+            `;
+            container.appendChild(productCard);
+          }
+        });
+      }).catch(error => {
+        console.error("Error filtering products:", error);
+      });
+    }
+
+    // Load products on page load
+    window.onload = function () {
+      loadProducts();
+
+      // Add event listeners for filtering
+      document.getElementById("searchInput").addEventListener("input", filterProducts);
+      document.getElementById("mainCategory").addEventListener("change", filterProducts);
+      document.getElementById("subCategory").addEventListener("change", filterProducts);
+      document.getElementById("subType").addEventListener("change", filterProducts);
+    };
+  </script>
 </head>
 
-<body onload="checkAuthState()">
+<body>
+  <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
+  <div class="filter-section">
+    <input type="text" id="searchInput" placeholder="Sök efter produkt eller artikelnummer...">
+    <select id="mainCategory">
+      <option value="">Alla Fabrikat</option>
+      <option value="Briggs & Stratton">Briggs & Stratton</option>
+      <option value="Stiga">Stiga</option>
+      <option value="Husqvarna">Husqvarna</option>
+      <option value="Stihl">Stihl</option>
+      <option value="Kohler">Kohler</option>
+    </select>
 
-    <div id="navbar"></div> <!-- Placeholder for the navbar -->
-    <div class="filter-section">
-        <input type="text" id="searchInput" placeholder="Sök efter produkt eller artikelnummer...">
-        <select id="mainCategory">
-            <option value="">Alla Fabrikat</option>
-            <option value="Briggs & Stratton">Briggs & Stratton</option>
-            <option value="Stiga">Stiga</option>
-            <option value="Husqvarna">Husqvarna</option>
-            <!-- <option value="Klippo">Klippo</option> -->
-            <option value="Honda">Honda</option>
-            <option value="Kawasaki">Kawasaki</option>
-            <option value="Stihl">Stihl</option>
-            <option value="Kohler">Kohler</option>
+    <select id="subCategory">
+      <option value="">Välj Produktkategori</option>
+    </select>
 
-        </select>
+    <select id="subType">
+      <option value="">Välj underkategori</option>
+    </select>
+  </div>
 
-        <select id="subCategory" disabled>
-            <option value="">Välj Produktkategori</option>
-        </select>
+  <div id="productContainer" class="product-grid"></div>
 
-        <select id="subType" disabled>
-            <option value="">Välj underkategori</option>
-        </select>
-    </div>
-
-    <div id="productContainer" class="product-grid"></div>
-
-    <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
-    <script type="module">
-        import productsDB from './productsDB.js';
-
-        // Initiera gränssnittet
-        function init() {
-            document.getElementById('searchInput').addEventListener('input', updateResults);
-            document.getElementById('mainCategory').addEventListener('change', updateSubcategories);
-            document.getElementById('subCategory').addEventListener('change', updateSubtypes);
-            document.getElementById('subType').addEventListener('change', updateResults);
-
-            updateResults();
-        }
-
-        // Uppdatera underkategorier
-        function updateSubcategories() {
-            const mainCategory = document.getElementById('mainCategory').value;
-            const subCategorySelect = document.getElementById('subCategory');
-            subCategorySelect.innerHTML = '<option value="">Välj underkategori</option>';
-
-            if (mainCategory) {
-                const category = productsDB.categories.find(c => c.name === mainCategory);
-
-                if (category && category.subgroups) {
-                    category.subgroups.forEach(subgroup => {
-                        const option = document.createElement('option');
-                        option.value = subgroup.name;
-                        option.textContent = subgroup.name;
-                        subCategorySelect.appendChild(option);
-                    });
-                    subCategorySelect.disabled = false;
-                } else {
-                    subCategorySelect.disabled = true;
-                }
-            } else {
-                subCategorySelect.disabled = true;
-            }
-
-            updateResults();
-        }
-
-        // Uppdatera undergrupper
-        function updateSubtypes() {
-            const mainCategory = document.getElementById('mainCategory').value;
-            const subCategory = document.getElementById('subCategory').value;
-            const subTypeSelect = document.getElementById('subType');
-            subTypeSelect.innerHTML = '<option value="">Välj underkategori</option>';
-
-            if (mainCategory && subCategory) {
-                const category = productsDB.categories.find(c => c.name === mainCategory);
-                const subgroup = category.subgroups.find(sg => sg.name === subCategory);
-
-                if (subgroup && subgroup.subtypes) {
-                    subgroup.subtypes.forEach(subtype => {
-                        const option = document.createElement('option');
-                        option.value = subtype;
-                        option.textContent = subtype;
-                        subTypeSelect.appendChild(option);
-                    });
-                    subTypeSelect.disabled = false;
-                } else {
-                    subTypeSelect.disabled = true;
-                }
-            } else {
-                subTypeSelect.disabled = true;
-            }
-
-            updateResults();
-        }
-
-        // Filtrera produkter
-        function filterProducts() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const mainCategory = document.getElementById('mainCategory').value;
-            const subCategory = document.getElementById('subCategory').value;
-            const subType = document.getElementById('subType').value;
-
-            return productsDB.categories.flatMap(category => {
-                if (mainCategory && category.name !== mainCategory) return [];
-
-                return category.products.filter(product => {
-                    const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
-                        product.productNumber.toLowerCase().includes(searchTerm) ||
-                        product.info.toLowerCase().includes(searchTerm) ||
-                        Object.values(product.specs).some(spec => spec.toLowerCase().includes(searchTerm));
-
-                    const matchesSubcategory = !subCategory || product.subcategory === subCategory;
-                    const matchesSubtype = !subType || product.subtype === subType;
-
-                    return matchesSearch && matchesSubcategory && matchesSubtype;
-                });
-            });
-        }
-
-        // Uppdatera resultat
-        function updateResults() {
-            const filteredProducts = filterProducts();
-            const container = document.getElementById('productContainer');
-
-            if (filteredProducts.length === 0) {
-                container.innerHTML = '<div class="no-results">Inga produkter hittades med aktuella filter</div>';
-                return;
-            }
-
-            container.innerHTML = filteredProducts.map(product => `
-                <div class="product-card">
-                    <img src="${product.image}" class="product-image" alt="${product.name}">
-                    <div class="product-info">
-                        <h3>${product.name}</h3>
-                        <div class="product-number-container" style="display: flex; align-items: center;">
-                            <p class="product-number" style="margin-right: 8px;">${product.productNumber}</p>
-                            <button class="copy-button" data-product-number="${product.productNumber}" style="background-image: url('../images/copy.jpg'); background-size: contain; background-repeat: no-repeat; width: 24px; height: 24px; border: none; cursor: pointer;"></button>
-                        </div>                        
-                        <p>${product.info}</p>
-                        <div class="specs">
-                            ${Object.entries(product.specs).map(([key, value]) => `
-                                <p><strong>${key}:</strong> ${value}</p>
-                            `).join('')}
-                        </div>
-                    </div>
-                        
-                    </div>
-                </div>
-            `).join('');
-
-            // Lägg till event listeners för kopieringsknapparna
-            document.querySelectorAll('.copy-button').forEach(button => {
-                button.addEventListener('click', () => {
-                    const productNumber = button.getAttribute('data-product-number');
-                    copyTextToClipboard(productNumber);
-                });
-            });
-        }
-
-        // Funktion för att kopiera text till urklipp
-        function copyTextToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                var message = document.createElement("div");
-                message.textContent = "Produktnumret har kopierats";
-                message.style.position = "fixed";
-                message.style.backgroundColor = "#333";
-                message.style.bottom = "10px";
-                message.style.left = "50%";
-                message.style.transform = "translateX(-50%)";
-                message.style.color = "#fff";
-                message.style.padding = "10px";
-                message.style.borderRadius = "5px";
-                message.style.zIndex = "1000";
-                message.style.fontSize = "48px";
-                message.style.transition = "opacity 1s";
-                message.style.opacity = "1";
-
-                document.body.appendChild(message);
-
-                // Ta bort meddelandet efter 3 sekunder
-                setTimeout(function () {
-                    message.style.opacity = "0";
-                    setTimeout(function () {
-                        document.body.removeChild(message);
-                    }, 1000); // Vänta på att övergången ska slutföras
-                }, 3000);
-            }).catch(function (err) {
-                console.error('Kunde inte kopiera texten: ', err);
-            });
-        }
-
-        // Starta applikationen
-        init();
-    </script>
+  <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
 </body>
 
 </html>
