@@ -39,7 +39,7 @@
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${key}</td>
-            <td>${brand}</td>
+            <td>${product.brand}</td>
             <td>${product.name}</td>
             <td>${product.category || ""}</td>
             <td>${product.subcategory || ""}</td>
@@ -110,7 +110,7 @@
         // Populate the modal with the current product data
         currentEditKey = key;
         document.getElementById("editKey").value = key;
-        document.getElementById("editBrand").value = brand;
+        document.getElementById("editBrand").value = product.brand || "";
         document.getElementById("editName").value = product.name || "";
         document.getElementById("editCategory").value = product.category || "";
         document.getElementById("editSubcategory").value = product.subcategory || "";
