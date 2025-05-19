@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin - Products</title>
-  <link rel="stylesheet" href="../styles/global.css" />
+  <!-- <link rel="stylesheet" href="../styles/global.css" /> -->
   <link rel="stylesheet" href="../styles/navbar.css" />
   <link rel="stylesheet" href="../styles/admin.css" />
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
@@ -39,6 +39,7 @@
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${key}</td>
+            <td>${brand}</td>
             <td>${product.name}</td>
             <td>${product.category || ""}</td>
             <td>${product.subcategory || ""}</td>
@@ -57,7 +58,9 @@
 
     // Function to add a new product
     function addProduct() {
+
       const key = document.getElementById("newKey").value.trim();
+      const brand = document.getElementById("newBrand").value.trim();
       const name = document.getElementById("newName").value.trim();
       const category = document.getElementById("newCategory").value.trim();
       const subcategory = document.getElementById("newSubcategory").value.trim();
@@ -107,6 +110,7 @@
         // Populate the modal with the current product data
         currentEditKey = key;
         document.getElementById("editKey").value = key;
+        document.getElementById("editBrand").value = brand;
         document.getElementById("editName").value = product.name || "";
         document.getElementById("editCategory").value = product.category || "";
         document.getElementById("editSubcategory").value = product.subcategory || "";
@@ -121,6 +125,7 @@
     // Function to save the edited product
     function saveEdit() {
       const key = document.getElementById("editKey").value.trim();
+      const brand = document.getElementById("editBrand").value.trim();
       const name = document.getElementById("editName").value.trim();
       const category = document.getElementById("editCategory").value.trim();
       const subcategory = document.getElementById("editSubcategory").value.trim();
@@ -132,6 +137,7 @@
         // Update the product data
         database.ref("products/" + currentEditKey).remove().then(() => {
           database.ref("products/" + key).set({
+            brand,
             name,
             category,
             subcategory,
@@ -172,6 +178,8 @@
       <div>
         <label for="newKey">Key:</label>
         <input type="text" id="newKey" placeholder="Unique Key" />
+        <label for="newBrand">Brand:</label>
+        <input type="text" id="newBrand" placeholder="Unique Brand" />
         <label for="newName">Name:</label>
         <input type="text" id="newName" placeholder="Product Name" />
         <label for="newCategory">Category:</label>
@@ -188,6 +196,7 @@
         <thead>
           <tr>
             <th>Key</th>
+            <th>Brand</th>
             <th>Name</th>
             <th>Category</th>
             <th>Subcategory</th>
@@ -207,6 +216,8 @@
     <h3>Edit Product</h3>
     <label for="editKey">Key:</label>
     <input id="editKey" type="text" />
+    <label for="editBrand">Brand:</label>
+    <input id="editBrand" type="text" />
     <label for="editName">Name:</label>
     <input id="editName" type="text" />
     <label for="editCategory">Category:</label>
