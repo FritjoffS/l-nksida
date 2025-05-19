@@ -43,9 +43,9 @@
             <img src="${product.image}" class="product-image" alt="${product.name}">
             <div class="product-info">
               <h3>${product.name}</h3>
-              <p class="product-number">${product.productNumber}</p>
-              <p>${product.info}</p>
-              <div class="specs">
+              <p class="product-number">produktnummer: ${product.productNumber}</p>
+              <p>produkt info: ${product.info}</p>
+              <div class="specs">specs
                 ${Object.entries(product.specs || {}).map(([key, value]) => `
                   <p><strong>${key}:</strong> ${value}</p>
                 `).join("")}
