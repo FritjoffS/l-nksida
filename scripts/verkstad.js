@@ -12,12 +12,24 @@ function loadButtons() {
       const button = document.createElement("button");
       button.id = buttonId;
       button.className = "linkButton";
-      button.innerHTML = buttonId.replace(/Button$/, ""); // Remove "Button" suffix for display
 
       // Set background image for the button (unique per button)
-      button.style.backgroundImage = "url('../images/" + buttonId + ".png')";
+      const imgUrl = "../images/" + buttonId + ".png";
+      button.style.backgroundImage = "url('" + imgUrl + "')";
       button.style.backgroundPosition = "center";
       button.style.color = "#fff"; // Optional: ensure text is visible
+
+      // Try to load the image, if it fails, display the key as text
+      const img = new Image();
+      img.onload = function() {
+        // Image loaded successfully, do nothing
+      };
+      img.onerror = function() {
+        button.style.backgroundImage = "";
+        button.textContent = buttonId.replace(/Button$/, "");
+        button.style.color = "#000"; // Make text visible if no background
+      };
+      img.src = imgUrl;
 
       // Attach event listener to the button
       button.addEventListener("click", function () {
