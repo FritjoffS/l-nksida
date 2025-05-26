@@ -22,66 +22,6 @@
     opacity: 0.8;
     filter: grayscale(100%);
   }
-  
-  .toolbox-button {
-    background-image: url("../images/toolbox.png");
-  }
-  
-  .stihl_b2b-button {
-    background-image: url("../images/stihl_b2b.png");
-  }
-  
-  .stihl_ssc-button {
-    background-image: url("../images/stihl_ssc.png");
-  }
-  .stihl_iot-button {
-    background-image: url("../images/iot_portal.png");
-  }
-  
-  .stiga-button {
-    background-image: url("../images/stiga.png");
-  }
-  
-  .power_portal-button {
-    background-image: url("../images/power_portal.png");
-  }
-  
-  .kramp-button {
-    background-image: url("../images/kramp.png");
-  }
-  
-  .husqvarna-button {
-    background-image: url("../images/husqvarna_blå.png");
-  }
-  
-  .jofrab-button {
-    background-image: url("../images/jofrab.png");
-  }
-
-  .openai-button {
-    background-image: url("../images/openai.png");
-  }
-
-  .ryobi-button {
-    background-image: url("../images/ryobi.png");
-  }
-
-  .tti-button {
-    background-image: url("../images/tti.png");
-  }
-
-  .al-ko-button {
-    background-image: url("../images/alko.png");
-  }
-
-  .kohler-button {
-    background-image: url("../images/kohler.png");
-  }
-
-  .tanaka-button {
-    background-image: url("../images/tanaka.png");
-  }
-
 
 
 
