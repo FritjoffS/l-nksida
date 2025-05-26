@@ -4,10 +4,20 @@ function loadButtons() {
   const container = document.querySelector(".container");
 
   database.ref("verkstad").once("value").then(snapshot => {
+    // Collect all children into an array
+    const buttonsData = [];
     snapshot.forEach(childSnapshot => {
-      const buttonId = childSnapshot.key;
-      const linkToFollow = childSnapshot.val();
+      buttonsData.push({
+        buttonId: childSnapshot.key,
+        linkToFollow: childSnapshot.val()
+      });
+    });
 
+    // Sort alphabetically by buttonId
+    buttonsData.sort((a, b) => a.buttonId.localeCompare(b.buttonId));
+
+    // Create buttons in sorted order
+    buttonsData.forEach(({ buttonId, linkToFollow }) => {
       // Create a button dynamically
       const button = document.createElement("button");
       button.id = buttonId;
