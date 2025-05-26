@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="../styles/navbar.css">
   <link rel="stylesheet" href="../styles/verkstad-buttons.css">
   <!-- Add Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>  
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
 
@@ -30,7 +30,7 @@
 
     // Function to check if a user is logged in or not
     function checkAuthState() {
-      firebase.auth().onAuthStateChanged(function(user) {
+      firebase.auth().onAuthStateChanged(function (user) {
         if (!user) {
           // User is not signed in, redirect to the login page
           window.location.href = "../index/login.html";
@@ -40,16 +40,16 @@
 
     // Function to log out the user
     function logout() {
-      firebase.auth().signOut().then(function() {
+      firebase.auth().signOut().then(function () {
         // Sign-out successful, redirect to login page
         window.location.href = "../index/login.html";
-      }).catch(function(error) {
+      }).catch(function (error) {
         // Handle errors here
         console.error("Logout error:", error);
       });
     }
 
-        // Load buttons dynamically from the database
+    // Load buttons dynamically from the database
     function loadButtons() {
       const database = firebase.database();
       const container = document.querySelector(".container");
@@ -81,8 +81,6 @@
 <body onload="checkAuthState()">
 
   <div id="navbar"></div> <!-- Placeholder for the navbar -->
-
-
 
   <div class="container">
 
