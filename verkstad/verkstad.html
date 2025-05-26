@@ -11,8 +11,9 @@
   <link rel="stylesheet" href="../styles/navbar.css">
   <link rel="stylesheet" href="../styles/verkstad-buttons.css">
   <!-- Add Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>  
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
 
   <script>
     // Initialize Firebase with your project's config
@@ -47,6 +48,32 @@
         console.error("Logout error:", error);
       });
     }
+
+        // Load buttons dynamically from the database
+    function loadButtons() {
+      const database = firebase.database();
+      const container = document.querySelector(".container");
+
+      database.ref("aviseringar").once("value").then(snapshot => {
+        snapshot.forEach(childSnapshot => {
+          const key = childSnapshot.key;
+          const value = childSnapshot.val();
+
+          const button = document.createElement("button");
+          button.id = key;
+          button.className = "copyButton";
+          button.innerHTML = key.replace(/Button$/, ""); // Remove "Button" suffix for display
+          button.onclick = () => alert(value); // Display the value on button click
+          container.appendChild(button);
+        });
+      });
+    }
+
+    // Load buttons on page load
+    window.onload = function () {
+      checkAuthState();
+      loadButtons();
+    };
   </script>
 
 </head>
@@ -55,7 +82,7 @@
 
   <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
-  <div class="container">
+<!--   <div class="container">
 
     <button class="toolbox-button" title="Stihl Toolbox" onclick="openNewWindow('https://b2bportal.stihl.com/se/sv')"></button>
     <button class="stihl_b2b-button" title="Stihl Webshop" onclick="openNewWindow('https://b2b.stihl.com/se/sv')"></button>
@@ -72,6 +99,10 @@
     <button class="jofrab-button" title="Jofrab Webshop" onclick="openNewWindow('https://www.jofrab.se/mitt-konto')"></button>
     <button class="tanaka-button" title="Tanaka Sprängskisser" onclick="openNewWindow('https://www.tanakaspares.co.uk/')"></button>
     
+  </div> -->
+
+  <div class="container">
+
   </div>
 
   <div class="search-bar">
@@ -85,9 +116,10 @@
   </div>
 
 
-
+  <script src="../scripts/verkstad.js"></script>
   <script src="../scripts/script.js"></script>
   <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
+
 
 </body>
 
