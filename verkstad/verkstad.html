@@ -59,9 +59,9 @@
           const key = childSnapshot.key;
           const value = childSnapshot.val();
 
-          const button = document.createElement("button");
-          button.id = key;
-          button.className = "copyButton";
+          const button = document.createElement("button"); // Create a new button element
+          button.id = key; // Use the key as the button ID
+          button.className = "linkButton";
           button.innerHTML = key.replace(/Button$/, ""); // Remove "Button" suffix for display
           button.onclick = () => alert(value); // Display the value on button click
           container.appendChild(button);
@@ -82,24 +82,7 @@
 
   <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
-<!--   <div class="container">
 
-    <button class="toolbox-button" title="Stihl Toolbox" onclick="openNewWindow('https://b2bportal.stihl.com/se/sv')"></button>
-    <button class="stihl_b2b-button" title="Stihl Webshop" onclick="openNewWindow('https://b2b.stihl.com/se/sv')"></button>
-    <button class="stihl_ssc-button" title="Stihl Service & Sprängskisser" onclick="openNewWindow('https://ssc.stihl.com/#/ssc/sso/en/catalog')"></button>
-    <button class="stihl_iot-button" title="Stihl IoT Portal" onclick="openNewWindow('https://isp.stihldealer.app/device')"></button>
-    <button class="stiga-button" title="Stiga Portal" onclick="openNewWindow('https://stiga.ev-portal.com/LogIn/Stiga')"></button>
-    <button class="power_portal-button" title="Briggs Service & Sprängskisser" onclick="openNewWindow('https://www.thepowerportal.com/')"></button>
-    <button class="kohler-button" title="Kohler Sprängskisser" onclick="openNewWindow('https://kohlerenginesparts.com/oemparts/c/kohler_engines/parts')"></button>
-    <button class="kramp-button" title="Kramp Webshop" onclick="openNewWindow('https://www.kramp.com/shop-se/sv')"></button>
-    <button class="husqvarna-button" title="Husqvarna Webshop & Sprängskisser" onclick="openNewWindow('https://supportsites.husqvarnagroup.com/se/')"></button>
-    <button class="ryobi-button" title="Ryobi Webshop & Sprängskisser" onclick="openNewWindow('https://services.ryobitools.eu/se-se/')"></button>
-    <button class="tti-button" title="Ryobi Färdigprodukter Webshop" onclick="openNewWindow('https://www.tti-webshop.eu')"></button>
-    <button class="al-ko-button" title="AL-KO Sprängskisser" onclick="openNewWindow('https://alko-garden.se/service/service-reparation/hitta-reservdelar/')"></button>
-    <button class="jofrab-button" title="Jofrab Webshop" onclick="openNewWindow('https://www.jofrab.se/mitt-konto')"></button>
-    <button class="tanaka-button" title="Tanaka Sprängskisser" onclick="openNewWindow('https://www.tanakaspares.co.uk/')"></button>
-    
-  </div> -->
 
   <div class="container">
 
