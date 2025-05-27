@@ -4,14 +4,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kontor</title>
   <link rel="stylesheet" href="../styles/global.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
   <link rel="stylesheet" href="../styles/kontor-buttons.css" />
-  <title>Kontor</title>
-
-  <!-- Add Firebase SDK -->
+   <!-- Add Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
 
   <script>
     // Initialize Firebase with your project's config
@@ -46,6 +46,32 @@
         console.error("Logout error:", error);
       });
     }
+
+        // Load buttons dynamically from the database
+    function loadButtons() {
+      const database = firebase.database();
+      const container = document.querySelector(".container");
+
+      database.ref("kontor").once("value").then(snapshot => {
+        snapshot.forEach(childSnapshot => {
+          const key = childSnapshot.key;
+          const value = childSnapshot.val();
+
+          const button = document.createElement("button"); // Create a new button element
+          button.id = key; // Use the key as the button ID
+          button.className = "linkButton";
+          button.innerHTML = key.replace(/Button$/, ""); // Remove "Button" suffix for display
+          button.onclick = () => alert(value); // Display the value on button click
+          container.appendChild(button);
+        });
+      });
+    }
+
+    // Load buttons on page load
+    window.onload = function () {
+      checkAuthState();
+      loadButtons();
+    };
   </script>
 </head>
 
@@ -55,7 +81,7 @@
 
   <div class="container">
 
-    <button class="logiq-button" title="Logiq" onclick="openNewWindow('https://sso.logiq.no/auth/realms/Logiq-webApp/protocol/openid-connect/auth?client_id=customer-portal&redirect_uri=https%3A%2F%2Fconnect.logiq.no%2Fcustomer-portal-gui%2Fhome&state=09c9faa7-d940-4dd1-84f1-32d603beca55&response_mode=fragment&response_type=code&scope=openid&nonce=8048dacf-5110-4dba-88ec-ba5a7f6be3c3')"></button>
+<!--     <button class="logiq-button" title="Logiq" onclick="openNewWindow('https://sso.logiq.no/auth/realms/Logiq-webApp/protocol/openid-connect/auth?client_id=customer-portal&redirect_uri=https%3A%2F%2Fconnect.logiq.no%2Fcustomer-portal-gui%2Fhome&state=09c9faa7-d940-4dd1-84f1-32d603beca55&response_mode=fragment&response_type=code&scope=openid&nonce=8048dacf-5110-4dba-88ec-ba5a7f6be3c3')"></button>
     <button class="prihandel-button" title="Pri Handel Prisfiler" onclick="openNewWindow('https://www.prihandel.com/')"></button>
     <button class="nea-button" title="NEA EDI lookup" onclick="openNewWindow('https://eregister.nea.nu/nea/index.html')"></button>
     <button class="fairown-button" title="Fairown Dashboard"
@@ -63,10 +89,11 @@
     <button class="SmsConnectButton" onclick="openNewWindow('https://www.smsteknik.se/member/login/')">Skicka
       SMS</button>
     <button class="kundorder-button" onclick="navigateToUrl('../guider/hamtKundorder.html')">HämtaKundorder</button>
-    <button class="kundorder-button" onclick="navigateToUrl('../guider/skapaKundorder.html')">Skapa Kundorder</button>
+    <button class="kundorder-button" onclick="navigateToUrl('../guider/skapaKundorder.html')">Skapa Kundorder</button> -->
 
   </div>
-
+  
+  <script src="../scripts/kontor.js"></script>
   <script src="../scripts/script.js"></script>
   <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
 </body>
