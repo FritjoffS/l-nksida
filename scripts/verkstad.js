@@ -35,9 +35,9 @@ function loadButtons() {
         // Image loaded successfully, do nothing
       };
       img.onerror = function() {
-        button.style.backgroundImage = "";
+        button.style.backgroundImage = "none";
         button.textContent = buttonId.replace(/Button$/, "");
-        button.style.color = "#fff"; // Make text visible if no background
+        button.style.color = "#000"; // Make text visible if no background
       };
       img.src = imgUrl;
 
