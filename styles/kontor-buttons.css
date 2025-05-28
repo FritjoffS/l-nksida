@@ -21,23 +21,3 @@
     opacity: 0.8;
     filter: grayscale(100%);
 }
-
-.logiq-button {
-    background-image: url("../images/logiq.png");
-}
-
-.prihandel-button {
-    background-image: url("../images/pri.png");
-}
-
-.nea-button {
-    background-image: url("../images/nea.png");
-}
-
-.fairown-button {
-    background-image: url("../images/allinclusive.png");
-}
-
-.SmsConnectButton {
-    background-image: url("../images/smsconnect.png");
-}
