@@ -13,20 +13,9 @@
     <!-- Add Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="../scripts/firebase-init.js"></script>
 
     <script>
-      // Initialize Firebase with your project's config
-      var firebaseConfig = {
-        apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
-        authDomain: "l-nksida.firebaseapp.com",
-        databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "l-nksida",
-        storageBucket: "l-nksida.firebasestorage.app",
-        messagingSenderId: "258147870107",
-        appId: "1:258147870107:web:ce637517bc30b7578cad3e"
-      };
-      firebase.initializeApp(firebaseConfig);
-  
       // Function to check if a user is logged in or not
       function checkAuthState() {
         firebase.auth().onAuthStateChanged(function(user) {
