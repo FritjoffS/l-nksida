@@ -63,6 +63,18 @@
       word-wrap: break-word;
       font-family: Arial, sans-serif;
     }
+    
+    /* Delete button styling */
+    .delete-button {
+      background-color: #ff4444 !important;
+      color: white !important;
+      border: 2px solid #cc0000 !important;
+    }
+    
+    .delete-button:hover {
+      background-color: #cc0000 !important;
+      transform: scale(1.05);
+    }
   </style>
 
   <script>
@@ -383,6 +395,30 @@
       currentEditKey = null;
     }
 
+    // Function to delete an entire guide
+    function deleteGuide() {
+      const selectedGuide = getSelectedGuide();
+      
+      if (!selectedGuide) {
+        alert("Välj en guide först.");
+        return;
+      }
+      
+      if (confirm(`Är du säker på att du vill radera hela guiden "${selectedGuide}"? Detta kommer att ta bort alla steg och kan inte ångras.`)) {
+        const database = firebase.database();
+        database.ref("guider/" + selectedGuide).remove().then(() => {
+          alert("Guide raderad!");
+          // Reset the form and reload the dropdown
+          document.getElementById("guideSelector").value = "";
+          loadGuideDropdown();
+          loadEntries();
+        }).catch(error => {
+          console.error("Error deleting guide:", error);
+          alert("Fel vid radering av guide.");
+        });
+      }
+    }
+
     // Load entries on page load
     window.onload = function() {
       checkAuthState();
@@ -427,6 +463,7 @@
               <br>
               <input type="text" id="guideDisplayName" placeholder="T.ex. Min Nya Guide" />
               <button onclick="updateGuideDisplayName()">Uppdatera Namn</button>
+              <button onclick="deleteGuide()" class="delete-button">Radera Guide</button>
               <br><br>
             </div>
           </div>
