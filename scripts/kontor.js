@@ -1,3 +1,15 @@
+// Function to generate default display name from guide ID
+function getDefaultDisplayName(guideId) {
+  // Default mapping for backward compatibility
+  const defaultNames = {
+    'hamtKundorderGuide': 'Hämta Kundorder',
+    'prisuppdateringGuide': 'Prisuppdatering',
+    'skapaKundorderGuide': 'Skapa Kundorder'
+  };
+  
+  return defaultNames[guideId] || guideId.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+}
+
 // Function to load buttons dynamically and attach event listeners
 function loadButtons() {
   const database = firebase.database();
@@ -63,13 +75,6 @@ function loadGuideShortcuts() {
   const database = firebase.database();
   const container = document.querySelector(".container");
 
-  // Guide display names
-  const guideDisplayNames = {
-    'hamtKundorderGuide': 'Hämta Kundorder',
-    'prisuppdateringGuide': 'Prisuppdatering',
-    'skapaKundorderGuide': 'Skapa Kundorder'
-  };
-
   console.log("Loading guide shortcuts...");
   
   database.ref("guider").once("value").then(snapshot => {
@@ -87,8 +92,11 @@ function loadGuideShortcuts() {
           console.log("Creating button for guide:", guideId);
           const button = document.createElement("button");
           button.className = "linkButton guide-button";
-          button.innerHTML = guideDisplayNames[guideId] || guideId;
-          button.title = `Öppna guide: ${guideDisplayNames[guideId] || guideId}`;
+          
+          // Use displayName from Firebase if available, otherwise generate from ID
+          const displayName = guideData.displayName || getDefaultDisplayName(guideId);
+          button.innerHTML = displayName;
+          button.title = `Öppna guide: ${displayName}`;
           button.onclick = () => navigateToUrl(`../guider/guide.html?guide=${guideId}`);
           container.appendChild(button);
         } else {
