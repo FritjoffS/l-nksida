@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Fredrik Söderberg">
+    <title>Guide</title>
+    <link rel="stylesheet" href="guide_styles.css">
+    <link rel="stylesheet" href="../styles/navbar.css" />
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+
+    <script>
+        // Initialize Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
+            authDomain: "l-nksida.firebaseapp.com",
+            databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "l-nksida",
+            storageBucket: "l-nksida.firebasestorage.app",
+            messagingSenderId: "258147870107",
+            appId: "1:258147870107:web:ce637517bc30b7578cad3e"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // Function to check if a user is logged in or not
+        function checkAuthState() {
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (!user) {
+                    // User is not signed in, redirect to the login page
+                    window.location.href = "../index/login.html";
+                }
+            });
+        }
+
+        // Function to get URL parameter
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Function to get guide display name
+        function getGuideDisplayName(guideId) {
+            const displayNames = {
+                'hamtKundorderGuide': 'HÄMTA KUNDORDER',
+                'prisuppdateringGuide': 'PRISUPPDATERING',
+                'skapaKundorderGuide': 'SKAPA KUNDORDER'
+            };
+            return displayNames[guideId] || guideId.toUpperCase();
+        }
+
+        // Function to load guide steps from Firebase
+        function loadGuideSteps() {
+            const guideId = getUrlParameter('guide');
+            const database = firebase.database();
+            const stepsContainer = document.getElementById("stepsContainer");
+            const pageTitle = document.getElementById("pageTitle");
+
+            if (!guideId) {
+                stepsContainer.innerHTML = '<p>Ingen guide specificerad. Gå tillbaka till kontorsidan.</p>';
+                return;
+            }
+
+            // Set page title
+            pageTitle.textContent = getGuideDisplayName(guideId);
+            document.title = getGuideDisplayName(guideId);
+
+            database.ref("guider/" + guideId + "/steps").once("value").then(snapshot => {
+                if (snapshot.exists()) {
+                    // Clear existing content
+                    stepsContainer.innerHTML = "";
+                    
+                    // Sort steps by key for consistent order
+                    const steps = [];
+                    snapshot.forEach(childSnapshot => {
+                        steps.push({
+                            key: childSnapshot.key,
+                            data: childSnapshot.val()
+                        });
+                    });
+                    
+                    steps.sort((a, b) => a.key.localeCompare(b.key));
+                    
+                    // Create sections for each step
+                    steps.forEach(step => {
+                        const stepData = step.data;
+                        const section = document.createElement("section");
+                        section.className = "guide-step";
+                        
+                        // Convert line breaks to HTML breaks to preserve formatting
+                        const formattedText = (stepData.text || '').replace(/\n/g, '<br>');
+                        let sectionContent = `<p style="white-space: pre-wrap;">${formattedText}</p>`;
+                        
+                        if (stepData.imageUrl) {
+                            sectionContent += `
+                                <img src="${stepData.imageUrl}" 
+                                     alt="${stepData.altText || stepData.title || ''}" 
+                                     title="${stepData.altText || stepData.title || ''}" 
+                                     width="auto" 
+                                     loading="eager">
+                            `;
+                        }
+                        
+                        sectionContent += `
+                            <p>
+                                ------------------------------------------------------------------------------------------
+                            </p>
+                        `;
+                        
+                        section.innerHTML = sectionContent;
+                        stepsContainer.appendChild(section);
+                    });
+                } else {
+                    // If no data exists, show message
+                    stepsContainer.innerHTML = `
+                        <p>Ingen guide hittades för "${guideId}". Kontakta administratören.</p>
+                    `;
+                }
+            }).catch(error => {
+                console.error("Error loading guide steps:", error);
+                stepsContainer.innerHTML = `
+                    <p>Fel vid laddning av guide. Försök igen senare.</p>
+                `;
+            });
+        }
+
+        // Load guide steps on page load
+        window.onload = function () {
+            checkAuthState();
+            loadGuideSteps();
+        };
+    </script>
+</head>
+
+<body>
+
+    <div id="navbar"></div> <!-- Placeholder for the navbar -->
+
+    <main>
+        <section class="center-bg">
+
+            <h1 id="pageTitle">
+                GUIDE
+            </h1>
+
+            <div id="stepsContainer">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
+
+</body>
+
+</html>
