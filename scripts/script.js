@@ -26,7 +26,10 @@ const år = currentDate.getFullYear();
 const formateratDatum = `${dag}/${månad} \n ${år}`;
 
 // Uppdatera elementet med id "date" med det formaterade datumet och veckodagen
-document.getElementById("date").innerText = `${veckodagar[dagIVeckan]} ${formateratDatum}`;
+const dateElement = document.getElementById("date");
+if (dateElement) {
+    dateElement.innerText = `${veckodagar[dagIVeckan]} ${formateratDatum}`;
+}
 
 // Uppdatera datumet en gång i timmen
 setInterval(() => {
@@ -35,7 +38,10 @@ setInterval(() => {
     const updatedMonth = updatedDate.getMonth() + 1;
     const updatedYear = updatedDate.getFullYear();
     const updatedFormattedDate = `${updatedDay}/${updatedMonth} \n ${updatedYear}`;
-    document.getElementById("date").innerText = `${veckodagar[updatedDate.getDay()]} ${updatedFormattedDate}`;
+    const dateElement = document.getElementById("date");
+    if (dateElement) {
+        dateElement.innerText = `${veckodagar[updatedDate.getDay()]} ${updatedFormattedDate}`;
+    }
 }, 1000); // 1000 millisekunder = 1 sekund, 3600000 millisekunder = 1 timme
 
 
