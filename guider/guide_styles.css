@@ -38,3 +38,16 @@ img {
 section {
     margin-top: 100px;
 }
+
+/* Preserve text formatting and line breaks */
+.guide-step p {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: center;
+}
+
+/* Specific styling for separator lines */
+.guide-step p:last-child {
+    text-align: center;
+    white-space: normal;
+}
