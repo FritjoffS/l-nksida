@@ -28,10 +28,16 @@
 
     // Function to check if a user is logged in or not
     function checkAuthState() {
+      console.log("Checking auth state...");
       firebase.auth().onAuthStateChanged(function (user) {
         if (!user) {
+          console.log("User not authenticated, redirecting to login");
           // User is not signed in, redirect to the login page
           window.location.href = "../index/login.html";
+        } else {
+          console.log("User is authenticated:", user.email);
+          // User is signed in, load content - kontor.js will handle loadButtons()
+          loadGuideShortcuts();
         }
       });
     }
@@ -47,30 +53,55 @@
       });
     }
 
-        // Load buttons dynamically from the database
-    function loadButtons() {
+    // Function to load guide shortcuts dynamically
+    function loadGuideShortcuts() {
       const database = firebase.database();
       const container = document.querySelector(".container");
 
-      database.ref("kontor").once("value").then(snapshot => {
-        snapshot.forEach(childSnapshot => {
-          const key = childSnapshot.key;
-          const value = childSnapshot.val();
+      // Guide display names
+      const guideDisplayNames = {
+        'hamtKundorderGuide': 'Hämta Kundorder',
+        'prisuppdateringGuide': 'Prisuppdatering',
+        'skapaKundorderGuide': 'Skapa Kundorder'
+      };
 
-          const button = document.createElement("button"); // Create a new button element
-          button.id = key; // Use the key as the button ID
-          button.className = "linkButton";
-          button.innerHTML = key.replace(/Button$/, ""); // Remove "Button" suffix for display
-          button.onclick = () => alert(value); // Display the value on button click
-          container.appendChild(button);
-        });
+      console.log("Loading guide shortcuts...");
+      
+      database.ref("guider").once("value").then(snapshot => {
+        console.log("Firebase response received:", snapshot.exists());
+        if (snapshot.exists()) {
+          console.log("Guides found in database");
+          snapshot.forEach(childSnapshot => {
+            const guideId = childSnapshot.key;
+            const guideData = childSnapshot.val();
+            
+            console.log("Processing guide:", guideId, guideData);
+            
+            // Only create button if guide has steps
+            if (guideData && guideData.steps) {
+              console.log("Creating button for guide:", guideId);
+              const button = document.createElement("button");
+              button.className = "linkButton guide-button";
+              button.innerHTML = guideDisplayNames[guideId] || guideId;
+              button.title = `Öppna guide: ${guideDisplayNames[guideId] || guideId}`;
+              button.onclick = () => navigateToUrl(`../guider/guide.html?guide=${guideId}`);
+              container.appendChild(button);
+            } else {
+              console.log("Guide has no steps:", guideId);
+            }
+          });
+        } else {
+          console.log("No guides found in database");
+        }
+      }).catch(error => {
+        console.error("Error loading guides:", error);
       });
     }
 
-    // Load buttons on page load
+    // Load page on page load
     window.onload = function () {
+      console.log("Page loaded, initializing...");
       checkAuthState();
-      loadButtons();
     };
   </script>
 </head>
@@ -80,17 +111,7 @@
   <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
   <div class="container">
-
-<!--     <button class="logiq-button" title="Logiq" onclick="openNewWindow('https://sso.logiq.no/auth/realms/Logiq-webApp/protocol/openid-connect/auth?client_id=customer-portal&redirect_uri=https%3A%2F%2Fconnect.logiq.no%2Fcustomer-portal-gui%2Fhome&state=09c9faa7-d940-4dd1-84f1-32d603beca55&response_mode=fragment&response_type=code&scope=openid&nonce=8048dacf-5110-4dba-88ec-ba5a7f6be3c3')"></button>
-    <button class="prihandel-button" title="Pri Handel Prisfiler" onclick="openNewWindow('https://www.prihandel.com/')"></button>
-    <button class="nea-button" title="NEA EDI lookup" onclick="openNewWindow('https://eregister.nea.nu/nea/index.html')"></button>
-    <button class="fairown-button" title="Fairown Dashboard"
-      onclick="openNewWindow('https://dashboard.fairown.com/login')"></button>
-    <button class="SmsConnectButton" onclick="openNewWindow('https://www.smsteknik.se/member/login/')">Skicka
-      SMS</button>
-    <button class="kundorder-button" onclick="navigateToUrl('../guider/hamtKundorder.html')">HämtaKundorder</button>
-    <button class="kundorder-button" onclick="navigateToUrl('../guider/skapaKundorder.html')">Skapa Kundorder</button> -->
-
+    <!-- Dynamic buttons will be loaded here -->
   </div>
   
   <script src="../scripts/kontor.js"></script>
