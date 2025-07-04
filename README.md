@@ -4,4 +4,4 @@ It is connected to Firebase project l-nksida
 
 Projects.
 
-aviseringar is under uppdate
+
