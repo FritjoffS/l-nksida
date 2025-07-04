@@ -43,6 +43,19 @@
       margin: 10px 5px;
     }
     
+    .topContainer select {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px 0;
+      font-size: 1rem;
+      border-top: 2px solid lightgray;
+      border-left: 2px solid lightgray;
+      border-right: 2px solid darkgray;
+      border-bottom: 2px solid darkgray;
+      box-sizing: border-box;
+      background-color: white;
+    }
+    
     /* Preserve text formatting in textareas and previews */
     .topContainer textarea,
     #editModal textarea {
@@ -75,13 +88,65 @@
       });
     }
 
+    // Function to load available guides into dropdown
+    function loadGuideDropdown() {
+      const database = firebase.database();
+      const guideSelector = document.getElementById("guideSelector");
+      
+      // Clear existing options except the default ones
+      guideSelector.innerHTML = `
+        <option value="">-- Välj guide --</option>
+        <option value="annanGuide">Skapa ny guide</option>
+      `;
+
+      database.ref("guider").once("value").then(snapshot => {
+        if (snapshot.exists()) {
+          snapshot.forEach(childSnapshot => {
+            const guideId = childSnapshot.key;
+            const guideData = childSnapshot.val();
+            
+            if (guideData && guideData.steps) {
+              const option = document.createElement("option");
+              option.value = guideId;
+              option.textContent = getGuideDisplayName(guideId);
+              guideSelector.appendChild(option);
+            }
+          });
+        }
+      }).catch(error => {
+        console.error("Error loading guides:", error);
+      });
+    }
+
+    // Function to get guide display name
+    function getGuideDisplayName(guideId) {
+      const displayNames = {
+        'hamtKundorderGuide': 'Hämta Kundorder',
+        'prisuppdateringGuide': 'Prisuppdatering',
+        'skapaKundorderGuide': 'Skapa Kundorder'
+      };
+      return displayNames[guideId] || guideId.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+    }
+
     // Function to fetch and display all database entries
     function loadEntries() {
       const database = firebase.database();
       const tableBody = document.getElementById("entriesTableBody");
+      const selectedGuide = getSelectedGuide();
+      const customGuideSection = document.getElementById("customGuideSection");
+      
+      // Show/hide custom guide section
+      if (document.getElementById("guideSelector").value === "annanGuide") {
+        customGuideSection.style.display = "block";
+      } else {
+        customGuideSection.style.display = "none";
+      }
+      
       tableBody.innerHTML = ""; // Clear existing rows
 
-      database.ref("guider/hamtKundorderGuide/steps").once("value").then(snapshot => {
+      if (!selectedGuide) return;
+
+      database.ref("guider/" + selectedGuide + "/steps").once("value").then(snapshot => {
         if (snapshot.exists()) {
           snapshot.forEach(childSnapshot => {
             const key = childSnapshot.key;
@@ -104,6 +169,16 @@
       });
     }
 
+    // Function to get the selected guide name
+    function getSelectedGuide() {
+      const selector = document.getElementById("guideSelector");
+      if (selector.value === "annanGuide") {
+        const customName = document.getElementById("customGuideName").value.trim();
+        return customName || null;
+      }
+      return selector.value;
+    }
+
     // Function to add a new entry
     function addEntry() {
       const stepId = document.getElementById("newStepId").value.trim();
@@ -111,6 +186,12 @@
       const text = document.getElementById("newText").value.trim();
       const imageUrl = document.getElementById("newImageUrl").value.trim();
       const altText = document.getElementById("newAltText").value.trim();
+      const selectedGuide = getSelectedGuide();
+
+      if (!selectedGuide) {
+        alert("Välj en guide eller ange namn för ny guide.");
+        return;
+      }
 
       if (stepId && title && text) {
         const database = firebase.database();
@@ -121,7 +202,7 @@
           altText: altText
         };
 
-        database.ref("guider/hamtKundorderGuide/steps/" + stepId).set(stepData).then(() => {
+        database.ref("guider/" + selectedGuide + "/steps/" + stepId).set(stepData).then(() => {
           alert("Steg tillagt!");
           clearForm();
           loadEntries();
@@ -145,9 +226,14 @@
 
     // Function to delete an entry
     function deleteEntry(stepId) {
+      const selectedGuide = getSelectedGuide();
+      if (!selectedGuide) {
+        alert("Välj en guide först.");
+        return;
+      }
       if (confirm(`Är du säker på att du vill radera steget "${stepId}"?`)) {
         const database = firebase.database();
-        database.ref("guider/hamtKundorderGuide/steps/" + stepId).remove().then(() => {
+        database.ref("guider/" + selectedGuide + "/steps/" + stepId).remove().then(() => {
           alert("Steg raderat!");
           loadEntries();
         }).catch(error => {
@@ -161,9 +247,15 @@
 
     function editEntry(stepId) {
       const database = firebase.database();
+      const selectedGuide = getSelectedGuide();
+
+      if (!selectedGuide) {
+        alert("Välj en guide först.");
+        return;
+      }
 
       // Fetch the current value from the database
-      database.ref("guider/hamtKundorderGuide/steps/" + stepId).once("value").then(snapshot => {
+      database.ref("guider/" + selectedGuide + "/steps/" + stepId).once("value").then(snapshot => {
         const currentData = snapshot.val();
 
         if (currentData) {
@@ -188,6 +280,12 @@
       const newText = document.getElementById("editText").value.trim();
       const newImageUrl = document.getElementById("editImageUrl").value.trim();
       const newAltText = document.getElementById("editAltText").value.trim();
+      const selectedGuide = getSelectedGuide();
+
+      if (!selectedGuide) {
+        alert("Välj en guide först.");
+        return;
+      }
 
       if (currentEditKey && newStepId && newTitle && newText) {
         const database = firebase.database();
@@ -200,8 +298,8 @@
 
         // If the step ID has changed, remove the old key and save the new key-value pair
         if (currentEditKey !== newStepId) {
-          database.ref("guider/hamtKundorderGuide/steps/" + currentEditKey).remove().then(() => {
-            database.ref("guider/hamtKundorderGuide/steps/" + newStepId).set(stepData).then(() => {
+          database.ref("guider/" + selectedGuide + "/steps/" + currentEditKey).remove().then(() => {
+            database.ref("guider/" + selectedGuide + "/steps/" + newStepId).set(stepData).then(() => {
               alert("Steg uppdaterat!");
               closeModal();
               loadEntries();
@@ -213,7 +311,7 @@
           });
         } else {
           // If the step ID hasn't changed, just update the data
-          database.ref("guider/hamtKundorderGuide/steps/" + currentEditKey).set(stepData).then(() => {
+          database.ref("guider/" + selectedGuide + "/steps/" + currentEditKey).set(stepData).then(() => {
             alert("Steg uppdaterat!");
             closeModal();
             loadEntries();
@@ -235,6 +333,7 @@
     // Load entries on page load
     window.onload = function() {
       checkAuthState();
+      loadGuideDropdown();
       loadEntries();
     };
   </script>
@@ -251,8 +350,25 @@
 
         <div class="topContainer">
 
-          <h1>Hämta Kundorder Guide</h1>
-          <h2>Administration</h2>
+          <h1>Guide Administration</h1>
+          <h2>Hantera Guider</h2>
+
+          <div>
+            <label for="guideSelector">Välj Guide:</label>
+            <br>
+            <select id="guideSelector" onchange="loadEntries()">
+              <option value="">-- Välj guide --</option>
+              <option value="annanGuide">Skapa ny guide</option>
+            </select>
+            <br><br>
+            
+            <div id="customGuideSection" style="display: none;">
+              <label for="customGuideName">Namn på ny guide:</label>
+              <br>
+              <input type="text" id="customGuideName" placeholder="t.ex. nyttGuideNamn" />
+              <br><br>
+            </div>
+          </div>
 
           <h2>Lägg Till Nytt Steg</h2>
 
