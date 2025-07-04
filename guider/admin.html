@@ -42,6 +42,14 @@
     .topContainer button {
       margin: 10px 5px;
     }
+    
+    /* Preserve text formatting in textareas and previews */
+    .topContainer textarea,
+    #editModal textarea {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: Arial, sans-serif;
+    }
   </style>
 
   <script>
