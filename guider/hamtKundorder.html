@@ -63,7 +63,9 @@
                         const section = document.createElement("section");
                         section.className = "guide-step";
                         
-                        let sectionContent = `<p>${stepData.text || ''}</p>`;
+                        // Convert line breaks to HTML breaks to preserve formatting
+                        const formattedText = (stepData.text || '').replace(/\n/g, '<br>');
+                        let sectionContent = `<p style="white-space: pre-wrap;">${formattedText}</p>`;
                         
                         if (stepData.imageUrl) {
                             sectionContent += `
