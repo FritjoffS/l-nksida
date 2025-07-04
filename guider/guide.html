@@ -66,55 +66,65 @@
                 return;
             }
 
-            // Set page title
-            pageTitle.textContent = getGuideDisplayName(guideId);
-            document.title = getGuideDisplayName(guideId);
-
-            database.ref("guider/" + guideId + "/steps").once("value").then(snapshot => {
+            // First, get the guide data including display name
+            database.ref("guider/" + guideId).once("value").then(snapshot => {
                 if (snapshot.exists()) {
-                    // Clear existing content
-                    stepsContainer.innerHTML = "";
+                    const guideData = snapshot.val();
                     
-                    // Sort steps by key for consistent order
-                    const steps = [];
-                    snapshot.forEach(childSnapshot => {
-                        steps.push({
-                            key: childSnapshot.key,
-                            data: childSnapshot.val()
+                    // Set page title using displayName if available, otherwise use default
+                    const displayName = guideData.displayName || getGuideDisplayName(guideId);
+                    pageTitle.textContent = displayName.toUpperCase();
+                    document.title = displayName;
+                    
+                    if (guideData.steps) {
+                        // Clear existing content
+                        stepsContainer.innerHTML = "";
+                        
+                        // Sort steps by key for consistent order
+                        const steps = [];
+                        Object.keys(guideData.steps).forEach(key => {
+                            steps.push({
+                                key: key,
+                                data: guideData.steps[key]
+                            });
                         });
-                    });
-                    
-                    steps.sort((a, b) => a.key.localeCompare(b.key));
-                    
-                    // Create sections for each step
-                    steps.forEach(step => {
-                        const stepData = step.data;
-                        const section = document.createElement("section");
-                        section.className = "guide-step";
                         
-                        // Convert line breaks to HTML breaks to preserve formatting
-                        const formattedText = (stepData.text || '').replace(/\n/g, '<br>');
-                        let sectionContent = `<p style="white-space: pre-wrap;">${formattedText}</p>`;
+                        steps.sort((a, b) => a.key.localeCompare(b.key));
                         
-                        if (stepData.imageUrl) {
+                        // Create sections for each step
+                        steps.forEach(step => {
+                            const stepData = step.data;
+                            const section = document.createElement("section");
+                            section.className = "guide-step";
+                            
+                            // Convert line breaks to HTML breaks to preserve formatting
+                            const formattedText = (stepData.text || '').replace(/\n/g, '<br>');
+                            let sectionContent = `<p style="white-space: pre-wrap;">${formattedText}</p>`;
+                            
+                            if (stepData.imageUrl) {
+                                sectionContent += `
+                                    <img src="${stepData.imageUrl}" 
+                                         alt="${stepData.altText || stepData.title || ''}" 
+                                         title="${stepData.altText || stepData.title || ''}" 
+                                         width="auto" 
+                                         loading="eager">
+                                `;
+                            }
+                            
                             sectionContent += `
-                                <img src="${stepData.imageUrl}" 
-                                     alt="${stepData.altText || stepData.title || ''}" 
-                                     title="${stepData.altText || stepData.title || ''}" 
-                                     width="auto" 
-                                     loading="eager">
+                                <p>
+                                    ------------------------------------------------------------------------------------------
+                                </p>
                             `;
-                        }
-                        
-                        sectionContent += `
-                            <p>
-                                ------------------------------------------------------------------------------------------
-                            </p>
+                            
+                            section.innerHTML = sectionContent;
+                            stepsContainer.appendChild(section);
+                        });
+                    } else {
+                        stepsContainer.innerHTML = `
+                            <p>Denna guide har inga steg. Kontakta administratören.</p>
                         `;
-                        
-                        section.innerHTML = sectionContent;
-                        stepsContainer.appendChild(section);
-                    });
+                    }
                 } else {
                     // If no data exists, show message
                     stepsContainer.innerHTML = `
