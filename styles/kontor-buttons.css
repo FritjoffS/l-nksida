@@ -31,7 +31,8 @@
     color: #333;
     background-color: #e8f4f8;
     border: 2px solid #4a90a4;
-    background-image: url('../icons/list.png');
+    /* background-image: url('../icons/list.png'); */
+    background-image: none;
 }
 
 .guide-button:hover {
