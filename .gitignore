@@ -8,6 +8,7 @@ yarn-error.log*
 firebase-debug.log
 .firebase/
 firebase.rules.json
+firebase-init.js
 
 # Build outputs
 dist/
