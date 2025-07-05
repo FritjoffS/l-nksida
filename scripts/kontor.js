@@ -1,15 +1,3 @@
-// Function to generate default display name from guide ID
-function getDefaultDisplayName(guideId) {
-  // Default mapping for backward compatibility
-  const defaultNames = {
-    'hamtKundorderGuide': 'Hämta Kundorder',
-    'prisuppdateringGuide': 'Prisuppdatering',
-    'skapaKundorderGuide': 'Skapa Kundorder'
-  };
-  
-  return defaultNames[guideId] || guideId.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-}
-
 // Function to load buttons dynamically and attach event listeners
 function loadButtons() {
   const database = firebase.database();
@@ -70,49 +58,7 @@ function loadButtons() {
   });
 }
 
-// Function to load guide shortcuts dynamically
-function loadGuideShortcuts() {
-  const database = firebase.database();
-  const container = document.querySelector(".container");
-
-  console.log("Loading guide shortcuts...");
-  
-  database.ref("guider").once("value").then(snapshot => {
-    console.log("Firebase guides response received:", snapshot.exists());
-    if (snapshot.exists()) {
-      console.log("Guides found in database");
-      snapshot.forEach(childSnapshot => {
-        const guideId = childSnapshot.key;
-        const guideData = childSnapshot.val();
-        
-        console.log("Processing guide:", guideId, guideData);
-        
-        // Only create button if guide has steps
-        if (guideData && guideData.steps) {
-          console.log("Creating button for guide:", guideId);
-          const button = document.createElement("button");
-          button.className = "linkButton guide-button";
-          
-          // Use displayName from Firebase if available, otherwise generate from ID
-          const displayName = guideData.displayName || getDefaultDisplayName(guideId);
-          button.innerHTML = displayName;
-          button.title = `Öppna guide: ${displayName}`;
-          button.onclick = () => navigateToUrl(`../guider/guide.html?guide=${guideId}`);
-          container.appendChild(button);
-        } else {
-          console.log("Guide has no steps:", guideId);
-        }
-      });
-    } else {
-      console.log("No guides found in database");
-    }
-  }).catch(error => {
-    console.error("Error loading guides:", error);
-  });
-}
-
 // Call loadButtons on page load
 window.onload = function () {
   loadButtons();
-  loadGuideShortcuts();
 };
