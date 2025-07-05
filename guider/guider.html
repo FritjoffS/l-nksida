@@ -8,6 +8,10 @@
   <link rel="stylesheet" href="../styles/global.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
   <link rel="stylesheet" href="../styles/kontor-buttons.css" />
+  
+  <!-- Google Analytics -->
+  <script type="module" src="../scripts/analytics.js"></script>
+  
    <!-- Add Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
@@ -99,7 +103,13 @@
             button.className = "linkButton guide-button";
             button.innerHTML = guide.displayName;
             button.title = `Öppna guide: ${guide.displayName}`;
-            button.onclick = () => navigateToUrl(`guide.html?guide=${guide.id}`);
+            button.onclick = () => {
+              // Log analytics event
+              if (window.logGuideInteraction) {
+                window.logGuideInteraction('click_guide_button', guide.id);
+              }
+              navigateToUrl(`guide.html?guide=${guide.id}`);
+            };
             container.appendChild(button);
           });
           
