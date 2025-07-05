@@ -11,6 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
 
   <style>
     .topContainer input[type="text"],
@@ -75,6 +76,101 @@
       background-color: #cc0000 !important;
       transform: scale(1.05);
     }
+    
+    /* Image upload styling */
+    .image-upload-section {
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 15px 0;
+      text-align: center;
+      background-color: #f9f9f9;
+    }
+    
+    .image-upload-section:hover {
+      border-color: #4a90a4;
+      background-color: #f0f8ff;
+    }
+    
+    .upload-button {
+      background-color: #4a90a4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    
+    .upload-button:hover {
+      background-color: #3a7a8a;
+    }
+    
+    .upload-progress {
+      width: 100%;
+      height: 20px;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    
+    .upload-progress-bar {
+      height: 100%;
+      background-color: #4a90a4;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+    
+    .uploaded-image-preview {
+      max-width: 200px;
+      max-height: 200px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      margin: 10px;
+    }
+    
+    .image-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .image-item {
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      background-color: white;
+    }
+    
+    .image-item img {
+      max-width: 150px;
+      max-height: 150px;
+      cursor: pointer;
+    }
+    
+    .image-item .image-url {
+      font-size: 12px;
+      color: #666;
+      word-break: break-all;
+      margin: 5px 0;
+    }
+    
+    .copy-url-button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .copy-url-button:hover {
+      background-color: #218838;
+    }
   </style>
 
   <script>
@@ -89,6 +185,286 @@
       appId: "1:258147870107:web:ce637517bc30b7578cad3e"
     };
     firebase.initializeApp(firebaseConfig);
+
+    // Image upload functions
+    function uploadImage() {
+      // Check if user is authenticated
+      if (!firebase.auth().currentUser) {
+        alert('Du måste vara inloggad för att ladda upp bilder.');
+        return;
+      }
+      
+      const fileInput = document.getElementById('imageFileInput');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        alert('Välj en bildfil först.');
+        return;
+      }
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Endast bildfiler är tillåtna.');
+        return;
+      }
+      
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Bilden får inte vara större än 5MB.');
+        return;
+      }
+      
+      const storage = firebase.storage();
+      const storageRef = storage.ref();
+      const fileName = 'guides/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const imageRef = storageRef.child(fileName);
+      
+      // Show progress
+      const progressBar = document.getElementById('uploadProgressBar');
+      const progressContainer = document.getElementById('uploadProgress');
+      progressContainer.style.display = 'block';
+      
+      const uploadTask = imageRef.put(file);
+      
+      uploadTask.on('state_changed', 
+        function(snapshot) {
+          // Progress
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          progressBar.style.width = progress + '%';
+        }, 
+        function(error) {
+          // Error
+          console.error('Upload error:', error);
+          let errorMessage = 'Fel vid uppladdning: ';
+          
+          switch (error.code) {
+            case 'storage/unauthorized':
+              errorMessage += 'Du har inte behörighet att ladda upp filer.';
+              break;
+            case 'storage/canceled':
+              errorMessage += 'Uppladdning avbruten.';
+              break;
+            case 'storage/unknown':
+              errorMessage += 'Ett okänt fel inträffade. Kontrollera din internetanslutning.';
+              break;
+            default:
+              errorMessage += error.message;
+          }
+          
+          alert(errorMessage);
+          progressContainer.style.display = 'none';
+        }, 
+        function() {
+          // Success
+          uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+            console.log('File available at', downloadURL);
+            
+            // Hide progress
+            progressContainer.style.display = 'none';
+            
+            // Clear file input
+            fileInput.value = '';
+            
+            // Show success message
+            alert('Bild uppladdad! URL kopierad till Bild URL-fältet.');
+            
+            // Fill the image URL field
+            document.getElementById('newImageUrl').value = downloadURL;
+            
+            // Reload uploaded images (but don't fail if it doesn't work)
+            try {
+              loadUploadedImages();
+            } catch (error) {
+              console.log('Could not reload image list, but upload was successful');
+            }
+          }).catch(function(error) {
+            console.error('Error getting download URL:', error);
+            alert('Uppladdning lyckades, men kunde inte hämta URL. Försök igen.');
+          });
+        }
+      );
+    }
+    
+    function loadUploadedImages() {
+      const storage = firebase.storage();
+      const storageRef = storage.ref();
+      const imagesRef = storageRef.child('guides/');
+      
+      const imagesList = document.getElementById('uploadedImagesList');
+      imagesList.innerHTML = '<p>Laddar bilder...</p>';
+      
+      // Check if user is authenticated first
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (!user) {
+          imagesList.innerHTML = '<p>Du måste vara inloggad för att se bilder.</p>';
+          return;
+        }
+        
+        imagesRef.listAll().then(function(result) {
+          imagesList.innerHTML = '';
+          
+          if (result.items.length === 0) {
+            imagesList.innerHTML = '<p>Inga bilder uppladdade än.</p>';
+            return;
+          }
+          
+          result.items.forEach(function(imageRef) {
+            imageRef.getDownloadURL().then(function(url) {
+              const imageItem = document.createElement('div');
+              imageItem.className = 'image-item';
+              
+              imageItem.innerHTML = `
+                <img src="${url}" alt="Uploaded image" onclick="selectImageUrl('${url}')">
+                <div class="image-url">${imageRef.name}</div>
+                <button class="copy-url-button" onclick="copyToClipboard('${url}')">Kopiera URL</button>
+                <button class="copy-url-button" onclick="selectImageUrl('${url}')" style="background-color: #007bff;">Använd i Guide</button>
+              `;
+              
+              imagesList.appendChild(imageItem);
+            }).catch(function(error) {
+              console.error('Error getting download URL:', error);
+            });
+          });
+        }).catch(function(error) {
+          console.error('Error loading images:', error);
+          
+          // Handle CORS or permission errors
+          if (error.code === 'storage/unauthorized' || error.code === 'storage/unknown') {
+            imagesList.innerHTML = `
+              <p style="color: orange;">
+                ⚠️ Kan inte ladda bilder just nu. Detta kan bero på:
+                <br>• CORS-inställningar behöver uppdateras i Firebase Console
+                <br>• Du kör från lokal server (använd Live Server eller deploy till en domän)
+                <br>• Storage regler behöver konfigureras
+                <br><br>
+                <strong>Uppladdning av nya bilder fungerar fortfarande!</strong>
+              </p>
+            `;
+          } else {
+            imagesList.innerHTML = '<p style="color: red;">Fel vid laddning av bilder: ' + error.message + '</p>';
+          }
+        });
+      });
+    }
+    
+    function selectImageUrl(url) {
+      document.getElementById('newImageUrl').value = url;
+      alert('Bild-URL har lagts till i formuläret!');
+    }
+    
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(function() {
+        alert('URL kopierad till urklipp!');
+      }).catch(function(error) {
+        console.error('Error copying to clipboard:', error);
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('URL kopierad till urklipp!');
+      });
+    }
+    
+    function uploadImageForEdit() {
+      // Check if user is authenticated
+      if (!firebase.auth().currentUser) {
+        alert('Du måste vara inloggad för att ladda upp bilder.');
+        return;
+      }
+      
+      const fileInput = document.getElementById('editImageFileInput');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        alert('Välj en bildfil först.');
+        return;
+      }
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Endast bildfiler är tillåtna.');
+        return;
+      }
+      
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Bilden får inte vara större än 5MB.');
+        return;
+      }
+      
+      const storage = firebase.storage();
+      const storageRef = storage.ref();
+      const fileName = 'guides/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const imageRef = storageRef.child(fileName);
+      
+      // Show progress
+      const progressBar = document.getElementById('editUploadProgressBar');
+      const progressContainer = document.getElementById('editUploadProgress');
+      progressContainer.style.display = 'block';
+      
+      const uploadTask = imageRef.put(file);
+      
+      uploadTask.on('state_changed', 
+        function(snapshot) {
+          // Progress
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          progressBar.style.width = progress + '%';
+        }, 
+        function(error) {
+          // Error
+          console.error('Upload error:', error);
+          let errorMessage = 'Fel vid uppladdning: ';
+          
+          switch (error.code) {
+            case 'storage/unauthorized':
+              errorMessage += 'Du har inte behörighet att ladda upp filer.';
+              break;
+            case 'storage/canceled':
+              errorMessage += 'Uppladdning avbruten.';
+              break;
+            case 'storage/unknown':
+              errorMessage += 'Ett okänt fel inträffade. Kontrollera din internetanslutning.';
+              break;
+            default:
+              errorMessage += error.message;
+          }
+          
+          alert(errorMessage);
+          progressContainer.style.display = 'none';
+        }, 
+        function() {
+          // Success
+          uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+            console.log('File available at', downloadURL);
+            
+            // Hide progress
+            progressContainer.style.display = 'none';
+            
+            // Clear file input
+            fileInput.value = '';
+            
+            // Show success message
+            alert('Bild uppladdad! URL lades till i Bild URL-fältet.');
+            
+            // Fill the edit image URL field
+            document.getElementById('editImageUrl').value = downloadURL;
+            
+            // Reload uploaded images (but don't fail if it doesn't work)
+            try {
+              loadUploadedImages();
+            } catch (error) {
+              console.log('Could not reload image list, but upload was successful');
+            }
+          }).catch(function(error) {
+            console.error('Error getting download URL:', error);
+            alert('Uppladdning lyckades, men kunde inte hämta URL. Försök igen.');
+          });
+        }
+      );
+    }
 
     // Function to check if a user is logged in or not
     function checkAuthState() {
@@ -424,6 +800,7 @@
       checkAuthState();
       loadGuideDropdown();
       loadEntries();
+      loadUploadedImages();
     };
   </script>
 </head>
@@ -489,6 +866,19 @@
             <label for="newImageUrl">Bild URL:</label>
             <br>
             <input type="text" id="newImageUrl" placeholder="img/hamta1.png" />
+            
+            <!-- Image Upload Section -->
+            <div class="image-upload-section">
+              <h3>Ladda upp ny bild</h3>
+              <input type="file" id="imageFileInput" accept="image/*" style="margin: 10px 0;">
+              <br>
+              <button type="button" class="upload-button" onclick="uploadImage()">Ladda upp bild</button>
+              
+              <div id="uploadProgress" class="upload-progress" style="display: none;">
+                <div id="uploadProgressBar" class="upload-progress-bar" style="width: 0%;"></div>
+              </div>
+            </div>
+            
             <br />
             
             <label for="newAltText">Alt text för bild:</label>
@@ -503,6 +893,20 @@
         </div>
 
         <div class="bottomContainer">
+          
+          <h2>UPPLADDADE BILDER</h2>
+          
+          <div style="background-color: #e8f4f8; border: 2px solid #4a90a4; border-radius: 5px; padding: 15px; margin-bottom: 20px;">
+            <strong>💡 Information om bildvisning:</strong>
+            <br>Om du ser ett CORS-fel eller om bilderna inte visas, kan det bero på att du kör sidan lokalt. 
+            <br><strong>Bilduppladdning fungerar fortfarande!</strong> Bara visningen av befintliga bilder kan vara begränsad.
+            <br><br>
+            <em>För full funktionalitet, deploya sidan till en webbserver eller konfigurera CORS i Firebase Console.</em>
+          </div>
+          
+          <div id="uploadedImagesList" class="image-list">
+            <!-- Uploaded images will be displayed here -->
+          </div>
 
           <h2>SPARADE STEG</h2>
           <table border="1">
@@ -540,6 +944,18 @@
     
     <label for="editImageUrl">Bild URL:</label>
     <input id="editImageUrl" type="text" />
+    
+    <!-- Image Upload Section for Edit Modal -->
+    <div class="image-upload-section">
+      <h4>Ladda upp ny bild för detta steg</h4>
+      <input type="file" id="editImageFileInput" accept="image/*" style="margin: 10px 0;">
+      <br>
+      <button type="button" class="upload-button" onclick="uploadImageForEdit()">Ladda upp bild</button>
+      
+      <div id="editUploadProgress" class="upload-progress" style="display: none;">
+        <div id="editUploadProgressBar" class="upload-progress-bar" style="width: 0%;"></div>
+      </div>
+    </div>
     
     <label for="editAltText">Alt text för bild:</label>
     <input id="editAltText" type="text" />
