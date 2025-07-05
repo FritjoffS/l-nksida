@@ -6,8 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Fredrik Söderberg">
     <title>Guide</title>
+    <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="guide_styles.css">
     <link rel="stylesheet" href="../styles/navbar.css" />
+    <link rel="stylesheet" href="../styles/kontor-buttons.css" />
     <!-- Add Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
@@ -157,6 +159,12 @@
             <h1 id="pageTitle">
                 GUIDE
             </h1>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button onclick="window.location.href='guider.html'" style="padding: 10px 20px; background-color: #4a90a4; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+                    ← Tillbaka till Guider
+                </button>
+            </div>
 
             <div id="stepsContainer">
                 <!-- Dynamic content will be loaded here -->
