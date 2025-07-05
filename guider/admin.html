@@ -13,6 +13,9 @@
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
 
+  <!-- Google Analytics -->
+  <script type="module" src="../scripts/analytics.js"></script>
+
   <style>
     .topContainer input[type="text"],
     .topContainer textarea {
@@ -267,6 +270,11 @@
             
             // Show success message
             alert('Bild uppladdad! URL kopierad till Bild URL-fältet.');
+            
+            // Log analytics event
+            if (window.logAdminAction) {
+              window.logAdminAction('upload_image', 'guide_step');
+            }
             
             // Fill the image URL field
             document.getElementById('newImageUrl').value = downloadURL;
@@ -645,6 +653,10 @@
 
         database.ref("guider/" + selectedGuide + "/steps/" + stepId).set(stepData).then(() => {
           alert("Steg tillagt!");
+          // Log analytics event
+          if (window.logAdminAction) {
+            window.logAdminAction('add_step', selectedGuide);
+          }
           clearForm();
           loadEntries();
         }).catch(error => {
@@ -676,6 +688,10 @@
         const database = firebase.database();
         database.ref("guider/" + selectedGuide + "/steps/" + stepId).remove().then(() => {
           alert("Steg raderat!");
+          // Log analytics event
+          if (window.logAdminAction) {
+            window.logAdminAction('delete_step', selectedGuide);
+          }
           loadEntries();
         }).catch(error => {
           console.error("Error deleting entry:", error);
@@ -784,6 +800,10 @@
         const database = firebase.database();
         database.ref("guider/" + selectedGuide).remove().then(() => {
           alert("Guide raderad!");
+          // Log analytics event
+          if (window.logAdminAction) {
+            window.logAdminAction('delete_guide', selectedGuide);
+          }
           // Reset the form and reload the dropdown
           document.getElementById("guideSelector").value = "";
           loadGuideDropdown();
