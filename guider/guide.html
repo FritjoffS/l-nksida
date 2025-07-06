@@ -59,6 +59,32 @@
             return displayNames[guideId] || guideId.toUpperCase();
         }
 
+        // Function to sort step keys naturally (handles numbers correctly)
+        function naturalSort(a, b) {
+            const regex = /(\d+)|(\D+)/g;
+            const aParts = a.match(regex) || [];
+            const bParts = b.match(regex) || [];
+            
+            const maxLength = Math.max(aParts.length, bParts.length);
+            
+            for (let i = 0; i < maxLength; i++) {
+                const aPart = aParts[i] || '';
+                const bPart = bParts[i] || '';
+                
+                // If both parts are numbers, compare numerically
+                if (!isNaN(aPart) && !isNaN(bPart)) {
+                    const diff = parseInt(aPart) - parseInt(bPart);
+                    if (diff !== 0) return diff;
+                } else {
+                    // Otherwise compare as strings
+                    const diff = aPart.localeCompare(bPart);
+                    if (diff !== 0) return diff;
+                }
+            }
+            
+            return 0;
+        }
+
         // Function to load guide steps from Firebase
         function loadGuideSteps() {
             const guideId = getUrlParameter('guide');
@@ -90,7 +116,7 @@
                         // Clear existing content
                         stepsContainer.innerHTML = "";
                         
-                        // Sort steps by key for consistent order
+                        // Sort steps by key for consistent order using natural sort
                         const steps = [];
                         Object.keys(guideData.steps).forEach(key => {
                             steps.push({
@@ -99,7 +125,7 @@
                             });
                         });
                         
-                        steps.sort((a, b) => a.key.localeCompare(b.key));
+                        steps.sort((a, b) => naturalSort(a.key, b.key));
                         
                         // Create sections for each step
                         steps.forEach(step => {
