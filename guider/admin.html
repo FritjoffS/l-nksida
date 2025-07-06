@@ -398,6 +398,32 @@
       return displayNames[guideId] || guideId.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
     }
 
+    // Function to sort step keys naturally (handles numbers correctly)
+    function naturalSort(a, b) {
+      const regex = /(\d+)|(\D+)/g;
+      const aParts = a.match(regex) || [];
+      const bParts = b.match(regex) || [];
+      
+      const maxLength = Math.max(aParts.length, bParts.length);
+      
+      for (let i = 0; i < maxLength; i++) {
+        const aPart = aParts[i] || '';
+        const bPart = bParts[i] || '';
+        
+        // If both parts are numbers, compare numerically
+        if (!isNaN(aPart) && !isNaN(bPart)) {
+          const diff = parseInt(aPart) - parseInt(bPart);
+          if (diff !== 0) return diff;
+        } else {
+          // Otherwise compare as strings
+          const diff = aPart.localeCompare(bPart);
+          if (diff !== 0) return diff;
+        }
+      }
+      
+      return 0;
+    }
+
     // Function to fetch and display all database entries
     function loadEntries() {
       const database = firebase.database();
@@ -426,17 +452,27 @@
 
       database.ref("guider/" + selectedGuide + "/steps").once("value").then(snapshot => {
         if (snapshot.exists()) {
+          // Collect all entries and sort them properly
+          const entries = [];
           snapshot.forEach(childSnapshot => {
-            const key = childSnapshot.key;
-            const data = childSnapshot.val();
-            
+            entries.push({
+              key: childSnapshot.key,
+              data: childSnapshot.val()
+            });
+          });
+          
+          // Sort using natural sort for proper number ordering
+          entries.sort((a, b) => naturalSort(a.key, b.key));
+          
+          // Add sorted entries to table
+          entries.forEach(entry => {
             const row = document.createElement("tr");
             row.innerHTML = `
-              <td>${key}</td>
-              <td>${data.title || 'Ingen titel'}</td>
+              <td>${entry.key}</td>
+              <td>${entry.data.title || 'Ingen titel'}</td>
               <td>
-                <button onclick="editEntry('${key}')">Ändra Steg</button>
-                <button onclick="deleteEntry('${key}')">Radera Steg</button>
+                <button onclick="editEntry('${entry.key}')">Ändra Steg</button>
+                <button onclick="deleteEntry('${entry.key}')">Radera Steg</button>
               </td>
             `;
             tableBody.appendChild(row);
