@@ -11,7 +11,9 @@
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
+
+  <!-- Cloudinary Upload Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 
   <!-- Google Analytics -->
   <script type="module" src="../scripts/analytics.js"></script>
@@ -197,107 +199,51 @@
         return;
       }
       
-      const fileInput = document.getElementById('imageFileInput');
-      const file = fileInput.files[0];
-      
-      if (!file) {
-        alert('Välj en bildfil först.');
-        return;
-      }
-      
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        alert('Endast bildfiler är tillåtna.');
-        return;
-      }
-      
-      // Check file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Bilden får inte vara större än 5MB.');
-        return;
-      }
-      
-      const storage = firebase.storage();
-      const storageRef = storage.ref();
-      const fileName = 'guides/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const imageRef = storageRef.child(fileName);
-      
-      // Show progress
-      const progressBar = document.getElementById('uploadProgressBar');
-      const progressContainer = document.getElementById('uploadProgress');
-      progressContainer.style.display = 'block';
-      
-      const uploadTask = imageRef.put(file);
-      
-      uploadTask.on('state_changed', 
-        function(snapshot) {
-          // Progress
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          progressBar.style.width = progress + '%';
-        }, 
-        function(error) {
-          // Error
-          console.error('Upload error:', error);
-          let errorMessage = 'Fel vid uppladdning: ';
+      // Initialize Cloudinary Upload Widget
+      const widget = cloudinary.createUploadWidget({
+        cloudName: 'dmtfxmepd',
+        uploadPreset: 'l-nksida-guides', // Du behöver skapa denna preset i Cloudinary Dashboard
+        folder: 'guides',
+        maxFileSize: 5000000, // 5MB
+        maxImageFileSize: 5000000,
+        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        multiple: false,
+        sources: ['local', 'url'],
+        showAdvancedOptions: false,
+        cropping: false,
+        showSkipCropButton: true,
+        croppingAspectRatio: null,
+        theme: 'minimal'
+      }, (error, result) => {
+        if (!error && result && result.event === "success") {
+          console.log('File uploaded successfully:', result.info);
           
-          switch (error.code) {
-            case 'storage/unauthorized':
-              errorMessage += 'Du har inte behörighet att ladda upp filer.';
-              break;
-            case 'storage/canceled':
-              errorMessage += 'Uppladdning avbruten.';
-              break;
-            case 'storage/unknown':
-              errorMessage += 'Ett okänt fel inträffade. Kontrollera din internetanslutning.';
-              break;
-            default:
-              errorMessage += error.message;
+          // Get the secure URL
+          const imageUrl = result.info.secure_url;
+          
+          // Fill the image URL field
+          document.getElementById('newImageUrl').value = imageUrl;
+          
+          // Show success message
+          alert('Bild uppladdad! URL kopierad till Bild URL-fältet.');
+          
+          // Log analytics event
+          if (window.logAdminAction) {
+            window.logAdminAction('upload_image', 'guide_step');
           }
           
-          alert(errorMessage);
-          progressContainer.style.display = 'none';
-        }, 
-        function() {
-          // Success
-          uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
-            console.log('File available at', downloadURL);
-            
-            // Hide progress
-            progressContainer.style.display = 'none';
-            
-            // Clear file input
-            fileInput.value = '';
-            
-            // Show success message
-            alert('Bild uppladdad! URL kopierad till Bild URL-fältet.');
-            
-            // Log analytics event
-            if (window.logAdminAction) {
-              window.logAdminAction('upload_image', 'guide_step');
-            }
-            
-            // Fill the image URL field
-            document.getElementById('newImageUrl').value = downloadURL;
-            
-            // Reload uploaded images (but don't fail if it doesn't work)
-            try {
-              loadUploadedImages();
-            } catch (error) {
-              console.log('Could not reload image list, but upload was successful');
-            }
-          }).catch(function(error) {
-            console.error('Error getting download URL:', error);
-            alert('Uppladdning lyckades, men kunde inte hämta URL. Försök igen.');
-          });
+          // Reload uploaded images
+          loadUploadedImages();
+        } else if (error) {
+          console.error('Upload error:', error);
+          alert('Fel vid uppladdning: ' + (error.message || 'Okänt fel'));
         }
-      );
+      });
+
+      widget.open();
     }
     
     function loadUploadedImages() {
-      const storage = firebase.storage();
-      const storageRef = storage.ref();
-      const imagesRef = storageRef.child('guides/');
-      
       const imagesList = document.getElementById('uploadedImagesList');
       imagesList.innerHTML = '<p>Laddar bilder...</p>';
       
@@ -308,50 +254,24 @@
           return;
         }
         
-        imagesRef.listAll().then(function(result) {
-          imagesList.innerHTML = '';
-          
-          if (result.items.length === 0) {
-            imagesList.innerHTML = '<p>Inga bilder uppladdade än.</p>';
-            return;
-          }
-          
-          result.items.forEach(function(imageRef) {
-            imageRef.getDownloadURL().then(function(url) {
-              const imageItem = document.createElement('div');
-              imageItem.className = 'image-item';
-              
-              imageItem.innerHTML = `
-                <img src="${url}" alt="Uploaded image" onclick="selectImageUrl('${url}')">
-                <div class="image-url">${imageRef.name}</div>
-                <button class="copy-url-button" onclick="copyToClipboard('${url}')">Kopiera URL</button>
-                <button class="copy-url-button" onclick="selectImageUrl('${url}')" style="background-color: #007bff;">Använd i Guide</button>
-              `;
-              
-              imagesList.appendChild(imageItem);
-            }).catch(function(error) {
-              console.error('Error getting download URL:', error);
-            });
-          });
-        }).catch(function(error) {
-          console.error('Error loading images:', error);
-          
-          // Handle CORS or permission errors
-          if (error.code === 'storage/unauthorized' || error.code === 'storage/unknown') {
-            imagesList.innerHTML = `
-              <p style="color: orange;">
-                ⚠️ Kan inte ladda bilder just nu. Detta kan bero på:
-                <br>• CORS-inställningar behöver uppdateras i Firebase Console
-                <br>• Du kör från lokal server (använd Live Server eller deploy till en domän)
-                <br>• Storage regler behöver konfigureras
-                <br><br>
-                <strong>Uppladdning av nya bilder fungerar fortfarande!</strong>
-              </p>
-            `;
-          } else {
-            imagesList.innerHTML = '<p style="color: red;">Fel vid laddning av bilder: ' + error.message + '</p>';
-          }
-        });
+        // Use Cloudinary Admin API to list images in the guides folder
+        // Note: This requires your API secret, so we'll use a simple approach
+        // In production, you might want to implement this server-side
+        
+        // For now, show a placeholder that explains how to view images
+        imagesList.innerHTML = `
+          <div style="padding: 15px; background-color: #f0f8ff; border: 1px solid #007bff; border-radius: 5px; margin: 10px 0;">
+            <h4 style="color: #007bff; margin-top: 0;">📷 Bildgalleri</h4>
+            <p>Dina uppladdade bilder sparas säkert i Cloudinary.</p>
+            <p><strong>För att se alla dina bilder:</strong></p>
+            <ul style="text-align: left; margin: 10px 0;">
+              <li>Gå till <a href="https://cloudinary.com/console" target="_blank">Cloudinary Console</a></li>
+              <li>Navigera till "Media Library"</li>
+              <li>Leta efter mappen "guides"</li>
+            </ul>
+            <p><em>Bildens URL läggs automatiskt in i formuläret efter uppladdning.</em></p>
+          </div>
+        `;
       });
     }
     
@@ -383,95 +303,48 @@
         return;
       }
       
-      const fileInput = document.getElementById('editImageFileInput');
-      const file = fileInput.files[0];
-      
-      if (!file) {
-        alert('Välj en bildfil först.');
-        return;
-      }
-      
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        alert('Endast bildfiler är tillåtna.');
-        return;
-      }
-      
-      // Check file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Bilden får inte vara större än 5MB.');
-        return;
-      }
-      
-      const storage = firebase.storage();
-      const storageRef = storage.ref();
-      const fileName = 'guides/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const imageRef = storageRef.child(fileName);
-      
-      // Show progress
-      const progressBar = document.getElementById('editUploadProgressBar');
-      const progressContainer = document.getElementById('editUploadProgress');
-      progressContainer.style.display = 'block';
-      
-      const uploadTask = imageRef.put(file);
-      
-      uploadTask.on('state_changed', 
-        function(snapshot) {
-          // Progress
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          progressBar.style.width = progress + '%';
-        }, 
-        function(error) {
-          // Error
-          console.error('Upload error:', error);
-          let errorMessage = 'Fel vid uppladdning: ';
+      // Initialize Cloudinary Upload Widget for edit
+      const widget = cloudinary.createUploadWidget({
+        cloudName: 'dmtfxmepd',
+        uploadPreset: 'l-nksida-guides',
+        folder: 'guides',
+        maxFileSize: 5000000, // 5MB
+        maxImageFileSize: 5000000,
+        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        multiple: false,
+        sources: ['local', 'url'],
+        showAdvancedOptions: false,
+        cropping: false,
+        showSkipCropButton: true,
+        croppingAspectRatio: null,
+        theme: 'minimal'
+      }, (error, result) => {
+        if (!error && result && result.event === "success") {
+          console.log('File uploaded successfully:', result.info);
           
-          switch (error.code) {
-            case 'storage/unauthorized':
-              errorMessage += 'Du har inte behörighet att ladda upp filer.';
-              break;
-            case 'storage/canceled':
-              errorMessage += 'Uppladdning avbruten.';
-              break;
-            case 'storage/unknown':
-              errorMessage += 'Ett okänt fel inträffade. Kontrollera din internetanslutning.';
-              break;
-            default:
-              errorMessage += error.message;
+          // Get the secure URL
+          const imageUrl = result.info.secure_url;
+          
+          // Fill the edit image URL field
+          document.getElementById('editImageUrl').value = imageUrl;
+          
+          // Show success message
+          alert('Bild uppladdad! URL lades till i Bild URL-fältet.');
+          
+          // Log analytics event
+          if (window.logAdminAction) {
+            window.logAdminAction('upload_image', 'guide_edit');
           }
           
-          alert(errorMessage);
-          progressContainer.style.display = 'none';
-        }, 
-        function() {
-          // Success
-          uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
-            console.log('File available at', downloadURL);
-            
-            // Hide progress
-            progressContainer.style.display = 'none';
-            
-            // Clear file input
-            fileInput.value = '';
-            
-            // Show success message
-            alert('Bild uppladdad! URL lades till i Bild URL-fältet.');
-            
-            // Fill the edit image URL field
-            document.getElementById('editImageUrl').value = downloadURL;
-            
-            // Reload uploaded images (but don't fail if it doesn't work)
-            try {
-              loadUploadedImages();
-            } catch (error) {
-              console.log('Could not reload image list, but upload was successful');
-            }
-          }).catch(function(error) {
-            console.error('Error getting download URL:', error);
-            alert('Uppladdning lyckades, men kunde inte hämta URL. Försök igen.');
-          });
+          // Reload uploaded images
+          loadUploadedImages();
+        } else if (error) {
+          console.error('Upload error:', error);
+          alert('Fel vid uppladdning: ' + (error.message || 'Okänt fel'));
         }
-      );
+      });
+
+      widget.open();
     }
 
     // Function to check if a user is logged in or not
@@ -890,13 +763,9 @@
             <!-- Image Upload Section -->
             <div class="image-upload-section">
               <h3>Ladda upp ny bild</h3>
-              <input type="file" id="imageFileInput" accept="image/*" style="margin: 10px 0;">
-              <br>
-              <button type="button" class="upload-button" onclick="uploadImage()">Ladda upp bild</button>
-              
-              <div id="uploadProgress" class="upload-progress" style="display: none;">
-                <div id="uploadProgressBar" class="upload-progress-bar" style="width: 0%;"></div>
-              </div>
+              <p style="color: #666; font-size: 0.9em; margin: 5px 0;">Klicka på knappen nedan för att öppna Cloudinary Upload Widget</p>
+              <button type="button" class="upload-button" onclick="uploadImage()">📷 Ladda upp bild till Cloudinary</button>
+              <p style="font-size: 0.8em; color: #888; margin-top: 5px;">Bilderna sparas säkert i molnet och länkas automatiskt till formuläret</p>
             </div>
             
             <br />
@@ -917,11 +786,11 @@
           <h2>UPPLADDADE BILDER</h2>
           
           <div style="background-color: #e8f4f8; border: 2px solid #4a90a4; border-radius: 5px; padding: 15px; margin-bottom: 20px;">
-            <strong>💡 Information om bildvisning:</strong>
-            <br>Om du ser ett CORS-fel eller om bilderna inte visas, kan det bero på att du kör sidan lokalt. 
-            <br><strong>Bilduppladdning fungerar fortfarande!</strong> Bara visningen av befintliga bilder kan vara begränsad.
+            <strong>☁️ Cloudinary Bildhantering:</strong>
+            <br>Dina bilder sparas nu säkert i Cloudinary molntjänst - snabbt, pålitligt och optimerat för webben!
+            <br><strong>Fördelar:</strong> Automatisk bildoptimering, snabb leverans, obegränsad bandbredd (inom gratis tier).
             <br><br>
-            <em>För full funktionalitet, deploya sidan till en webbserver eller konfigurera CORS i Firebase Console.</em>
+            <em>Inga CORS-problem eller komplicerade konfigurationer - bara enkelt och säkert!</em>
           </div>
           
           <div id="uploadedImagesList" class="image-list">
@@ -968,13 +837,9 @@
     <!-- Image Upload Section for Edit Modal -->
     <div class="image-upload-section">
       <h4>Ladda upp ny bild för detta steg</h4>
-      <input type="file" id="editImageFileInput" accept="image/*" style="margin: 10px 0;">
-      <br>
-      <button type="button" class="upload-button" onclick="uploadImageForEdit()">Ladda upp bild</button>
-      
-      <div id="editUploadProgress" class="upload-progress" style="display: none;">
-        <div id="editUploadProgressBar" class="upload-progress-bar" style="width: 0%;"></div>
-      </div>
+      <p style="color: #666; font-size: 0.9em; margin: 5px 0;">Klicka på knappen nedan för att öppna Cloudinary Upload Widget</p>
+      <button type="button" class="upload-button" onclick="uploadImageForEdit()">📷 Ladda upp bild till Cloudinary</button>
+      <p style="font-size: 0.8em; color: #888; margin-top: 5px;">Bilderna sparas säkert i molnet och länkas automatiskt till formuläret</p>
     </div>
     
     <label for="editAltText">Alt text för bild:</label>
