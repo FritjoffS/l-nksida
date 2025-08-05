@@ -39,26 +39,6 @@
       });
     }
 
-    // Load buttons dynamically from the database
-    function loadButtons() {
-      const database = firebase.database();
-      const container = document.querySelector(".container");
-
-      database.ref("aviseringar").once("value").then(snapshot => {
-        snapshot.forEach(childSnapshot => {
-          const key = childSnapshot.key;
-          const value = childSnapshot.val();
-
-          const button = document.createElement("button"); // Create a new button element
-          button.id = key; // Use the key as the button ID
-          button.className = "linkButton";
-          button.innerHTML = key.replace(/Button$/, ""); // Remove "Button" suffix for display
-          button.onclick = () => alert(value); // Display the value on button click
-          container.appendChild(button);
-        });
-      });
-    }
-
     // Load buttons on page load
     window.onload = function () {
       checkAuthState();
@@ -87,7 +67,7 @@
   </div>
 
 
-  <script src="../scripts/verkstad.js"></script>
+  <script src="../scripts/generic.js"></script>
   <!-- <script src="../scripts/script.js"></script> -->
   <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
 
