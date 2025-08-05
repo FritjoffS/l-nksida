@@ -18,15 +18,12 @@
 
   <script>
     
-    // Function to check if a user is logged in or not
+        // Function to check if a user is logged in or not
     function checkAuthState() {
       firebase.auth().onAuthStateChanged(function (user) {
         if (!user) {
           // User is not signed in, redirect to the login page
           window.location.href = "../index/login.html";
-        }
-        else {
-          console.log("User is logged in:", user.email);
         }
       });
     }
