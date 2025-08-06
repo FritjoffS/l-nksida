@@ -12,6 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
     <script src="../scripts/firebase-init.js"></script>
+    <script src="../scripts/loadNavbar.js"></script>
 
     <script>
 
@@ -45,6 +46,7 @@
 
 
     <div id="navbar"></div> <!-- Placeholder for the navbar -->
+
     <div class="filter-section">
         <input type="text" id="searchInput" placeholder="Sök efter produkt eller artikelnummer...">
         <select id="mainCategory">
@@ -72,7 +74,7 @@
 
     <div id="productContainer" class="product-grid"></div>
 
-    <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
+    
     <script type="module">
         import productsDB from './productsDB.js';
 
