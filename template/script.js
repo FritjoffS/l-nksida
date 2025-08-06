@@ -5,7 +5,8 @@ function checkAuthState() {
       // User is not signed in, redirect to the login page
       window.location.href = "../index/login.html";
     }
-    console.log("User is logged in:", user);
+    console.log("User is logged in");
+    /* console.log("User is logged in:", user); */
   });
 }
 
