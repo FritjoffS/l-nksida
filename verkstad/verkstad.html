@@ -16,22 +16,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
   <script src="../scripts/firebase-init.js"></script>
 
-  <script>
-
-
-    // Function to log out the user
-    function logout() {
-      firebase.auth().signOut().then(function () {
-        // Sign-out successful, redirect to login page
-        window.location.href = "../index/login.html";
-      }).catch(function (error) {
-        // Handle errors here
-        console.error("Logout error:", error);
-      });
-    }
-
-  </script>
-
 </head>
 
 <body onload="checkAuthState()">
@@ -52,11 +36,8 @@
 
   </div>
 
-
   <script src="../scripts/verkstad.js"></script>
-  <!-- <script src="../scripts/script.js"></script> -->
-  <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
-
+  <script src="../scripts/loadNavbar.js"></script>
 
 </body>
 
