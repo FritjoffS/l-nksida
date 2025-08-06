@@ -17,16 +17,7 @@
   <script src="../scripts/firebase-init.js"></script>
 
   <script>
-    
-        // Function to check if a user is logged in or not
-    function checkAuthState() {
-      firebase.auth().onAuthStateChanged(function (user) {
-        if (!user) {
-          // User is not signed in, redirect to the login page
-          window.location.href = "../index/login.html";
-        }
-      });
-    }
+
 
     // Function to log out the user
     function logout() {
@@ -39,11 +30,6 @@
       });
     }
 
-    // Load buttons on page load
-    window.onload = function () {
-      checkAuthState();
-      loadButtons();
-    };
   </script>
 
 </head>
