@@ -1,13 +1,25 @@
-        // Function to check if a user is logged in or not
-    function checkAuthState() {
-      firebase.auth().onAuthStateChanged(function (user) {
-        if (!user) {
-          // User is not signed in, redirect to the login page
-          window.location.href = "../index/login.html";
-        }
-        console.log("User is logged in:", user);
-      });
+// Function to check if a user is logged in or not
+function checkAuthState() {
+  firebase.auth().onAuthStateChanged(function (user) {
+    if (!user) {
+      // User is not signed in, redirect to the login page
+      window.location.href = "../index/login.html";
     }
+    console.log("User is logged in:", user);
+  });
+}
+
+// Function to log out the user
+function logout() {
+  firebase.auth().signOut().then(function () {
+    // Sign-out successful, redirect to login page
+    window.location.href = "../index/login.html";
+  }).catch(function (error) {
+    // Handle errors here
+    console.error("Logout error:", error);
+  });
+}
+
 // Function to load buttons dynamically and attach event listeners
 function loadButtons() {
   const database = firebase.database();
@@ -41,10 +53,10 @@ function loadButtons() {
 
       // Try to load the image, if it fails, display the key as text
       const img = new Image();
-      img.onload = function() {
+      img.onload = function () {
         // Image loaded successfully, do nothing
       };
-      img.onerror = function() {
+      img.onerror = function () {
         button.style.backgroundImage = "none";
         button.textContent = buttonId.replace(/Button$/, "");
         button.style.color = "#000"; // Make text visible if no background
