@@ -1,3 +1,13 @@
+        // Function to check if a user is logged in or not
+    function checkAuthState() {
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (!user) {
+          // User is not signed in, redirect to the login page
+          window.location.href = "../index/login.html";
+        }
+        console.log("User is logged in:", user);
+      });
+    }
 // Function to load buttons dynamically and attach event listeners
 function loadButtons() {
   const database = firebase.database();
@@ -60,5 +70,7 @@ function loadButtons() {
 
 // Call loadButtons on page load
 window.onload = function () {
+  console.log("Page loaded, checking authentication state and loading buttons...");
+  checkAuthState();
   loadButtons();
 };
