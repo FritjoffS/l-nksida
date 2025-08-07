@@ -178,6 +178,73 @@
         <!-- Status Messages -->
         <div id="statusContainer"></div>
 
+        <!-- Category Management Section -->
+        <div class="section">
+            <h2>Hantera Kategorier och Underkategorier</h2>
+            
+            <!-- Add Category -->
+            <div style="margin-bottom: 20px;">
+                <h3>Lägg till ny kategori</h3>
+                <div style="display: flex; gap: 10px; align-items: end;">
+                    <div class="form-group">
+                        <label for="newCategoryName">Kategorinamn:</label>
+                        <input type="text" id="newCategoryName" placeholder="t.ex. Honda">
+                    </div>
+                    <button class="btn btn-success" onclick="addCategory()">Lägg till kategori</button>
+                </div>
+            </div>
+
+            <!-- Manage Subcategories -->
+            <div style="margin-bottom: 20px;">
+                <h3>Hantera underkategorier</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="manageCategorySelect">Välj kategori:</label>
+                        <select id="manageCategorySelect" onchange="loadSubcategories()">
+                            <option value="">Välj kategori</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newSubcategoryName">Ny underkategori:</label>
+                        <input type="text" id="newSubcategoryName" placeholder="t.ex. Luftfilter">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="addSubcategory()">Lägg till underkategori</button>
+            </div>
+
+            <!-- Manage Subtypes -->
+            <div style="margin-bottom: 20px;">
+                <h3>Hantera undertyper</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="subtypeCategorySelect">Kategori:</label>
+                        <select id="subtypeCategorySelect" onchange="loadSubcategoriesForSubtype()">
+                            <option value="">Välj kategori</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subtypeSubcategorySelect">Underkategori:</label>
+                        <select id="subtypeSubcategorySelect" disabled>
+                            <option value="">Välj underkategori</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newSubtypeName">Ny undertyp:</label>
+                        <input type="text" id="newSubtypeName" placeholder="t.ex. Panel typ">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="addSubtype()">Lägg till undertyp</button>
+            </div>
+
+            <!-- Current Structure Display -->
+            <div style="margin-top: 30px;">
+                <h3>Nuvarande struktur</h3>
+                <div id="categoryStructure" style="background: #f8f9fa; padding: 15px; border-radius: 4px; max-height: 400px; overflow-y: auto;">
+                    <p>Laddar struktur...</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Add Product Section -->
         <div class="section">
             <h2>Lägg till/Redigera produkt</h2>
@@ -259,6 +326,7 @@
             checkAuthState();
             loadCategories();
             loadStatistics();
+            loadCategoryManagement();
         });
 
         function checkAuthState() {
@@ -283,6 +351,342 @@
                     div.parentNode.removeChild(div);
                 }
             }, 5000);
+        }
+
+        // Category Management Functions
+        async function loadCategoryManagement() {
+            try {
+                const productsRef = firebase.database().ref('products');
+                const snapshot = await productsRef.once('value');
+                const data = snapshot.val();
+                
+                if (data) {
+                    productsData.categories = Object.keys(data).map(key => data[key]);
+                    
+                    // Populate management dropdowns
+                    const managementSelects = ['manageCategorySelect', 'subtypeCategorySelect'];
+                    managementSelects.forEach(selectId => {
+                        const select = document.getElementById(selectId);
+                        select.innerHTML = '<option value="">Välj kategori</option>';
+                        
+                        productsData.categories.forEach(category => {
+                            const option = document.createElement('option');
+                            option.value = category.name;
+                            option.textContent = category.name;
+                            select.appendChild(option);
+                        });
+                    });
+                    
+                    displayCategoryStructure();
+                }
+            } catch (error) {
+                addStatus(`Fel vid laddning av kategorier: ${error.message}`, 'error');
+            }
+        }
+
+        async function addCategory() {
+            const categoryName = document.getElementById('newCategoryName').value.trim();
+            
+            if (!categoryName) {
+                addStatus('Ange ett kategorinamn', 'error');
+                return;
+            }
+            
+            try {
+                // Check if category already exists
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                
+                if (snapshot.exists()) {
+                    addStatus('Kategorin finns redan', 'error');
+                    return;
+                }
+                
+                // Create new category
+                const newCategory = {
+                    name: categoryName,
+                    subgroups: [],
+                    products: []
+                };
+                
+                await categoryRef.set(newCategory);
+                
+                addStatus(`Kategori "${categoryName}" tillagd`, 'success');
+                document.getElementById('newCategoryName').value = '';
+                
+                // Refresh all dropdowns and displays
+                await loadCategories();
+                await loadCategoryManagement();
+                await loadStatistics();
+                
+            } catch (error) {
+                addStatus(`Fel vid tillägg av kategori: ${error.message}`, 'error');
+            }
+        }
+
+        function loadSubcategories() {
+            const categoryName = document.getElementById('manageCategorySelect').value;
+            // This function is called when user selects a category for subcategory management
+            // The subcategories are displayed in the structure view
+            displayCategoryStructure();
+        }
+
+        async function addSubcategory() {
+            const categoryName = document.getElementById('manageCategorySelect').value;
+            const subcategoryName = document.getElementById('newSubcategoryName').value.trim();
+            
+            if (!categoryName || !subcategoryName) {
+                addStatus('Välj kategori och ange underkategorinamn', 'error');
+                return;
+            }
+            
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+                
+                if (!categoryData) {
+                    addStatus('Kategorin finns inte', 'error');
+                    return;
+                }
+                
+                // Check if subcategory already exists
+                if (categoryData.subgroups && categoryData.subgroups.find(sg => sg.name === subcategoryName)) {
+                    addStatus('Underkategorin finns redan', 'error');
+                    return;
+                }
+                
+                // Add new subcategory
+                if (!categoryData.subgroups) {
+                    categoryData.subgroups = [];
+                }
+                
+                categoryData.subgroups.push({
+                    name: subcategoryName,
+                    subtypes: []
+                });
+                
+                await categoryRef.set(categoryData);
+                
+                addStatus(`Underkategori "${subcategoryName}" tillagd till ${categoryName}`, 'success');
+                document.getElementById('newSubcategoryName').value = '';
+                
+                // Refresh displays
+                await loadCategories();
+                await loadCategoryManagement();
+                
+            } catch (error) {
+                addStatus(`Fel vid tillägg av underkategori: ${error.message}`, 'error');
+            }
+        }
+
+        function loadSubcategoriesForSubtype() {
+            const categoryName = document.getElementById('subtypeCategorySelect').value;
+            const subcategorySelect = document.getElementById('subtypeSubcategorySelect');
+            
+            subcategorySelect.innerHTML = '<option value="">Välj underkategori</option>';
+            
+            if (categoryName) {
+                const category = productsData.categories.find(c => c.name === categoryName);
+                if (category && category.subgroups) {
+                    category.subgroups.forEach(subgroup => {
+                        const option = document.createElement('option');
+                        option.value = subgroup.name;
+                        option.textContent = subgroup.name;
+                        subcategorySelect.appendChild(option);
+                    });
+                    subcategorySelect.disabled = false;
+                } else {
+                    subcategorySelect.disabled = true;
+                }
+            } else {
+                subcategorySelect.disabled = true;
+            }
+        }
+
+        async function addSubtype() {
+            const categoryName = document.getElementById('subtypeCategorySelect').value;
+            const subcategoryName = document.getElementById('subtypeSubcategorySelect').value;
+            const subtypeName = document.getElementById('newSubtypeName').value.trim();
+            
+            if (!categoryName || !subcategoryName || !subtypeName) {
+                addStatus('Välj kategori, underkategori och ange undertypsnamn', 'error');
+                return;
+            }
+            
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+                
+                if (!categoryData) {
+                    addStatus('Kategorin finns inte', 'error');
+                    return;
+                }
+                
+                // Find subcategory
+                const subgroup = categoryData.subgroups.find(sg => sg.name === subcategoryName);
+                if (!subgroup) {
+                    addStatus('Underkategorin finns inte', 'error');
+                    return;
+                }
+                
+                // Check if subtype already exists
+                if (subgroup.subtypes && subgroup.subtypes.includes(subtypeName)) {
+                    addStatus('Undertypen finns redan', 'error');
+                    return;
+                }
+                
+                // Add new subtype
+                if (!subgroup.subtypes) {
+                    subgroup.subtypes = [];
+                }
+                
+                subgroup.subtypes.push(subtypeName);
+                
+                await categoryRef.set(categoryData);
+                
+                addStatus(`Undertyp "${subtypeName}" tillagd till ${subcategoryName}`, 'success');
+                document.getElementById('newSubtypeName').value = '';
+                
+                // Refresh displays
+                await loadCategories();
+                await loadCategoryManagement();
+                
+            } catch (error) {
+                addStatus(`Fel vid tillägg av undertyp: ${error.message}`, 'error');
+            }
+        }
+
+        function displayCategoryStructure() {
+            const container = document.getElementById('categoryStructure');
+            
+            if (!productsData.categories || productsData.categories.length === 0) {
+                container.innerHTML = '<p>Inga kategorier hittades</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            productsData.categories.forEach(category => {
+                html += `
+                    <div style="margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="font-size: 1.1em;">${category.name}</strong>
+                            <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" 
+                                    onclick="deleteCategory('${category.name}')">Ta bort kategori</button>
+                        </div>
+                `;
+                
+                if (category.subgroups && category.subgroups.length > 0) {
+                    category.subgroups.forEach(subgroup => {
+                        html += `
+                            <div style="margin: 10px 0 10px 20px; padding: 8px; background: #f8f9fa; border-radius: 3px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <strong>${subgroup.name}</strong>
+                                    <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px;" 
+                                            onclick="deleteSubcategory('${category.name}', '${subgroup.name}')">Ta bort</button>
+                                </div>
+                        `;
+                        
+                        if (subgroup.subtypes && subgroup.subtypes.length > 0) {
+                            html += '<div style="margin-left: 15px; margin-top: 5px;">';
+                            subgroup.subtypes.forEach(subtype => {
+                                html += `
+                                    <span style="display: inline-block; margin: 2px; padding: 2px 6px; background: #e9ecef; border-radius: 2px; font-size: 12px;">
+                                        ${subtype}
+                                        <button onclick="deleteSubtype('${category.name}', '${subgroup.name}', '${subtype}')" 
+                                                style="border: none; background: none; color: #dc3545; margin-left: 4px; cursor: pointer;">×</button>
+                                    </span>
+                                `;
+                            });
+                            html += '</div>';
+                        }
+                        
+                        html += '</div>';
+                    });
+                }
+                
+                html += '</div>';
+            });
+            
+            container.innerHTML = html;
+        }
+
+        async function deleteCategory(categoryName) {
+            if (!confirm(`Är du säker på att du vill ta bort hela kategorin "${categoryName}"? Detta kommer också att ta bort alla produkter i kategorin.`)) {
+                return;
+            }
+            
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                await categoryRef.remove();
+                
+                addStatus(`Kategori "${categoryName}" borttagen`, 'success');
+                
+                // Refresh all displays
+                await loadCategories();
+                await loadCategoryManagement();
+                await loadStatistics();
+                
+            } catch (error) {
+                addStatus(`Fel vid borttagning av kategori: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteSubcategory(categoryName, subcategoryName) {
+            if (!confirm(`Är du säker på att du vill ta bort underkategorin "${subcategoryName}"?`)) {
+                return;
+            }
+            
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+                
+                if (categoryData && categoryData.subgroups) {
+                    categoryData.subgroups = categoryData.subgroups.filter(sg => sg.name !== subcategoryName);
+                    await categoryRef.set(categoryData);
+                    
+                    addStatus(`Underkategori "${subcategoryName}" borttagen`, 'success');
+                    
+                    // Refresh displays
+                    await loadCategories();
+                    await loadCategoryManagement();
+                }
+                
+            } catch (error) {
+                addStatus(`Fel vid borttagning av underkategori: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteSubtype(categoryName, subcategoryName, subtypeName) {
+            if (!confirm(`Är du säker på att du vill ta bort undertypen "${subtypeName}"?`)) {
+                return;
+            }
+            
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+                
+                if (categoryData && categoryData.subgroups) {
+                    const subgroup = categoryData.subgroups.find(sg => sg.name === subcategoryName);
+                    if (subgroup && subgroup.subtypes) {
+                        subgroup.subtypes = subgroup.subtypes.filter(st => st !== subtypeName);
+                        await categoryRef.set(categoryData);
+                        
+                        addStatus(`Undertyp "${subtypeName}" borttagen`, 'success');
+                        
+                        // Refresh displays
+                        await loadCategories();
+                        await loadCategoryManagement();
+                    }
+                }
+                
+            } catch (error) {
+                addStatus(`Fel vid borttagning av undertyp: ${error.message}`, 'error');
+            }
         }
 
         async function loadCategories() {
@@ -567,6 +971,7 @@
         // Event listeners
         document.getElementById('productCategory').addEventListener('change', updateSubcategories);
         document.getElementById('productSubcategory').addEventListener('change', updateSubtypes);
+        document.getElementById('subtypeCategorySelect').addEventListener('change', loadSubcategoriesForSubtype);
     </script>
 </body>
 </html>
