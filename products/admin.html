@@ -160,7 +160,7 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-number" id="totalCategories">-</div>
-                    <div>Kategorier</div>
+                    <div>Fabrikat</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="totalProducts">-</div>
@@ -178,81 +178,16 @@
         <!-- Status Messages -->
         <div id="statusContainer"></div>
 
-        <!-- Category Management Section -->
-        <div class="section">
-            <h2>Hantera Kategorier och Underkategorier</h2>
-            
-            <!-- Add Category -->
-            <div style="margin-bottom: 20px;">
-                <h3>Lägg till ny kategori</h3>
-                <div style="display: flex; gap: 10px; align-items: end;">
-                    <div class="form-group">
-                        <label for="newCategoryName">Kategorinamn:</label>
-                        <input type="text" id="newCategoryName" placeholder="t.ex. Honda">
-                    </div>
-                    <button class="btn btn-success" onclick="addCategory()">Lägg till kategori</button>
-                </div>
-            </div>
 
-            <!-- Manage Subcategories -->
-            <div style="margin-bottom: 20px;">
-                <h3>Hantera underkategorier</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <div class="form-group">
-                        <label for="manageCategorySelect">Välj kategori:</label>
-                        <select id="manageCategorySelect" onchange="loadSubcategories()">
-                            <option value="">Välj kategori</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="newSubcategoryName">Ny underkategori:</label>
-                        <input type="text" id="newSubcategoryName" placeholder="t.ex. Luftfilter">
-                    </div>
-                </div>
-                <button class="btn btn-success" onclick="addSubcategory()">Lägg till underkategori</button>
-            </div>
-
-            <!-- Manage Subtypes -->
-            <div style="margin-bottom: 20px;">
-                <h3>Hantera undertyper</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <div class="form-group">
-                        <label for="subtypeCategorySelect">Kategori:</label>
-                        <select id="subtypeCategorySelect" onchange="loadSubcategoriesForSubtype()">
-                            <option value="">Välj kategori</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="subtypeSubcategorySelect">Underkategori:</label>
-                        <select id="subtypeSubcategorySelect" disabled>
-                            <option value="">Välj underkategori</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="newSubtypeName">Ny undertyp:</label>
-                        <input type="text" id="newSubtypeName" placeholder="t.ex. Panel typ">
-                    </div>
-                </div>
-                <button class="btn btn-success" onclick="addSubtype()">Lägg till undertyp</button>
-            </div>
-
-            <!-- Current Structure Display -->
-            <div style="margin-top: 30px;">
-                <h3>Nuvarande struktur</h3>
-                <div id="categoryStructure" style="background: #f8f9fa; padding: 15px; border-radius: 4px; max-height: 400px; overflow-y: auto;">
-                    <p>Laddar struktur...</p>
-                </div>
-            </div>
-        </div>
 
         <!-- Add Product Section -->
         <div class="section">
             <h2>Lägg till/Redigera produkt</h2>
             <form class="product-form" id="productForm">
                 <div class="form-group">
-                    <label for="productCategory">Kategori:</label>
+                    <label for="productCategory">Fabrikat:</label>
                     <select id="productCategory" required>
-                        <option value="">Välj kategori</option>
+                        <option value="">Välj Fabrikat</option>
                     </select>
                 </div>
                 
@@ -312,7 +247,73 @@
                 <button class="btn btn-primary" onclick="loadProductList()">Ladda produkter</button>
             </div>
             <div class="product-list" id="productList">
-                <p>Välj en kategori för att se produkter</p>
+                <p>Välj ett Fabrikat för att se produkter</p>
+            </div>
+        </div>
+                <!-- Category Management Section -->
+        <div class="section">
+            <h2>Hantera Fabrikat och Underkategorier</h2>
+            
+            <!-- Add Category -->
+            <div style="margin-bottom: 20px;">
+                <h3>Lägg till nytt Fabrikat</h3>
+                <div style="display: flex; gap: 10px; align-items: end;">
+                    <div class="form-group">
+                        <label for="newCategoryName">Fabrikat:</label>
+                        <input type="text" id="newCategoryName" placeholder="t.ex. Honda">
+                    </div>
+                    <button class="btn btn-success" onclick="addCategory()">Lägg till Fabrikat</button>
+                </div>
+            </div>
+
+            <!-- Manage Subcategories -->
+            <div style="margin-bottom: 20px;">
+                <h3>Hantera underkategorier</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="manageCategorySelect">Välj Fabrikat:</label>
+                        <select id="manageCategorySelect" onchange="loadSubcategories()">
+                            <option value="">Välj Fabrikat</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newSubcategoryName">Ny underkategori:</label>
+                        <input type="text" id="newSubcategoryName" placeholder="t.ex. Luftfilter">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="addSubcategory()">Lägg till underkategori</button>
+            </div>
+
+            <!-- Manage Subtypes -->
+            <div style="margin-bottom: 20px;">
+                <h3>Hantera undertyper</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="subtypeCategorySelect">Fabrikat:</label>
+                        <select id="subtypeCategorySelect" onchange="loadSubcategoriesForSubtype()">
+                            <option value="">Välj Fabrikat</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subtypeSubcategorySelect">Underkategori:</label>
+                        <select id="subtypeSubcategorySelect" disabled>
+                            <option value="">Välj underkategori</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newSubtypeName">Ny undertyp:</label>
+                        <input type="text" id="newSubtypeName" placeholder="t.ex. Panel typ">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="addSubtype()">Lägg till undertyp</button>
+            </div>
+
+            <!-- Current Structure Display -->
+            <div style="margin-top: 30px;">
+                <h3>Nuvarande struktur</h3>
+                <div id="categoryStructure" style="background: #f8f9fa; padding: 15px; border-radius: 4px; max-height: 400px; overflow-y: auto;">
+                    <p>Laddar struktur...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -398,7 +399,7 @@
                 const snapshot = await categoryRef.once('value');
                 
                 if (snapshot.exists()) {
-                    addStatus('Kategorin finns redan', 'error');
+                    addStatus('Fabrikat finns redan', 'error');
                     return;
                 }
                 
@@ -411,7 +412,7 @@
                 
                 await categoryRef.set(newCategory);
                 
-                addStatus(`Kategori "${categoryName}" tillagd`, 'success');
+                addStatus(`Fabrikat "${categoryName}" tillagd`, 'success');
                 document.getElementById('newCategoryName').value = '';
                 
                 // Refresh all dropdowns and displays
@@ -420,7 +421,7 @@
                 await loadStatistics();
                 
             } catch (error) {
-                addStatus(`Fel vid tillägg av kategori: ${error.message}`, 'error');
+                addStatus(`Fel vid tillägg av Fabrikat: ${error.message}`, 'error');
             }
         }
 
