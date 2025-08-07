@@ -11,3 +11,6 @@ var firebaseConfig = {
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
+
+// Initialize Firebase Database reference
+var database = firebase.database();
