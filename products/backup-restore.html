@@ -1,21 +1,38 @@
 <!DOCTYPE html>
 <html lang="sv">
+
 <head>
     <meta charset="UTF-8">
     <title>Backup/Restore Database</title>
     <style>
+
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #333;
+            background-image: url("../images/logo_rund_utan_räv.png");
+            background-size: 55%;
+            background-position: 50% 20%;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
         }
+
         .section {
             margin: 20px 0;
             padding: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
+            background-color: #fff;
         }
+
+        h1, h2 {
+            color: black;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
         button {
             padding: 10px 20px;
             margin: 5px;
@@ -25,64 +42,75 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #0056b3;
         }
+
         button.danger {
             background-color: #dc3545;
         }
+
         button.danger:hover {
             background-color: #c82333;
         }
+
         textarea {
             width: 100%;
             min-height: 200px;
             font-family: monospace;
         }
+
         .status {
             padding: 10px;
             margin: 10px 0;
             border-radius: 4px;
         }
+
         .success {
             background-color: #d4edda;
             color: #155724;
         }
+
         .error {
             background-color: #f8d7da;
             color: #721c24;
         }
+
         .info {
             background-color: #d1ecf1;
             color: #0c5460;
         }
     </style>
-    
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
     <script src="../scripts/firebase-init.js"></script>
 </head>
+
 <body>
-    <h1>Backup / Återställ Databas</h1>
     
+
     <div id="statusContainer"></div>
-    
+
     <div class="section">
+        <h1>Backup / Återställ Databas</h1>
+        <p>Detta verktyg hjälper dig att skapa och återställa en backup av produktdata i Firebase Realtime Database.</p>
         <h2>Skapa Backup</h2>
         <p>Ladda ner hela databasen som en JSON-fil.</p>
         <button onclick="createBackup()">Skapa Backup</button>
         <button onclick="downloadBackup()" id="downloadBtn" style="display: none;">Ladda ner Backup</button>
     </div>
-    
+
     <div class="section">
         <h2>Återställ från Backup</h2>
         <p>Ladda upp och återställ databasen från en backup-fil.</p>
         <input type="file" id="backupFile" accept=".json">
         <button onclick="restoreFromFile()">Återställ från Fil</button>
     </div>
-    
+
     <div class="section">
         <h2>JSON Export/Import</h2>
         <p>Kopiera eller klistra in JSON-data för export/import.</p>
@@ -105,7 +133,7 @@
         }
 
         // Check authentication
-        firebase.auth().onAuthStateChanged(function(user) {
+        firebase.auth().onAuthStateChanged(function (user) {
             if (!user) {
                 addStatus('Du måste vara inloggad för att använda detta verktyg', 'error');
                 setTimeout(() => {
@@ -117,25 +145,25 @@
         async function createBackup() {
             try {
                 addStatus('Skapar backup...', 'info');
-                
+
                 const productsRef = firebase.database().ref('products');
                 const snapshot = await productsRef.once('value');
                 const data = snapshot.val();
-                
+
                 if (data) {
                     backupData = {
                         timestamp: new Date().toISOString(),
                         version: '1.0',
                         data: data
                     };
-                    
+
                     addStatus('✓ Backup skapad!', 'success');
                     document.getElementById('downloadBtn').style.display = 'inline-block';
                     document.getElementById('jsonData').value = JSON.stringify(backupData, null, 2);
                 } else {
                     addStatus('Ingen data hittades i databasen', 'error');
                 }
-                
+
             } catch (error) {
                 addStatus(`Fel vid skapande av backup: ${error.message}`, 'error');
             }
@@ -146,47 +174,47 @@
                 addStatus('Ingen backup att ladda ner. Skapa en backup först.', 'error');
                 return;
             }
-            
+
             const dataStr = JSON.stringify(backupData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
             const link = document.createElement('a');
             link.href = URL.createObjectURL(dataBlob);
             link.download = `products-backup-${new Date().toISOString().split('T')[0]}.json`;
             link.click();
-            
+
             addStatus('✓ Backup nedladdad!', 'success');
         }
 
         async function restoreFromFile() {
             const fileInput = document.getElementById('backupFile');
             const file = fileInput.files[0];
-            
+
             if (!file) {
                 addStatus('Välj en backup-fil först', 'error');
                 return;
             }
-            
+
             if (!confirm('Varning: Detta kommer att ersätta all befintlig data i databasen. Är du säker?')) {
                 return;
             }
-            
+
             try {
                 const fileText = await file.text();
                 const backupData = JSON.parse(fileText);
-                
+
                 if (!backupData.data) {
                     addStatus('Ogiltig backup-fil format', 'error');
                     return;
                 }
-                
+
                 addStatus('Återställer från backup...', 'info');
-                
+
                 const productsRef = firebase.database().ref('products');
                 await productsRef.set(backupData.data);
-                
+
                 addStatus('✓ Databas återställd från backup!', 'success');
-                
+
             } catch (error) {
                 addStatus(`Fel vid återställning: ${error.message}`, 'error');
             }
@@ -195,23 +223,23 @@
         async function exportToJson() {
             try {
                 addStatus('Exporterar data...', 'info');
-                
+
                 const productsRef = firebase.database().ref('products');
                 const snapshot = await productsRef.once('value');
                 const data = snapshot.val();
-                
+
                 if (data) {
                     const exportData = {
                         timestamp: new Date().toISOString(),
                         data: data
                     };
-                    
+
                     document.getElementById('jsonData').value = JSON.stringify(exportData, null, 2);
                     addStatus('✓ Data exporterad till JSON-området', 'success');
                 } else {
                     addStatus('Ingen data att exportera', 'error');
                 }
-                
+
             } catch (error) {
                 addStatus(`Fel vid export: ${error.message}`, 'error');
             }
@@ -219,20 +247,20 @@
 
         async function importFromJson() {
             const jsonText = document.getElementById('jsonData').value.trim();
-            
+
             if (!jsonText) {
                 addStatus('Klistra in JSON-data först', 'error');
                 return;
             }
-            
+
             if (!confirm('Varning: Detta kommer att ersätta all befintlig data i databasen. Är du säker?')) {
                 return;
             }
-            
+
             try {
                 const importData = JSON.parse(jsonText);
                 let dataToImport;
-                
+
                 // Handle different JSON formats
                 if (importData.data) {
                     dataToImport = importData.data;
@@ -245,18 +273,19 @@
                 } else {
                     dataToImport = importData;
                 }
-                
+
                 addStatus('Importerar data...', 'info');
-                
+
                 const productsRef = firebase.database().ref('products');
                 await productsRef.set(dataToImport);
-                
+
                 addStatus('✓ Data importerad!', 'success');
-                
+
             } catch (error) {
                 addStatus(`Fel vid import: ${error.message}`, 'error');
             }
         }
     </script>
 </body>
+
 </html>
