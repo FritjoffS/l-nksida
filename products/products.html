@@ -75,8 +75,6 @@
 
     <div id="productContainer" class="product-grid"></div>
 
-    <div id="productContainer" class="product-grid"></div>
-
     <!-- Loading indicator -->
     <div id="loadingIndicator" style="text-align: center; padding: 20px;">
         <p>Laddar produkter...</p>
@@ -99,9 +97,22 @@
                 const data = snapshot.val();
                 
                 if (data) {
-                    // Convert Firebase data to expected format
-                    productsDB.categories = Object.keys(data).map(key => data[key]);
+                    // Convert Firebase data to expected format with safety checks
+                    productsDB.categories = Object.keys(data).map(key => {
+                        const category = data[key];
+                        return {
+                            name: category.name || key,
+                            subgroups: category.subgroups || [],
+                            products: Array.isArray(category.products) ? category.products : []
+                        };
+                    });
+                    
                     console.log('Produkter laddade från Firebase:', productsDB.categories.length, 'kategorier');
+                    
+                    // Debug: visa struktur
+                    productsDB.categories.forEach(cat => {
+                        console.log(`Kategori: ${cat.name}, Produkter: ${cat.products.length}`);
+                    });
                 } else {
                     console.warn('Ingen produktdata hittades i Firebase');
                     productsDB.categories = [];
@@ -226,11 +237,30 @@
             return productsDB.categories.flatMap(category => {
                 if (mainCategory && category.name !== mainCategory) return [];
 
+                // Säkerhetskontroll för products array
+                if (!category.products || !Array.isArray(category.products)) {
+                    console.warn(`Kategori ${category.name} har ingen products array`);
+                    return [];
+                }
+
                 return category.products.filter(product => {
-                    const matchesSearch = product.name.toLowerCase().includes(searchTerm) ||
-                        product.productNumber.toLowerCase().includes(searchTerm) ||
-                        product.info.toLowerCase().includes(searchTerm) ||
-                        Object.values(product.specs).some(spec => spec.toLowerCase().includes(searchTerm));
+                    // Säkerhetskontroller för produktegenskaper
+                    if (!product || typeof product !== 'object') {
+                        console.warn('Ogiltig produkt funnen:', product);
+                        return false;
+                    }
+
+                    const productName = product.name || '';
+                    const productNumber = product.productNumber || '';
+                    const productInfo = product.info || '';
+                    const productSpecs = product.specs || {};
+
+                    const matchesSearch = productName.toLowerCase().includes(searchTerm) ||
+                        productNumber.toLowerCase().includes(searchTerm) ||
+                        productInfo.toLowerCase().includes(searchTerm) ||
+                        Object.values(productSpecs).some(spec => 
+                            spec && spec.toString().toLowerCase().includes(searchTerm)
+                        );
 
                     const matchesSubcategory = !subCategory || product.subcategory === subCategory;
                     const matchesSubtype = !subType || product.subtype === subType;
@@ -244,42 +274,56 @@
         function updateResults() {
             if (!isDataLoaded) return;
             
-            const filteredProducts = filterProducts();
-            const container = document.getElementById('productContainer');
+            try {
+                const filteredProducts = filterProducts();
+                const container = document.getElementById('productContainer');
 
-            if (filteredProducts.length === 0) {
-                container.innerHTML = '<div class="no-results">Inga produkter hittades med aktuella filter</div>';
-                return;
-            }
+                if (filteredProducts.length === 0) {
+                    container.innerHTML = '<div class="no-results">Inga produkter hittades med aktuella filter</div>';
+                    return;
+                }
 
-            container.innerHTML = filteredProducts.map(product => `
-                <div class="product-card">
-                    <img src="${product.image}" class="product-image" alt="${product.name}">
-                    <div class="product-info">
-                        <h3>${product.name}</h3>
-                        <div class="product-number-container" style="display: flex; align-items: center;">
-                            <p class="product-number" style="margin-right: 8px;">${product.productNumber}</p>
-                            <button class="copy-button" data-product-number="${product.productNumber}" style="background-image: url('../images/copy.jpg'); background-size: contain; background-repeat: no-repeat; width: 24px; height: 24px; border: none; cursor: pointer;"></button>
-                        </div>                        
-                        <p>${product.info}</p>
-                        <div class="specs">
-                            ${Object.entries(product.specs).map(([key, value]) => `
-                                <p><strong>${key}:</strong> ${value}</p>
-                            `).join('')}
+                container.innerHTML = filteredProducts.map(product => {
+                    // Säkerhetskontroller för produktdata
+                    const productName = product.name || 'Okänt produktnamn';
+                    const productNumber = product.productNumber || 'Okänt nummer';
+                    const productInfo = product.info || 'Ingen info tillgänglig';
+                    const productImage = product.image || '../images/placeholder.png';
+                    const productSpecs = product.specs || {};
+
+                    return `
+                        <div class="product-card">
+                            <img src="${productImage}" class="product-image" alt="${productName}" onerror="this.src='../images/placeholder.png'">
+                            <div class="product-info">
+                                <h3>${productName}</h3>
+                                <div class="product-number-container" style="display: flex; align-items: center;">
+                                    <p class="product-number" style="margin-right: 8px;">${productNumber}</p>
+                                    <button class="copy-button" data-product-number="${productNumber}" style="background-image: url('../images/copy.jpg'); background-size: contain; background-repeat: no-repeat; width: 24px; height: 24px; border: none; cursor: pointer;"></button>
+                                </div>                        
+                                <p>${productInfo}</p>
+                                <div class="specs">
+                                    ${Object.entries(productSpecs).map(([key, value]) => `
+                                        <p><strong>${key}:</strong> ${value || 'N/A'}</p>
+                                    `).join('')}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                        
-                    </div>
-                </div>
-            `).join('');
+                    `;
+                }).join('');
 
-            // Lägg till event listeners för kopieringsknapparna
-            document.querySelectorAll('.copy-button').forEach(button => {
-                button.addEventListener('click', () => {
-                    const productNumber = button.getAttribute('data-product-number');
-                    copyTextToClipboard(productNumber);
+                // Lägg till event listeners för kopieringsknapparna
+                document.querySelectorAll('.copy-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const productNumber = button.getAttribute('data-product-number');
+                        copyTextToClipboard(productNumber);
+                    });
                 });
-            });
+
+            } catch (error) {
+                console.error('Fel vid uppdatering av resultat:', error);
+                const container = document.getElementById('productContainer');
+                container.innerHTML = '<div class="no-results">Ett fel uppstod vid visning av produkter</div>';
+            }
         }
 
         // Funktion för att kopiera text till urklipp
