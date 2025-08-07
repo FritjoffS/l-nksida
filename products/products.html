@@ -11,6 +11,7 @@
     <!-- Add Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
     <script src="../scripts/firebase-init.js"></script>
     <script src="../scripts/loadNavbar.js"></script>
 
@@ -74,9 +75,76 @@
 
     <div id="productContainer" class="product-grid"></div>
 
+    <div id="productContainer" class="product-grid"></div>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" style="text-align: center; padding: 20px;">
+        <p>Laddar produkter...</p>
+    </div>
+
     
-    <script type="module">
-       import productsDB from './productsDB.js';
+    <script>
+        // Global variables
+        let productsDB = { categories: [] };
+        let isDataLoaded = false;
+
+        // Load data from Firebase
+        async function loadProductsFromFirebase() {
+            try {
+                document.getElementById('loadingIndicator').style.display = 'block';
+                document.getElementById('productContainer').style.display = 'none';
+                
+                const productsRef = firebase.database().ref('products');
+                const snapshot = await productsRef.once('value');
+                const data = snapshot.val();
+                
+                if (data) {
+                    // Convert Firebase data to expected format
+                    productsDB.categories = Object.keys(data).map(key => data[key]);
+                    console.log('Produkter laddade från Firebase:', productsDB.categories.length, 'kategorier');
+                } else {
+                    console.warn('Ingen produktdata hittades i Firebase');
+                    productsDB.categories = [];
+                }
+                
+                isDataLoaded = true;
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('productContainer').style.display = 'block';
+                
+                // Update interface after data is loaded
+                updateResults();
+                
+            } catch (error) {
+                console.error('Fel vid laddning av produkter från Firebase:', error);
+                document.getElementById('loadingIndicator').innerHTML = 
+                    '<p style="color: red;">Fel vid laddning av produkter. Försök igen senare.</p>';
+            }
+        }
+
+        // Function to check if a user is logged in or not
+        function checkAuthState() {
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (!user) {
+                    // User is not signed in, redirect to the login page
+                    window.location.href = "../index/login.html";
+                } else {
+                    console.log("User is signed in");
+                    // Load products after authentication
+                    loadProductsFromFirebase();
+                }
+            });
+        }
+
+        // Function to log out the user
+        function logout() {
+            firebase.auth().signOut().then(function () {
+                // Sign-out successful, redirect to login page
+                window.location.href = "../index/login.html";
+            }).catch(function (error) {
+                // Handle errors here
+                console.error("Logout error:", error);
+            });
+        }
 
         // Initiera gränssnittet
         function init() {
@@ -84,12 +152,12 @@
             document.getElementById('mainCategory').addEventListener('change', updateSubcategories);
             document.getElementById('subCategory').addEventListener('change', updateSubtypes);
             document.getElementById('subType').addEventListener('change', updateResults);
-
-            updateResults();
         }
 
         // Uppdatera underkategorier
         function updateSubcategories() {
+            if (!isDataLoaded) return;
+            
             const mainCategory = document.getElementById('mainCategory').value;
             const subCategorySelect = document.getElementById('subCategory');
             subCategorySelect.innerHTML = '<option value="">Välj underkategori</option>';
@@ -117,6 +185,8 @@
 
         // Uppdatera undergrupper
         function updateSubtypes() {
+            if (!isDataLoaded) return;
+            
             const mainCategory = document.getElementById('mainCategory').value;
             const subCategory = document.getElementById('subCategory').value;
             const subTypeSelect = document.getElementById('subType');
@@ -146,6 +216,8 @@
 
         // Filtrera produkter
         function filterProducts() {
+            if (!isDataLoaded) return [];
+            
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const mainCategory = document.getElementById('mainCategory').value;
             const subCategory = document.getElementById('subCategory').value;
@@ -170,6 +242,8 @@
 
         // Uppdatera resultat
         function updateResults() {
+            if (!isDataLoaded) return;
+            
             const filteredProducts = filterProducts();
             const container = document.getElementById('productContainer');
 
@@ -241,7 +315,10 @@
         }
 
         // Starta applikationen
-        init();
+        window.onload = function() {
+            checkAuthState();
+            init();
+        };
     </script>
 </body>
 
