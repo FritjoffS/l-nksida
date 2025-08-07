@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <title>Migrera Produktdata till Firebase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+    <script src="../scripts/firebase-init.js"></script>
+</head>
+<body>
+    <h1>Migrera Produktdata till Firebase</h1>
+    <p>Detta verktyg hjälper dig att migrera produktdata från lokala JavaScript-filer till Firebase Realtime Database.</p>
+    
+    <div id="statusContainer"></div>
+    
+    <button id="migrateBtn" onclick="migrateData()">Starta Migrering</button>
+    <button id="testBtn" onclick="testConnection()">Testa Anslutning</button>
+    <button id="clearBtn" onclick="clearDatabase()" style="background-color: #dc3545;">Rensa Databas</button>
+
+    <script type="module">
+        import productsDB from './productsDB.js';
+
+        // Gör productsDB tillgänglig globalt för migreringsknapparna
+        window.productsDB = productsDB;
+
+        function addStatus(message, type = 'info') {
+            const container = document.getElementById('statusContainer');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        window.testConnection = async function() {
+            try {
+                addStatus('Testar anslutning till Firebase...', 'info');
+                const testRef = firebase.database().ref('test');
+                await testRef.set({ timestamp: Date.now() });
+                await testRef.remove();
+                addStatus('✓ Anslutning till Firebase fungerar!', 'success');
+            } catch (error) {
+                addStatus(`✗ Fel vid anslutning: ${error.message}`, 'error');
+            }
+        };
+
+        window.migrateData = async function() {
+            const migrateBtn = document.getElementById('migrateBtn');
+            migrateBtn.disabled = true;
+            migrateBtn.textContent = 'Migrerar...';
+            
+            try {
+                addStatus('Startar migrering...', 'info');
+                
+                // Referens till produktdatabasen i Firebase
+                const productsRef = firebase.database().ref('products');
+                
+                // Räkna totalt antal produkter för progress
+                const totalProducts = window.productsDB.categories.reduce((total, category) => {
+                    return total + category.products.length;
+                }, 0);
+                
+                addStatus(`Hittat ${window.productsDB.categories.length} kategorier med totalt ${totalProducts} produkter`, 'info');
+                
+                // Migrera varje kategori
+                for (const category of window.productsDB.categories) {
+                    addStatus(`Migrerar kategori: ${category.name}`, 'info');
+                    
+                    const categoryRef = productsRef.child(category.name);
+                    
+                    // Sätt kategoridata
+                    await categoryRef.set({
+                        name: category.name,
+                        subgroups: category.subgroups || [],
+                        products: category.products || []
+                    });
+                    
+                    addStatus(`✓ ${category.name}: ${category.products.length} produkter migrerade`, 'success');
+                }
+                
+                addStatus('✓ Migrering slutförd!', 'success');
+                addStatus('Du kan nu uppdatera products.html för att använda Firebase-data', 'info');
+                
+            } catch (error) {
+                addStatus(`✗ Fel under migrering: ${error.message}`, 'error');
+                console.error('Migration error:', error);
+            } finally {
+                migrateBtn.disabled = false;
+                migrateBtn.textContent = 'Starta Migrering';
+            }
+        };
+
+        window.clearDatabase = async function() {
+            if (!confirm('Är du säker på att du vill rensa hela produktdatabasen? Detta kan inte ångras!')) {
+                return;
+            }
+            
+            try {
+                addStatus('Rensar databas...', 'info');
+                const productsRef = firebase.database().ref('products');
+                await productsRef.remove();
+                addStatus('✓ Databas rensad', 'success');
+            } catch (error) {
+                addStatus(`✗ Fel vid rensning: ${error.message}`, 'error');
+            }
+        };
+
+        // Kontrollera auth status
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (!user) {
+                addStatus('⚠️  Du är inte inloggad. Logga in för att fortsätta.', 'error');
+                setTimeout(() => {
+                    window.location.href = '../index/login.html';
+                }, 3000);
+            } else {
+                addStatus(`Inloggad som: ${user.email}`, 'success');
+            }
+        });
+    </script>
+</body>
+</html>
