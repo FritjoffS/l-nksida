@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrilager Inventeringsapp</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Industrilager</h1>
+        </header>
+        <main>
+            <section id="start" class="active">
+                <button onclick="showPage('lager')">Lager</button>
+                <button onclick="showPage('inventering')">Inventering</button>
+            </section>
+            <section id="lager" class="hidden">
+                <h2>Lägg till produkt</h2>
+                <form id="addProductForm">
+                    <input type="text" id="benamning" placeholder="Benämning" required>
+                    <input type="number" id="lagerAntal" placeholder="Lager antal" required>
+                    <button type="submit">Spara</button>
+                </form>
+                <h3>Produkter</h3>
+                <ul id="productList"></ul>
+                <button onclick="showPage('start')">Tillbaka</button>
+            </section>
+            <section id="inventering" class="hidden">
+                <h2>Inventering</h2>
+                <form id="orderForm">
+                    <ul id="inventoryList"></ul>
+                    <button type="submit">Spara beställning</button>
+                </form>
+                <button onclick="showPage('start')">Tillbaka</button>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
