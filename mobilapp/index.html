@@ -27,7 +27,13 @@
                 <h2 id="currentCustomerHeader"></h2>
                 <button onclick="showPage('inventering')">Inventering</button>
                 <button onclick="showPage('lager')">Lager</button>
+                <button onclick="showPage('orders')">Beställningshistorik</button>
                 <button onclick="showPage('customerSelect')">Byt kund</button>
+            </section>
+            <section id="orders" class="hidden">
+                <h2>Beställningshistorik</h2>
+                <ul id="orderHistoryList"></ul>
+                <button onclick="showPage('start')">Tillbaka</button>
             </section>
             <section id="lager" class="hidden">
                 <h2>Lägg till produkt</h2>
