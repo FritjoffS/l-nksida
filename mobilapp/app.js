@@ -14,9 +14,13 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 function showPage(page) {
-    document.querySelectorAll('section').forEach(sec => sec.classList.add('hidden'));
-    document.getElementById(page).classList.remove('hidden');
-    document.getElementById(page).classList.add('active');
+    document.querySelectorAll('section').forEach(sec => {
+        sec.classList.add('hidden');
+        sec.classList.remove('active');
+    });
+    const selected = document.getElementById(page);
+    selected.classList.remove('hidden');
+    selected.classList.add('active');
     if(page === 'lager') loadProducts();
     if(page === 'inventering') loadInventory();
 }
