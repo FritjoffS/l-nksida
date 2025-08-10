@@ -15,9 +15,19 @@
             <h1>Industrilager</h1>
         </header>
         <main>
-            <section id="start" class="active">
-                    <button onclick="showPage('inventering')">Inventering</button>
-                    <button onclick="showPage('lager')">Lager</button>
+            <section id="customerSelect" class="active">
+                <h2>Välj kund</h2>
+                <form id="addCustomerForm">
+                    <input type="text" id="customerName" placeholder="Ny kund" required>
+                    <button type="submit">Spara kund</button>
+                </form>
+                <div id="customerList"></div>
+            </section>
+            <section id="start" class="hidden">
+                <h2 id="currentCustomerHeader"></h2>
+                <button onclick="showPage('inventering')">Inventering</button>
+                <button onclick="showPage('lager')">Lager</button>
+                <button onclick="showPage('customerSelect')">Byt kund</button>
             </section>
             <section id="lager" class="hidden">
                 <h2>Lägg till produkt</h2>
