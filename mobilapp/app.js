@@ -23,6 +23,16 @@ function showPage(page) {
     selected.classList.add('active');
     if(page === 'lager') loadProducts();
     if(page === 'inventering') loadInventory();
+    if(page === 'start') {
+        const header = document.getElementById('currentCustomerHeader');
+        header.textContent = currentCustomer ? `Kund: ${currentCustomer.name}` : '';
+    }
+    if(page === 'customerSelect') {
+        loadCustomers();
+    }
+    if(page === 'orders') {
+        loadOrderHistory();
+    }
 }
 
 // Lager: Lägg till produkt
@@ -33,7 +43,8 @@ if(addProductForm) {
         const benamning = document.getElementById('benamning').value.trim();
         const lagerAntal = parseInt(document.getElementById('lagerAntal').value);
         if(benamning && !isNaN(lagerAntal)) {
-            const newRef = db.ref('produkter').push();
+            if(!currentCustomer) return;
+            const newRef = db.ref(`kunder/${currentCustomer.id}/produkter`).push();
             newRef.set({ benamning, lagerAntal });
             addProductForm.reset();
             loadProducts();
@@ -44,21 +55,50 @@ if(addProductForm) {
 function loadProducts() {
     const productList = document.getElementById('productList');
     productList.innerHTML = '';
-    db.ref('produkter').once('value', snapshot => {
+    if(!currentCustomer) return;
+    db.ref(`kunder/${currentCustomer.id}/produkter`).once('value', snapshot => {
         snapshot.forEach(child => {
             const prod = child.val();
             const li = document.createElement('li');
-            li.textContent = `${prod.benamning} (${prod.lagerAntal})`;
+            li.innerHTML = `<span>${prod.benamning} (${prod.lagerAntal})</span> ` +
+                `<button onclick="editProduct('${child.key}', '${prod.benamning}', ${prod.lagerAntal})">Redigera</button> ` +
+                `<button onclick="deleteProduct('${child.key}')">Radera</button>`;
             productList.appendChild(li);
         });
     });
+}
+
+function editProduct(key, benamning, lagerAntal) {
+    const productList = document.getElementById('productList');
+    const li = document.createElement('li');
+    li.innerHTML = `<input type='text' id='editBenamning' value='${benamning}'> ` +
+        `<input type='number' id='editAntal' value='${lagerAntal}'> ` +
+        `<button onclick="saveProductEdit('${key}')">Spara</button> ` +
+        `<button onclick="loadProducts()">Avbryt</button>`;
+    productList.innerHTML = '';
+    productList.appendChild(li);
+}
+
+function saveProductEdit(key) {
+    const benamning = document.getElementById('editBenamning').value.trim();
+    const lagerAntal = parseInt(document.getElementById('editAntal').value);
+    if(benamning && !isNaN(lagerAntal) && currentCustomer) {
+        db.ref(`kunder/${currentCustomer.id}/produkter/${key}`).set({ benamning, lagerAntal }, loadProducts);
+    }
+}
+
+function deleteProduct(key) {
+    if(currentCustomer) {
+        db.ref(`kunder/${currentCustomer.id}/produkter/${key}`).remove().then(loadProducts);
+    }
 }
 
 // Inventering: Lista produkter och beställning
 function loadInventory() {
     const inventoryList = document.getElementById('inventoryList');
     inventoryList.innerHTML = '';
-    db.ref('produkter').once('value', snapshot => {
+    if(!currentCustomer) return;
+    db.ref(`kunder/${currentCustomer.id}/produkter`).once('value', snapshot => {
         snapshot.forEach(child => {
             const prod = child.val();
             const li = document.createElement('li');
@@ -82,7 +122,8 @@ if(orderForm) {
             }
         });
         if(Object.keys(bestallning).length > 0) {
-            db.ref('bestallningar').push({
+            if(!currentCustomer) return;
+            db.ref(`kunder/${currentCustomer.id}/bestallningar`).push({
                 tid: new Date().toISOString(),
                 bestallning
             });
@@ -93,25 +134,6 @@ if(orderForm) {
 }
 
 let currentCustomer = null;
-
-function showPage(page) {
-    document.querySelectorAll('section').forEach(sec => {
-        sec.classList.add('hidden');
-        sec.classList.remove('active');
-    });
-    const selected = document.getElementById(page);
-    selected.classList.remove('hidden');
-    selected.classList.add('active');
-    if(page === 'lager') loadProducts();
-    if(page === 'inventering') loadInventory();
-    if(page === 'start') {
-        const header = document.getElementById('currentCustomerHeader');
-        header.textContent = currentCustomer ? `Kund: ${currentCustomer.name}` : '';
-    }
-    if(page === 'customerSelect') {
-        loadCustomers();
-    }
-}
 
 // Hantera kundinmatning och visning
 function loadCustomers() {
@@ -141,6 +163,25 @@ if(addCustomerForm) {
             addCustomerForm.reset();
             loadCustomers();
         }
+    });
+}
+
+// Beställningshistorik
+function loadOrderHistory() {
+    const orderHistoryList = document.getElementById('orderHistoryList');
+    orderHistoryList.innerHTML = '';
+    if(!currentCustomer) return;
+    db.ref(`kunder/${currentCustomer.id}/bestallningar`).once('value', snapshot => {
+        snapshot.forEach(child => {
+            const order = child.val();
+            const li = document.createElement('li');
+            let items = '';
+            for(const key in order.bestallning) {
+                items += `${key}: ${order.bestallning[key]}, `;
+            }
+            li.textContent = `${order.tid}: ${items.slice(0, -2)}`;
+            orderHistoryList.appendChild(li);
+        });
     });
 }
 
