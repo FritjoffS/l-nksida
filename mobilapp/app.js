@@ -92,5 +92,57 @@ if(orderForm) {
     });
 }
 
-// Visa startsidan vid laddning
-showPage('start');
+let currentCustomer = null;
+
+function showPage(page) {
+    document.querySelectorAll('section').forEach(sec => {
+        sec.classList.add('hidden');
+        sec.classList.remove('active');
+    });
+    const selected = document.getElementById(page);
+    selected.classList.remove('hidden');
+    selected.classList.add('active');
+    if(page === 'lager') loadProducts();
+    if(page === 'inventering') loadInventory();
+    if(page === 'start') {
+        const header = document.getElementById('currentCustomerHeader');
+        header.textContent = currentCustomer ? `Kund: ${currentCustomer.name}` : '';
+    }
+    if(page === 'customerSelect') {
+        loadCustomers();
+    }
+}
+
+// Hantera kundinmatning och visning
+function loadCustomers() {
+    const customerList = document.getElementById('customerList');
+    customerList.innerHTML = '';
+    db.ref('kunder').once('value', snapshot => {
+        snapshot.forEach(child => {
+            const kund = child.val();
+            const btn = document.createElement('button');
+            btn.textContent = kund.name;
+            btn.onclick = () => {
+                currentCustomer = { id: child.key, name: kund.name };
+                showPage('start');
+            };
+            customerList.appendChild(btn);
+        });
+    });
+}
+
+const addCustomerForm = document.getElementById('addCustomerForm');
+if(addCustomerForm) {
+    addCustomerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const name = document.getElementById('customerName').value.trim();
+        if(name) {
+            db.ref('kunder').push({ name });
+            addCustomerForm.reset();
+            loadCustomers();
+        }
+    });
+}
+
+// Starta med kundvalssidan
+showPage('customerSelect');
