@@ -273,18 +273,81 @@ function loadManageCustomers() {
     if(!list) return;
     list.innerHTML = '';
     db.ref('kunder').once('value', snapshot => {
-        snapshot.forEach(child => {
+        snapshot.forEach((child, idx) => {
             const kund = child.val();
             const li = document.createElement('li');
-            li.innerHTML = `<span>${kund.name}</span> <button onclick="deleteCustomer('${child.key}')">Radera</button>`;
+            li.innerHTML = `<label for='manageCustomerSelect${idx}'>${kund.name}</label> ` +
+                `<input type='radio' name='manageCustomerSelect' id='manageCustomerSelect${idx}' value='${child.key}' style='float:right;'>`;
             list.appendChild(li);
         });
     });
 }
 
 // Funktion för att radera kund
-function deleteCustomer(key) {
-    if(confirm('Vill du verkligen radera denna kund?')) {
-        db.ref('kunder/' + key).remove().then(loadManageCustomers);
+
+function getSelectedManageCustomerKey() {
+    const selected = document.querySelector('input[name="manageCustomerSelect"]:checked');
+    return selected ? selected.value : null;
+}
+
+function deleteSelectedManageCustomer() {
+    const key = getSelectedManageCustomerKey();
+    if(key) {
+        if(confirm('Vill du verkligen radera denna kund?')) {
+            db.ref('kunder/' + key).remove().then(loadManageCustomers);
+        }
+    } else {
+        alert('Välj en kund att radera.');
     }
+}
+
+// Koppla raderaknappen
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteBtn = document.getElementById('deleteCustomerBtn');
+    if(deleteBtn) {
+        deleteBtn.onclick = deleteSelectedManageCustomer;
+    }
+
+    const editBtn = document.getElementById('editCustomerBtn');
+    if(editBtn) {
+        editBtn.onclick = editSelectedManageCustomer;
+    }
+});
+// Redigera vald kund
+function editSelectedManageCustomer() {
+    const key = getSelectedManageCustomerKey();
+    if(!key) {
+        alert('Välj en kund att redigera.');
+        return;
+    }
+    db.ref('kunder/' + key).once('value', snapshot => {
+        const kund = snapshot.val();
+        if(!kund) return;
+        const list = document.getElementById('manageCustomerList');
+        if(!list) return;
+        // Visa redigeringsformulär
+        list.innerHTML = '';
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <label for='editCustomerName'>Nytt namn:</label><br>
+            <input type='text' id='editCustomerName' value='${kund.name}' style='width:100%;margin-bottom:8px;'>
+        `;
+        list.appendChild(li);
+        // Spara/Avbryt-knappar
+        const btnDiv = document.createElement('div');
+        btnDiv.style.marginTop = '12px';
+        btnDiv.innerHTML = `<button id='saveEditCustomerBtn'>Spara</button> <button id='cancelEditCustomerBtn'>Avbryt</button>`;
+        list.appendChild(btnDiv);
+        document.getElementById('saveEditCustomerBtn').onclick = function() {
+            const newName = document.getElementById('editCustomerName').value.trim();
+            if(newName) {
+                db.ref('kunder/' + key).update({ name: newName }, function() {
+                    loadManageCustomers();
+                });
+            }
+        };
+        document.getElementById('cancelEditCustomerBtn').onclick = function() {
+            loadManageCustomers();
+        };
+    });
 }
