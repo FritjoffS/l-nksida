@@ -329,7 +329,7 @@ function editSelectedManageCustomer() {
         list.innerHTML = '';
         const li = document.createElement('li');
         li.innerHTML = `
-            <label for='editCustomerName'>Nytt namn:</label><br>
+            <label for='editCustomerName'>Kund:</label><br>
             <input type='text' id='editCustomerName' value='${kund.name}' style='width:100%;margin-bottom:8px;'>
         `;
         list.appendChild(li);
