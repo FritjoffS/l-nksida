@@ -41,6 +41,7 @@
                 <button onclick="showPage('customerSelect')">Byt kund</button>
             </section>
             <section id="orders" class="hidden">
+                <div id="currentCustomerOrders" style="text-align:center;margin-bottom:16px;font-weight:bold;color:#555;"></div>
                 <h2>Beställningshistorik</h2>
                 <ul id="orderHistoryList"></ul>
                 <button onclick="showPage('start')">Tillbaka</button>
@@ -51,6 +52,8 @@
                 <button onclick="showPage('orders')">Tillbaka</button>
             </section>
             <section id="lager" class="hidden">
+                <div id="currentCustomerLager" style="text-align:center;margin-bottom:16px;font-weight:bold;color:#555;"></div>
+                <div id="currentRecipientLager" style="text-align:center;margin-bottom:16px;font-style:italic;color:#777;"></div>
                 <h2>Lägg till produkt</h2>
                 <form id="addProductForm">
                     <input type="text" id="benamning" placeholder="Benämning" required style="width:100%;box-sizing:border-box;">
@@ -63,6 +66,8 @@
                 <button onclick="showPage('start')">Tillbaka</button>
             </section>
             <section id="order" class="hidden">
+                <div id="currentCustomerOrder" style="text-align:center;margin-bottom:16px;font-weight:bold;color:#555;"></div>
+                <div id="currentRecipientOrder" style="text-align:center;margin-bottom:16px;font-style:italic;color:#777;"></div>
                 <h2>Order</h2>
                 <form id="orderForm">
                     <ul id="orderList"></ul>
