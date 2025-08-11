@@ -28,7 +28,7 @@
                     <button id="editCustomerBtn" style="flex:1;">Redigera vald kund</button>
                 </div>
                 <form id="addCustomerForm" style="margin-top:24px;">
-                    <input type="text" id="customerName" placeholder="Ny kund" required>
+                    <input type="text" id="customerName" placeholder="Ny kund" required style="width:100%;box-sizing:border-box;">
                     <button type="submit">Spara kund</button>
                 </form>
                 <button onclick="showPage('customerSelect')">Tillbaka</button>
@@ -53,9 +53,9 @@
             <section id="lager" class="hidden">
                 <h2>Lägg till produkt</h2>
                 <form id="addProductForm">
-                    <input type="text" id="benamning" placeholder="Benämning" required>
-                    <input type="text" id="produktnummer" placeholder="Produktnummer" required style="margin-top:8px;">
-                    <input type="number" id="lagerAntal" placeholder="Lager antal" required>
+                    <input type="text" id="benamning" placeholder="Benämning" required style="width:100%;box-sizing:border-box;">
+                    <input type="text" id="produktnummer" placeholder="Produktnummer" required style="width:100%;box-sizing:border-box;margin-top:8px;">
+                    <input type="number" id="lagerAntal" placeholder="Lager antal" required style="width:100%;box-sizing:border-box;">
                     <button type="submit">Spara</button>
                 </form>
                 <h3>Produkter</h3>
