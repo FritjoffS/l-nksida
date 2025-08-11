@@ -22,7 +22,42 @@ function showPage(page) {
     selected.classList.remove('hidden');
     selected.classList.add('active');
     if(page === 'lager') loadProducts();
-    if(page === 'order') loadOrder();
+    if(page === 'order') {
+        // Fråga om godsmottagare om det finns
+        if(currentCustomer) {
+            db.ref('kunder/' + currentCustomer.id + '/godsmottagare').once('value', snap => {
+                if(snap.exists()) {
+                    // Visa dialog för val av godsmottagare
+                    const recipients = [];
+                    snap.forEach(child => {
+                        recipients.push({ key: child.key, namn: child.val().namn });
+                    });
+                    let html = '<div id="recipientDialog" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:9999;">';
+                    html += '<div style="background:#fff;padding:24px;border-radius:12px;max-width:320px;width:90vw;box-shadow:0 2px 8px rgba(0,0,0,0.15);">';
+                    html += '<h3>Välj godsmottagare för order</h3>';
+                    recipients.forEach(rec => {
+                        html += `<button style='width:100%;margin:8px 0;' onclick='window.selectRecipientForOrder("${rec.key}")'>${rec.namn}</button>`;
+                    });
+                    html += `<button style='width:100%;margin-top:12px;' onclick='window.cancelRecipientDialog()'>Avbryt</button>`;
+                    html += '</div></div>';
+                    document.body.insertAdjacentHTML('beforeend', html);
+                    window.selectRecipientForOrder = function(recipientKey) {
+                        document.getElementById('recipientDialog').remove();
+                        window.selectedRecipientForOrder = recipientKey;
+                        loadOrder(recipientKey);
+                    };
+                    window.cancelRecipientDialog = function() {
+                        document.getElementById('recipientDialog').remove();
+                    };
+                    return;
+                } else {
+                    loadOrder();
+                }
+            });
+        } else {
+            loadOrder();
+        }
+    }
     if(page === 'start') {
         const header = document.getElementById('currentCustomerHeader');
         header.textContent = currentCustomer ? `${currentCustomer.name}` : '';
@@ -139,7 +174,7 @@ function deleteSelectedProduct() {
     }
 }
 
-function loadOrder() {
+function loadOrder(recipientKey) {
     const orderList = document.getElementById('orderList');
     orderList.innerHTML = '';
     if(!currentCustomer) return;
@@ -152,6 +187,8 @@ function loadOrder() {
             orderList.appendChild(li);
         });
     });
+    // Spara valt godsmottagare för order
+    window.selectedRecipientForOrder = recipientKey || null;
 }
 
 const orderForm = document.getElementById('orderForm');
@@ -168,12 +205,21 @@ if(orderForm) {
         });
         if(Object.keys(bestallning).length > 0) {
             if(!currentCustomer) return;
-            db.ref(`kunder/${currentCustomer.id}/bestallningar`).push({
-                tid: new Date().toISOString(),
-                bestallning
-            });
+            // Spara ordern under godsmottagare om en är vald
+            if(window.selectedRecipientForOrder) {
+                db.ref(`kunder/${currentCustomer.id}/godsmottagare/${window.selectedRecipientForOrder}/bestallningar`).push({
+                    tid: new Date().toISOString(),
+                    bestallning
+                });
+            } else {
+                db.ref(`kunder/${currentCustomer.id}/bestallningar`).push({
+                    tid: new Date().toISOString(),
+                    bestallning
+                });
+            }
             orderForm.reset();
             alert('Beställning sparad!');
+            window.selectedRecipientForOrder = null;
         }
     });
 }
@@ -204,9 +250,11 @@ if(addCustomerForm) {
         e.preventDefault();
         const name = document.getElementById('customerName').value.trim();
         if(name) {
-            db.ref('kunder').push({ name });
-            addCustomerForm.reset();
-            loadCustomers();
+            db.ref('kunder').push({ name }).then(() => {
+                addCustomerForm.reset();
+                loadCustomers();
+                loadManageCustomers();
+            });
         }
     });
 }
@@ -333,6 +381,58 @@ function editSelectedManageCustomer() {
             <input type='text' id='editCustomerName' value='${kund.name}' style='width:100%;margin-bottom:8px;'>
         `;
         list.appendChild(li);
+
+        // Visa godsmottagare
+        const recList = document.createElement('ul');
+        recList.id = 'recipientList';
+        recList.style.margin = '12px 0';
+        if(kund.godsmottagare) {
+            Object.entries(kund.godsmottagare).forEach(([recKey, rec]) => {
+                const recLi = document.createElement('li');
+                recLi.innerHTML = `
+                    <input type='text' id='recipientEdit_${recKey}' value='${rec.namn}' style='width:60%;margin-right:8px;'>
+                    <button class='saveRecipientBtn' data-customer='${key}' data-recipient='${recKey}'>Spara</button>
+                    <button onclick="deleteRecipient('${key}','${recKey}')">Radera</button>
+                `;
+                recList.appendChild(recLi);
+            });
+        }
+        list.appendChild(recList);
+        // Lägg till event listeners för spara-knappar
+        setTimeout(() => {
+            document.querySelectorAll('.saveRecipientBtn').forEach(btn => {
+                btn.onclick = function() {
+                    const customerKey = btn.getAttribute('data-customer');
+                    const recipientKey = btn.getAttribute('data-recipient');
+                    saveRecipientEdit(customerKey, recipientKey);
+                };
+            });
+        }, 0);
+// Gör funktionen global
+window.saveRecipientEdit = function(customerKey, recipientKey) {
+    const input = document.getElementById('recipientEdit_' + recipientKey);
+    if(input) {
+        const newName = input.value.trim();
+        if(newName) {
+            db.ref('kunder/' + customerKey + '/godsmottagare/' + recipientKey).update({ namn: newName }).then(() => {
+                alert('Namnet är ändrat!');
+                editSelectedManageCustomer_bypass(customerKey);
+            });
+        }
+    }
+}
+        list.appendChild(recList);
+
+        // Lägg till godsmottagare-knapp
+        const addRecBtn = document.createElement('button');
+        addRecBtn.id = 'addRecipientBtn';
+        addRecBtn.textContent = 'Lägg till godsmottagare';
+        addRecBtn.style.margin = '8px 0';
+        addRecBtn.onclick = function() {
+            showAddRecipientDialog(key);
+        };
+        list.appendChild(addRecBtn);
+
         // Spara/Avbryt-knappar
         const btnDiv = document.createElement('div');
         btnDiv.style.marginTop = '12px';
@@ -351,3 +451,112 @@ function editSelectedManageCustomer() {
         };
     });
 }
+
+// Radera godsmottagare
+function deleteRecipient(customerKey, recipientKey) {
+    if(confirm('Vill du verkligen radera denna godsmottagare?')) {
+        db.ref('kunder/' + customerKey + '/godsmottagare/' + recipientKey).remove().then(() => {
+            editSelectedManageCustomer_bypass(customerKey);
+        });
+    }
+};
+
+
+
+// Dialog/metod för att lägga till godsmottagare
+function showAddRecipientDialog(customerKey) {
+    const list = document.getElementById('manageCustomerList');
+    if(!list) return;
+    list.innerHTML = '';
+    const li = document.createElement('li');
+    li.innerHTML = `
+        <label for='recipientName'>Godsmottagare:</label><br>
+        <input type='text' id='recipientName' placeholder='Namn på godsmottagare' style='width:100%;margin-bottom:8px;'>
+    `;
+    list.appendChild(li);
+    const btnDiv = document.createElement('div');
+    btnDiv.style.marginTop = '12px';
+    btnDiv.innerHTML = `<button id='saveRecipientBtn'>Spara</button> <button id='cancelRecipientBtn'>Avbryt</button>`;
+    list.appendChild(btnDiv);
+    document.getElementById('saveRecipientBtn').onclick = function() {
+        const name = document.getElementById('recipientName').value.trim();
+        if(name) {
+            db.ref('kunder/' + customerKey + '/godsmottagare').push({ namn: name }).then(() => {
+                // Återgå till redigeringsdialogen för samma kund, utan att kontrollera om någon är vald
+                db.ref('kunder/' + customerKey).once('value', snapshot => {
+                    const kund = snapshot.val();
+                    if(!kund) return;
+                    const list = document.getElementById('manageCustomerList');
+                    if(!list) return;
+                    // Visa redigeringsformulär igen
+                    // ...anropa editSelectedManageCustomer med bypass av valkontroll...
+                    // Vi kan anropa editSelectedManageCustomer, men sätt en global bypass-flagga om du har problem
+                    editSelectedManageCustomer_bypass(customerKey);
+                });
+            });
+        }
+    };
+    document.getElementById('cancelRecipientBtn').onclick = function() {
+        editSelectedManageCustomer_bypass(customerKey);
+    };
+}
+
+// Variant av editSelectedManageCustomer som alltid visar dialogen för angiven kund
+function editSelectedManageCustomer_bypass(customerKey) {
+    db.ref('kunder/' + customerKey).once('value', snapshot => {
+        const kund = snapshot.val();
+        if(!kund) return;
+        const list = document.getElementById('manageCustomerList');
+        if(!list) return;
+        // Visa redigeringsformulär
+        list.innerHTML = '';
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <label for='editCustomerName'>Kund:</label><br>
+            <input type='text' id='editCustomerName' value='${kund.name}' style='width:100%;margin-bottom:8px;'>
+        `;
+        list.appendChild(li);
+        // Visa godsmottagare
+        const recList = document.createElement('ul');
+        recList.id = 'recipientList';
+        recList.style.margin = '12px 0';
+        if(kund.godsmottagare) {
+            Object.entries(kund.godsmottagare).forEach(([recKey, rec]) => {
+                const recLi = document.createElement('li');
+                recLi.innerHTML = `
+                    <input type='text' id='recipientEdit_${recKey}' value='${rec.namn}' style='width:60%;margin-right:8px;'>
+                    <button onclick="saveRecipientEdit('${customerKey}','${recKey}')">Spara</button>
+                    <button onclick="deleteRecipient('${customerKey}','${recKey}')">Radera</button>
+                `;
+                recList.appendChild(recLi);
+            });
+        }
+        list.appendChild(recList);
+        // Lägg till godsmottagare-knapp
+        const addRecBtn = document.createElement('button');
+        addRecBtn.id = 'addRecipientBtn';
+        addRecBtn.textContent = 'Lägg till godsmottagare';
+        addRecBtn.style.margin = '8px 0';
+        addRecBtn.onclick = function() {
+            showAddRecipientDialog(customerKey);
+        };
+        list.appendChild(addRecBtn);
+        // Spara/Avbryt-knappar
+        const btnDiv = document.createElement('div');
+        btnDiv.style.marginTop = '12px';
+        btnDiv.innerHTML = `<button id='saveEditCustomerBtn'>Spara</button> <button id='cancelEditCustomerBtn'>Avbryt</button>`;
+        list.appendChild(btnDiv);
+        document.getElementById('saveEditCustomerBtn').onclick = function() {
+            const newName = document.getElementById('editCustomerName').value.trim();
+            if(newName) {
+                db.ref('kunder/' + customerKey).update({ name: newName }, function() {
+                    loadManageCustomers();
+                });
+            }
+        };
+        document.getElementById('cancelEditCustomerBtn').onclick = function() {
+            loadManageCustomers();
+        };
+    });
+    }
+
