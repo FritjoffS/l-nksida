@@ -474,6 +474,13 @@ function loadManageCustomers() {
     const list = document.getElementById('manageCustomerList');
     if(!list) return;
     list.innerHTML = '';
+    
+    // Visa radera/redigera-knapparna igen
+    const deleteBtn = document.getElementById('deleteCustomerBtn');
+    const editBtn = document.getElementById('editCustomerBtn');
+    if(deleteBtn) deleteBtn.style.display = '';
+    if(editBtn) editBtn.style.display = '';
+    
     db.ref('kunder').once('value', snapshot => {
         snapshot.forEach((child, idx) => {
             const kund = child.val();
@@ -522,6 +529,13 @@ function editSelectedManageCustomer() {
         alert('Välj en kund att redigera.');
         return;
     }
+    
+    // Dölj radera/redigera-knapparna under redigering
+    const deleteBtn = document.getElementById('deleteCustomerBtn');
+    const editBtn = document.getElementById('editCustomerBtn');
+    if(deleteBtn) deleteBtn.style.display = 'none';
+    if(editBtn) editBtn.style.display = 'none';
+    
     db.ref('kunder/' + key).once('value', snapshot => {
         const kund = snapshot.val();
         if(!kund) return;
@@ -587,10 +601,10 @@ window.saveRecipientEdit = function(customerKey, recipientKey) {
         };
         list.appendChild(addRecBtn);
 
-        // Spara/Avbryt-knappar
+        // Spara/Tillbaka-knappar
         const btnDiv = document.createElement('div');
         btnDiv.style.marginTop = '12px';
-        btnDiv.innerHTML = `<button id='saveEditCustomerBtn'>Spara</button> <button id='cancelEditCustomerBtn'>Avbryt</button>`;
+        btnDiv.innerHTML = `<button id='saveEditCustomerBtn'>Spara</button> <button id='cancelEditCustomerBtn'>Tillbaka</button>`;
         list.appendChild(btnDiv);
         document.getElementById('saveEditCustomerBtn').onclick = function() {
             const newName = document.getElementById('editCustomerName').value.trim();
@@ -630,7 +644,7 @@ function showAddRecipientDialog(customerKey) {
     list.appendChild(li);
     const btnDiv = document.createElement('div');
     btnDiv.style.marginTop = '12px';
-    btnDiv.innerHTML = `<button id='saveRecipientBtn'>Spara</button> <button id='cancelRecipientBtn'>Avbryt</button>`;
+    btnDiv.innerHTML = `<button id='saveRecipientBtn'>Spara</button> <button id='cancelRecipientBtn'>Tillbaka</button>`;
     list.appendChild(btnDiv);
     document.getElementById('saveRecipientBtn').onclick = function() {
         const name = document.getElementById('recipientName').value.trim();
@@ -657,6 +671,12 @@ function showAddRecipientDialog(customerKey) {
 
 // Variant av editSelectedManageCustomer som alltid visar dialogen för angiven kund
 function editSelectedManageCustomer_bypass(customerKey) {
+    // Dölj radera/redigera-knapparna under redigering
+    const deleteBtn = document.getElementById('deleteCustomerBtn');
+    const editBtn = document.getElementById('editCustomerBtn');
+    if(deleteBtn) deleteBtn.style.display = 'none';
+    if(editBtn) editBtn.style.display = 'none';
+    
     db.ref('kunder/' + customerKey).once('value', snapshot => {
         const kund = snapshot.val();
         if(!kund) return;
@@ -695,10 +715,10 @@ function editSelectedManageCustomer_bypass(customerKey) {
             showAddRecipientDialog(customerKey);
         };
         list.appendChild(addRecBtn);
-        // Spara/Avbryt-knappar
+        // Spara/Tillbaka-knappar
         const btnDiv = document.createElement('div');
         btnDiv.style.marginTop = '12px';
-        btnDiv.innerHTML = `<button id='saveEditCustomerBtn'>Spara</button> <button id='cancelEditCustomerBtn'>Avbryt</button>`;
+        btnDiv.innerHTML = `<button id='saveEditCustomerBtn'>Spara</button> <button id='cancelEditCustomerBtn'>Tillbaka</button>`;
         list.appendChild(btnDiv);
         document.getElementById('saveEditCustomerBtn').onclick = function() {
             const newName = document.getElementById('editCustomerName').value.trim();
