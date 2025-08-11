@@ -17,11 +17,11 @@
         <main>
             <section id="customerSelect" class="active">
                 <h2>Välj kund</h2>
-                <form id="addCustomerForm">
+                <div id="customerList"></div>
+                <form id="addCustomerForm" style="margin-top:24px;">
                     <input type="text" id="customerName" placeholder="Ny kund" required>
                     <button type="submit">Spara kund</button>
                 </form>
-                <div id="customerList"></div>
             </section>
             <section id="start" class="hidden">
                 <h2 id="currentCustomerHeader"></h2>
@@ -44,6 +44,7 @@
                 <h2>Lägg till produkt</h2>
                 <form id="addProductForm">
                     <input type="text" id="benamning" placeholder="Benämning" required>
+                    <input type="text" id="produktnummer" placeholder="Produktnummer" required style="margin-top:8px;">
                     <input type="number" id="lagerAntal" placeholder="Lager antal" required>
                     <button type="submit">Spara</button>
                 </form>
