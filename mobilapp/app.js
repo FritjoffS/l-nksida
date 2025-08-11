@@ -220,11 +220,19 @@ function showOrderDetails(orderKey) {
     db.ref(`kunder/${currentCustomer.id}/bestallningar/${orderKey}`).once('value', snapshot => {
         const order = snapshot.val();
         if(order && order.bestallning) {
-            for(const key in order.bestallning) {
-                const li = document.createElement('li');
-                li.textContent = `${key}: ${order.bestallning[key]}`;
-                orderDetailsList.appendChild(li);
-            }
+            // Hämta produktnamn för varje id
+            db.ref(`kunder/${currentCustomer.id}/produkter`).once('value', prodSnap => {
+                const prodMap = {};
+                prodSnap.forEach(prodChild => {
+                    prodMap[prodChild.key] = prodChild.val().benamning;
+                });
+                for(const key in order.bestallning) {
+                    const li = document.createElement('li');
+                    const namn = prodMap[key] || key;
+                    li.textContent = `${namn}: ${order.bestallning[key]}`;
+                    orderDetailsList.appendChild(li);
+                }
+            });
         }
     });
 }
