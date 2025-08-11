@@ -21,7 +21,42 @@ function showPage(page) {
     const selected = document.getElementById(page);
     selected.classList.remove('hidden');
     selected.classList.add('active');
-    if(page === 'lager') loadProducts();
+    if(page === 'lager') {
+        // Fråga om godsmottagare om det finns
+        if(currentCustomer) {
+            db.ref('kunder/' + currentCustomer.id + '/godsmottagare').once('value', snap => {
+                if(snap.exists()) {
+                    // Visa dialog för val av godsmottagare
+                    const recipients = [];
+                    snap.forEach(child => {
+                        recipients.push({ key: child.key, namn: child.val().namn });
+                    });
+                    let html = '<div id="recipientDialog" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:9999;">';
+                    html += '<div style="background:#fff;padding:24px;border-radius:12px;max-width:320px;width:90vw;box-shadow:0 2px 8px rgba(0,0,0,0.15);">';
+                    html += '<h3>Välj godsmottagare för lager</h3>';
+                    recipients.forEach(rec => {
+                        html += `<button style='width:100%;margin:8px 0;' onclick='window.selectRecipientForLager("${rec.key}")'>${rec.namn}</button>`;
+                    });
+                    html += `<button style='width:100%;margin-top:12px;' onclick='window.cancelRecipientDialog()'>Avbryt</button>`;
+                    html += '</div></div>';
+                    document.body.insertAdjacentHTML('beforeend', html);
+                    window.selectRecipientForLager = function(recipientKey) {
+                        document.getElementById('recipientDialog').remove();
+                        window.selectedRecipientForLager = recipientKey;
+                        loadProducts(recipientKey);
+                    };
+                    window.cancelRecipientDialog = function() {
+                        document.getElementById('recipientDialog').remove();
+                    };
+                    return;
+                } else {
+                    loadProducts();
+                }
+            });
+        } else {
+            loadProducts();
+        }
+    }
     if(page === 'order') {
         // Fråga om godsmottagare om det finns
         if(currentCustomer) {
@@ -66,7 +101,43 @@ function showPage(page) {
         loadCustomers();
     }
     if(page === 'orders') {
-        loadOrderHistory();
+        // Fråga om godsmottagare om det finns, precis som för order-sidan
+        if(currentCustomer) {
+            db.ref('kunder/' + currentCustomer.id + '/godsmottagare').once('value', snap => {
+                if(snap.exists()) {
+                    // Visa dialog för val av godsmottagare
+                    const recipients = [];
+                    snap.forEach(child => {
+                        recipients.push({ key: child.key, namn: child.val().namn });
+                    });
+                    let html = '<div id="recipientDialogOrders" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:9999;">';
+                    html += '<div style="background:#fff;padding:24px;border-radius:12px;max-width:320px;width:90vw;box-shadow:0 2px 8px rgba(0,0,0,0.15);">';
+                    html += '<h3>Välj godsmottagare för orderhistorik</h3>';
+                    recipients.forEach(rec => {
+                        html += `<button style='width:100%;margin:8px 0;' onclick='window.selectRecipientForOrders("${rec.key}")'>${rec.namn}</button>`;
+                    });
+                    html += `<button style='width:100%;margin:8px 0;' onclick='window.selectRecipientForOrders(null)'>Visa huvudkundens beställningar</button>`;
+                    html += `<button style='width:100%;margin-top:12px;' onclick='window.cancelRecipientDialogOrders()'>Avbryt</button>`;
+                    html += '</div></div>';
+                    document.body.insertAdjacentHTML('beforeend', html);
+                    window.selectRecipientForOrders = function(recipientKey) {
+                        document.getElementById('recipientDialogOrders').remove();
+                        window.selectedRecipientForOrder = recipientKey;
+                        loadOrderHistory();
+                    };
+                    window.cancelRecipientDialogOrders = function() {
+                        document.getElementById('recipientDialogOrders').remove();
+                        showPage('start');
+                    };
+                } else {
+                    // Ingen godsmottagare finns, ladda huvudkundens orderhistorik
+                    window.selectedRecipientForOrder = null;
+                    loadOrderHistory();
+                }
+            });
+        } else {
+            loadOrderHistory();
+        }
     }
     if(page === 'orderDetails') {
         // laddas via showOrderDetails
@@ -83,20 +154,30 @@ if(addProductForm) {
         const lagerAntal = parseInt(document.getElementById('lagerAntal').value);
         if(benamning && produktnummer && !isNaN(lagerAntal)) {
             if(!currentCustomer) return;
-            const newRef = db.ref(`kunder/${currentCustomer.id}/produkter`).push();
-            newRef.set({ benamning, produktnummer, lagerAntal });
+            // Spara produkten under vald godsmottagare om en är vald
+            if(window.selectedRecipientForLager) {
+                const newRef = db.ref(`kunder/${currentCustomer.id}/godsmottagare/${window.selectedRecipientForLager}/produkter`).push();
+                newRef.set({ benamning, produktnummer, lagerAntal });
+            } else {
+                const newRef = db.ref(`kunder/${currentCustomer.id}/produkter`).push();
+                newRef.set({ benamning, produktnummer, lagerAntal });
+            }
             addProductForm.reset();
-            loadProducts();
+            loadProducts(window.selectedRecipientForLager);
         }
     });
 }
 
-function loadProducts() {
+function loadProducts(recipientKey) {
     const productList = document.getElementById('productList');
     productList.innerHTML = '';
     if(!currentCustomer) return;
     let products = [];
-    db.ref(`kunder/${currentCustomer.id}/produkter`).once('value', snapshot => {
+    // Läs produkter från vald godsmottagare eller från kundens produkter
+    const path = recipientKey ? 
+        `kunder/${currentCustomer.id}/godsmottagare/${recipientKey}/produkter` : 
+        `kunder/${currentCustomer.id}/produkter`;
+    db.ref(path).once('value', snapshot => {
         snapshot.forEach(child => {
             const prod = child.val();
             products.push({ key: child.key, benamning: prod.benamning, produktnummer: prod.produktnummer, lagerAntal: prod.lagerAntal });
@@ -114,6 +195,8 @@ function loadProducts() {
             `<button onclick='deleteSelectedProduct()'>Radera vald</button>`;
         productList.appendChild(btnDiv);
     });
+    // Spara vald godsmottagare för lager
+    window.selectedRecipientForLager = recipientKey || null;
 }
 
 function getSelectedProductKey() {
@@ -124,7 +207,10 @@ function getSelectedProductKey() {
 function editSelectedProduct() {
     const key = getSelectedProductKey();
     if(!key || !currentCustomer) return;
-    db.ref(`kunder/${currentCustomer.id}/produkter/${key}`).once('value', snapshot => {
+    const path = window.selectedRecipientForLager ? 
+        `kunder/${currentCustomer.id}/godsmottagare/${window.selectedRecipientForLager}/produkter/${key}` : 
+        `kunder/${currentCustomer.id}/produkter/${key}`;
+    db.ref(path).once('value', snapshot => {
         const prod = snapshot.val();
         if(!prod) return;
         const productList = document.getElementById('productList');
@@ -151,7 +237,7 @@ function editSelectedProduct() {
         const btnDiv = document.createElement('div');
         btnDiv.style.marginTop = '16px';
         btnDiv.innerHTML = `<button onclick="saveProductEdit('${key}')">Spara</button> ` +
-            `<button onclick="loadProducts()">Avbryt</button>`;
+            `<button onclick="loadProducts(window.selectedRecipientForLager)">Avbryt</button>`;
         productList.appendChild(btnDiv);
     });
 }
@@ -161,7 +247,10 @@ function saveProductEdit(key) {
     const produktnummer = document.getElementById('editProduktnummer').value.trim();
     const lagerAntal = parseInt(document.getElementById('editAntal').value);
     if(benamning && produktnummer && !isNaN(lagerAntal) && currentCustomer) {
-        db.ref(`kunder/${currentCustomer.id}/produkter/${key}`).set({ benamning, produktnummer, lagerAntal }, function() {
+        const path = window.selectedRecipientForLager ? 
+            `kunder/${currentCustomer.id}/godsmottagare/${window.selectedRecipientForLager}/produkter/${key}` : 
+            `kunder/${currentCustomer.id}/produkter/${key}`;
+        db.ref(path).set({ benamning, produktnummer, lagerAntal }, function() {
             showPage('lager');
         });
     }
@@ -170,7 +259,10 @@ function saveProductEdit(key) {
 function deleteSelectedProduct() {
     const key = getSelectedProductKey();
     if(key && currentCustomer) {
-        db.ref(`kunder/${currentCustomer.id}/produkter/${key}`).remove().then(loadProducts);
+        const path = window.selectedRecipientForLager ? 
+            `kunder/${currentCustomer.id}/godsmottagare/${window.selectedRecipientForLager}/produkter/${key}` : 
+            `kunder/${currentCustomer.id}/produkter/${key}`;
+        db.ref(path).remove().then(() => loadProducts(window.selectedRecipientForLager));
     }
 }
 
@@ -178,7 +270,11 @@ function loadOrder(recipientKey) {
     const orderList = document.getElementById('orderList');
     orderList.innerHTML = '';
     if(!currentCustomer) return;
-    db.ref(`kunder/${currentCustomer.id}/produkter`).once('value', snapshot => {
+    // Läs produkter från vald godsmottagare eller från kundens produkter
+    const path = recipientKey ? 
+        `kunder/${currentCustomer.id}/godsmottagare/${recipientKey}/produkter` : 
+        `kunder/${currentCustomer.id}/produkter`;
+    db.ref(path).once('value', snapshot => {
         snapshot.forEach(child => {
             const prod = child.val();
             const li = document.createElement('li');
@@ -264,28 +360,53 @@ function loadOrderHistory() {
     const orderHistoryList = document.getElementById('orderHistoryList');
     orderHistoryList.innerHTML = '';
     if(!currentCustomer) return;
-    db.ref(`kunder/${currentCustomer.id}/bestallningar`).once('value', snapshot => {
-        snapshot.forEach(child => {
-            const order = child.val();
-            const li = document.createElement('li');
-            // Visa datum och tid, gör raden klickbar
-            const date = new Date(order.tid);
-            li.innerHTML = `<button style='width:100%;text-align:left;' onclick="showOrderDetails('${child.key}')">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</button>`;
-            orderHistoryList.appendChild(li);
+    
+    // Läs beställningar från vald godsmottagare om en är vald
+    if(window.selectedRecipientForOrder) {
+        db.ref(`kunder/${currentCustomer.id}/godsmottagare/${window.selectedRecipientForOrder}/bestallningar`).once('value', snapshot => {
+            snapshot.forEach(child => {
+                const order = child.val();
+                const li = document.createElement('li');
+                // Visa datum och tid, gör raden klickbar
+                const date = new Date(order.tid);
+                li.innerHTML = `<button style='width:100%;text-align:left;' onclick="showOrderDetails('${child.key}', '${window.selectedRecipientForOrder}')">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</button>`;
+                orderHistoryList.appendChild(li);
+            });
         });
-    });
+    } else {
+        db.ref(`kunder/${currentCustomer.id}/bestallningar`).once('value', snapshot => {
+            snapshot.forEach(child => {
+                const order = child.val();
+                const li = document.createElement('li');
+                // Visa datum och tid, gör raden klickbar
+                const date = new Date(order.tid);
+                li.innerHTML = `<button style='width:100%;text-align:left;' onclick="showOrderDetails('${child.key}')">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</button>`;
+                orderHistoryList.appendChild(li);
+            });
+        });
+    }
 }
 
-function showOrderDetails(orderKey) {
+function showOrderDetails(orderKey, recipientKey) {
     showPage('orderDetails');
     const orderDetailsList = document.getElementById('orderDetailsList');
     orderDetailsList.innerHTML = '';
     if(!currentCustomer || !orderKey) return;
-    db.ref(`kunder/${currentCustomer.id}/bestallningar/${orderKey}`).once('value', snapshot => {
+    
+    // Läs orderdetaljer från rätt plats (godsmottagare eller huvudkund)
+    const orderPath = recipientKey ? 
+        `kunder/${currentCustomer.id}/godsmottagare/${recipientKey}/bestallningar/${orderKey}` :
+        `kunder/${currentCustomer.id}/bestallningar/${orderKey}`;
+        
+    db.ref(orderPath).once('value', snapshot => {
         const order = snapshot.val();
         if(order && order.bestallning) {
-            // Hämta produktnamn för varje id
-            db.ref(`kunder/${currentCustomer.id}/produkter`).once('value', prodSnap => {
+            // Hämta produktnamn från rätt plats (godsmottagare eller huvudkund)
+            const productPath = recipientKey ?
+                `kunder/${currentCustomer.id}/godsmottagare/${recipientKey}/produkter` :
+                `kunder/${currentCustomer.id}/produkter`;
+                
+            db.ref(productPath).once('value', prodSnap => {
                 const prodMap = {};
                 prodSnap.forEach(prodChild => {
                     prodMap[prodChild.key] = prodChild.val().benamning;
