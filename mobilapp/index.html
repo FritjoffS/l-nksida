@@ -18,10 +18,16 @@
             <section id="customerSelect" class="active">
                 <h2>Välj kund</h2>
                 <div id="customerList"></div>
+                    <button id="manageCustomersBtn" style="margin-top:12px;">Hantera kunder</button>
+            </section>
+            <section id="manageCustomers" class="hidden">
+                <h2>Hantera kunder</h2>
+                <ul id="manageCustomerList"></ul>
                 <form id="addCustomerForm" style="margin-top:24px;">
                     <input type="text" id="customerName" placeholder="Ny kund" required>
                     <button type="submit">Spara kund</button>
                 </form>
+                <button onclick="showPage('customerSelect')">Tillbaka</button>
             </section>
             <section id="start" class="hidden">
                 <h2 id="currentCustomerHeader"></h2>
