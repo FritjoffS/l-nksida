@@ -25,7 +25,7 @@ function showPage(page) {
     if(page === 'order') loadOrder();
     if(page === 'start') {
         const header = document.getElementById('currentCustomerHeader');
-        header.textContent = currentCustomer ? `Kund: ${currentCustomer.name}` : '';
+        header.textContent = currentCustomer ? `${currentCustomer.name}` : '';
     }
     if(page === 'customerSelect') {
         loadCustomers();
