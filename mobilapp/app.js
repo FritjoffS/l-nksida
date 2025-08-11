@@ -255,3 +255,36 @@ function showOrderDetails(orderKey) {
 
 // Starta med kundvalssidan
 showPage('customerSelect');
+
+// Hantera kunder-knapp
+document.addEventListener('DOMContentLoaded', function() {
+    const manageBtn = document.getElementById('manageCustomersBtn');
+    if(manageBtn) {
+        manageBtn.onclick = function() {
+            showPage('manageCustomers');
+            loadManageCustomers();
+        };
+    }
+});
+
+// Funktion för att ladda kunder till hantera-kunder-sidan
+function loadManageCustomers() {
+    const list = document.getElementById('manageCustomerList');
+    if(!list) return;
+    list.innerHTML = '';
+    db.ref('kunder').once('value', snapshot => {
+        snapshot.forEach(child => {
+            const kund = child.val();
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${kund.name}</span> <button onclick="deleteCustomer('${child.key}')">Radera</button>`;
+            list.appendChild(li);
+        });
+    });
+}
+
+// Funktion för att radera kund
+function deleteCustomer(key) {
+    if(confirm('Vill du verkligen radera denna kund?')) {
+        db.ref('kunder/' + key).remove().then(loadManageCustomers);
+    }
+}
