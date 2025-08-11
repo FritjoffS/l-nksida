@@ -44,11 +44,12 @@ if(addProductForm) {
     addProductForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const benamning = document.getElementById('benamning').value.trim();
+        const produktnummer = document.getElementById('produktnummer').value.trim();
         const lagerAntal = parseInt(document.getElementById('lagerAntal').value);
-        if(benamning && !isNaN(lagerAntal)) {
+        if(benamning && produktnummer && !isNaN(lagerAntal)) {
             if(!currentCustomer) return;
             const newRef = db.ref(`kunder/${currentCustomer.id}/produkter`).push();
-            newRef.set({ benamning, lagerAntal });
+            newRef.set({ benamning, produktnummer, lagerAntal });
             addProductForm.reset();
             loadProducts();
         }
@@ -63,12 +64,12 @@ function loadProducts() {
     db.ref(`kunder/${currentCustomer.id}/produkter`).once('value', snapshot => {
         snapshot.forEach(child => {
             const prod = child.val();
-            products.push({ key: child.key, benamning: prod.benamning, lagerAntal: prod.lagerAntal });
+            products.push({ key: child.key, benamning: prod.benamning, produktnummer: prod.produktnummer, lagerAntal: prod.lagerAntal });
         });
         products.forEach((prod, idx) => {
             const li = document.createElement('li');
-            li.innerHTML = `<input type='radio' name='productSelect' id='productSelect${idx}' value='${prod.key}'> ` +
-                `<label for='productSelect${idx}'>${prod.benamning} (${prod.lagerAntal})</label>`;
+            li.innerHTML = `<label for='productSelect${idx}'>${prod.benamning} (${prod.lagerAntal})<br><span style='font-size:0.9em;color:#555;'>Produktnummer: ${prod.produktnummer || ''}</span></label> ` +
+                `<input type='radio' name='productSelect' id='productSelect${idx}' value='${prod.key}' style='float:right;'>`;
             productList.appendChild(li);
         });
         // Lägg till knappar under listan
@@ -93,8 +94,22 @@ function editSelectedProduct() {
         if(!prod) return;
         const productList = document.getElementById('productList');
         const li = document.createElement('li');
-        li.innerHTML = `<input type='text' id='editBenamning' value='${prod.benamning}'> ` +
-            `<input type='number' id='editAntal' value='${prod.lagerAntal}'>`;
+        li.innerHTML = `
+            <div style='display:flex; margin-bottom:8px; gap:8px;'>
+                <div style='flex:1;'>
+                    <label for='editBenamning'>Benämning:</label><br>
+                    <input type='text' id='editBenamning' value='${prod.benamning}' style='width:100%;'>
+                </div>
+                <div style='width:100px;'>
+                    <label for='editAntal'>Antal:</label><br>
+                    <input type='number' id='editAntal' value='${prod.lagerAntal}' style='width:100%;'>
+                </div>
+            </div>
+            <div style='margin-bottom:8px;'>
+                <label for='editProduktnummer'>Produktnummer:</label><br>
+                <input type='text' id='editProduktnummer' value='${prod.produktnummer || ''}' style='width:100%;'>
+            </div>
+        `;
         productList.innerHTML = '';
         productList.appendChild(li);
         // Knappar under raden
@@ -108,9 +123,10 @@ function editSelectedProduct() {
 
 function saveProductEdit(key) {
     const benamning = document.getElementById('editBenamning').value.trim();
+    const produktnummer = document.getElementById('editProduktnummer').value.trim();
     const lagerAntal = parseInt(document.getElementById('editAntal').value);
-    if(benamning && !isNaN(lagerAntal) && currentCustomer) {
-        db.ref(`kunder/${currentCustomer.id}/produkter/${key}`).set({ benamning, lagerAntal }, function() {
+    if(benamning && produktnummer && !isNaN(lagerAntal) && currentCustomer) {
+        db.ref(`kunder/${currentCustomer.id}/produkter/${key}`).set({ benamning, produktnummer, lagerAntal }, function() {
             showPage('lager');
         });
     }
