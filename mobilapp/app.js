@@ -4,7 +4,7 @@ const firebaseConfig = {
   authDomain: "jarnhandelio.firebaseapp.com",
   databaseURL: "https://jarnhandelio-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "jarnhandelio",
-  storageBucket: "jarnhandelio.firebasestorage.app",
+  storageBucket: "jarnhandelio.appspot.com",
   messagingSenderId: "179988070152",
   appId: "1:179988070152:web:6fb2614625b929f74176bd",
   measurementId: "G-78S8WQVN0N"
