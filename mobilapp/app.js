@@ -22,6 +22,11 @@ function showPage(page) {
     selected.classList.remove('hidden');
     selected.classList.add('active');
     if(page === 'lager') {
+        // Visa aktuell kund
+        const customerDisplay = document.getElementById('currentCustomerLager');
+        if(customerDisplay) {
+            customerDisplay.textContent = currentCustomer ? `${currentCustomer.name}` : '';
+        }
         // Fråga om godsmottagare om det finns
         if(currentCustomer) {
             db.ref('kunder/' + currentCustomer.id + '/godsmottagare').once('value', snap => {
@@ -31,33 +36,47 @@ function showPage(page) {
                     snap.forEach(child => {
                         recipients.push({ key: child.key, namn: child.val().namn });
                     });
-                    let html = '<div id="recipientDialog" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:9999;">';
+                    let html = '<div id="recipientDialogLager" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:9999;">';
                     html += '<div style="background:#fff;padding:24px;border-radius:12px;max-width:320px;width:90vw;box-shadow:0 2px 8px rgba(0,0,0,0.15);">';
                     html += '<h3>Välj godsmottagare för lager</h3>';
                     recipients.forEach(rec => {
                         html += `<button style='width:100%;margin:8px 0;' onclick='window.selectRecipientForLager("${rec.key}")'>${rec.namn}</button>`;
                     });
-                    html += `<button style='width:100%;margin-top:12px;' onclick='window.cancelRecipientDialog()'>Avbryt</button>`;
+                    html += `<button style='width:100%;margin-top:12px;' onclick='window.cancelRecipientDialogLager()'>Avbryt</button>`;
                     html += '</div></div>';
                     document.body.insertAdjacentHTML('beforeend', html);
                     window.selectRecipientForLager = function(recipientKey) {
-                        document.getElementById('recipientDialog').remove();
+                        document.getElementById('recipientDialogLager').remove();
                         window.selectedRecipientForLager = recipientKey;
+                        // Uppdatera visning av vald godsmottagare
+                        updateRecipientDisplay('lager', recipientKey);
                         loadProducts(recipientKey);
                     };
-                    window.cancelRecipientDialog = function() {
-                        document.getElementById('recipientDialog').remove();
+                    window.cancelRecipientDialogLager = function() {
+                        document.getElementById('recipientDialogLager').remove();
+                        showPage('start');
                     };
                     return;
                 } else {
+                    // Ingen godsmottagare finns, använd huvudkund
+                    window.selectedRecipientForLager = null;
+                    updateRecipientDisplay('lager', null);
                     loadProducts();
                 }
             });
         } else {
+            // Ingen godsmottagare finns, använd huvudkund
+            window.selectedRecipientForLager = null;
+            updateRecipientDisplay('lager', null);
             loadProducts();
         }
     }
     if(page === 'order') {
+        // Visa aktuell kund
+        const customerDisplay = document.getElementById('currentCustomerOrder');
+        if(customerDisplay) {
+            customerDisplay.textContent = currentCustomer ? `${currentCustomer.name}` : '';
+        }
         // Fråga om godsmottagare om det finns
         if(currentCustomer) {
             db.ref('kunder/' + currentCustomer.id + '/godsmottagare').once('value', snap => {
@@ -67,29 +86,38 @@ function showPage(page) {
                     snap.forEach(child => {
                         recipients.push({ key: child.key, namn: child.val().namn });
                     });
-                    let html = '<div id="recipientDialog" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:9999;">';
+                    let html = '<div id="recipientDialogOrder" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:9999;">';
                     html += '<div style="background:#fff;padding:24px;border-radius:12px;max-width:320px;width:90vw;box-shadow:0 2px 8px rgba(0,0,0,0.15);">';
                     html += '<h3>Välj godsmottagare för order</h3>';
                     recipients.forEach(rec => {
                         html += `<button style='width:100%;margin:8px 0;' onclick='window.selectRecipientForOrder("${rec.key}")'>${rec.namn}</button>`;
                     });
-                    html += `<button style='width:100%;margin-top:12px;' onclick='window.cancelRecipientDialog()'>Avbryt</button>`;
+                    html += `<button style='width:100%;margin-top:12px;' onclick='window.cancelRecipientDialogOrder()'>Avbryt</button>`;
                     html += '</div></div>';
                     document.body.insertAdjacentHTML('beforeend', html);
                     window.selectRecipientForOrder = function(recipientKey) {
-                        document.getElementById('recipientDialog').remove();
+                        document.getElementById('recipientDialogOrder').remove();
                         window.selectedRecipientForOrder = recipientKey;
+                        // Uppdatera visning av vald godsmottagare
+                        updateRecipientDisplay('order', recipientKey);
                         loadOrder(recipientKey);
                     };
-                    window.cancelRecipientDialog = function() {
-                        document.getElementById('recipientDialog').remove();
+                    window.cancelRecipientDialogOrder = function() {
+                        document.getElementById('recipientDialogOrder').remove();
+                        showPage('start');
                     };
                     return;
                 } else {
+                    // Ingen godsmottagare finns, använd huvudkund
+                    window.selectedRecipientForOrder = null;
+                    updateRecipientDisplay('order', null);
                     loadOrder();
                 }
             });
         } else {
+            // Ingen godsmottagare finns, använd huvudkund
+            window.selectedRecipientForOrder = null;
+            updateRecipientDisplay('order', null);
             loadOrder();
         }
     }
@@ -101,6 +129,11 @@ function showPage(page) {
         loadCustomers();
     }
     if(page === 'orders') {
+        // Visa aktuell kund
+        const customerDisplay = document.getElementById('currentCustomerOrders');
+        if(customerDisplay) {
+            customerDisplay.textContent = currentCustomer ? `${currentCustomer.name}` : '';
+        }
         // Fråga om godsmottagare om det finns, precis som för order-sidan
         if(currentCustomer) {
             db.ref('kunder/' + currentCustomer.id + '/godsmottagare').once('value', snap => {
@@ -680,4 +713,29 @@ function editSelectedManageCustomer_bypass(customerKey) {
         };
     });
     }
+
+// Funktion för att uppdatera visning av vald godsmottagare
+function updateRecipientDisplay(pageType, recipientKey) {
+    const displayElement = document.getElementById(`currentRecipient${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`);
+    if(!displayElement || !currentCustomer) {
+        if(displayElement) displayElement.textContent = '';
+        return;
+    }
+    
+    if(!recipientKey) {
+        // Ingen godsmottagare vald, visa huvudkund
+        displayElement.textContent = 'Godsmottagare: Huvudkund';
+        return;
+    }
+    
+    // Hämta godsmottagarens namn från databasen
+    db.ref(`kunder/${currentCustomer.id}/godsmottagare/${recipientKey}`).once('value', snapshot => {
+        const recipient = snapshot.val();
+        if(recipient && recipient.namn) {
+            displayElement.textContent = `Godsmottagare: ${recipient.namn}`;
+        } else {
+            displayElement.textContent = 'Godsmottagare: Huvudkund';
+        }
+    });
+}
 
