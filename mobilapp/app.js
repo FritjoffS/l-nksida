@@ -22,7 +22,7 @@ function showPage(page) {
     selected.classList.remove('hidden');
     selected.classList.add('active');
     if(page === 'lager') loadProducts();
-    if(page === 'inventering') loadInventory();
+    if(page === 'order') loadOrder();
     if(page === 'start') {
         const header = document.getElementById('currentCustomerHeader');
         header.textContent = currentCustomer ? `Kund: ${currentCustomer.name}` : '';
@@ -32,6 +32,9 @@ function showPage(page) {
     }
     if(page === 'orders') {
         loadOrderHistory();
+    }
+    if(page === 'orderDetails') {
+        // laddas via showOrderDetails
     }
 }
 
@@ -91,12 +94,26 @@ function editSelectedProduct() {
         const productList = document.getElementById('productList');
         const li = document.createElement('li');
         li.innerHTML = `<input type='text' id='editBenamning' value='${prod.benamning}'> ` +
-            `<input type='number' id='editAntal' value='${prod.lagerAntal}'> ` +
-            `<button onclick="saveProductEdit('${key}')">Spara</button> ` +
-            `<button onclick="loadProducts()">Avbryt</button>`;
+            `<input type='number' id='editAntal' value='${prod.lagerAntal}'>`;
         productList.innerHTML = '';
         productList.appendChild(li);
+        // Knappar under raden
+        const btnDiv = document.createElement('div');
+        btnDiv.style.marginTop = '16px';
+        btnDiv.innerHTML = `<button onclick="saveProductEdit('${key}')">Spara</button> ` +
+            `<button onclick="loadProducts()">Avbryt</button>`;
+        productList.appendChild(btnDiv);
     });
+}
+
+function saveProductEdit(key) {
+    const benamning = document.getElementById('editBenamning').value.trim();
+    const lagerAntal = parseInt(document.getElementById('editAntal').value);
+    if(benamning && !isNaN(lagerAntal) && currentCustomer) {
+        db.ref(`kunder/${currentCustomer.id}/produkter/${key}`).set({ benamning, lagerAntal }, function() {
+            showPage('lager');
+        });
+    }
 }
 
 function deleteSelectedProduct() {
@@ -106,10 +123,9 @@ function deleteSelectedProduct() {
     }
 }
 
-// Inventering: Lista produkter och beställning
-function loadInventory() {
-    const inventoryList = document.getElementById('inventoryList');
-    inventoryList.innerHTML = '';
+function loadOrder() {
+    const orderList = document.getElementById('orderList');
+    orderList.innerHTML = '';
     if(!currentCustomer) return;
     db.ref(`kunder/${currentCustomer.id}/produkter`).once('value', snapshot => {
         snapshot.forEach(child => {
@@ -117,7 +133,7 @@ function loadInventory() {
             const li = document.createElement('li');
             li.innerHTML = `<span>${prod.benamning} (${prod.lagerAntal})</span>
                 <input type='number' min='0' placeholder='Beställ antal' data-key='${child.key}' style='width:80px;'>`;
-            inventoryList.appendChild(li);
+            orderList.appendChild(li);
         });
     });
 }
@@ -188,13 +204,28 @@ function loadOrderHistory() {
         snapshot.forEach(child => {
             const order = child.val();
             const li = document.createElement('li');
-            let items = '';
-            for(const key in order.bestallning) {
-                items += `${key}: ${order.bestallning[key]}, `;
-            }
-            li.textContent = `${order.tid}: ${items.slice(0, -2)}`;
+            // Visa datum och tid, gör raden klickbar
+            const date = new Date(order.tid);
+            li.innerHTML = `<button style='width:100%;text-align:left;' onclick="showOrderDetails('${child.key}')">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</button>`;
             orderHistoryList.appendChild(li);
         });
+    });
+}
+
+function showOrderDetails(orderKey) {
+    showPage('orderDetails');
+    const orderDetailsList = document.getElementById('orderDetailsList');
+    orderDetailsList.innerHTML = '';
+    if(!currentCustomer || !orderKey) return;
+    db.ref(`kunder/${currentCustomer.id}/bestallningar/${orderKey}`).once('value', snapshot => {
+        const order = snapshot.val();
+        if(order && order.bestallning) {
+            for(const key in order.bestallning) {
+                const li = document.createElement('li');
+                li.textContent = `${key}: ${order.bestallning[key]}`;
+                orderDetailsList.appendChild(li);
+            }
+        }
     });
 }
 
