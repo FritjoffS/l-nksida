@@ -56,39 +56,52 @@ function loadProducts() {
     const productList = document.getElementById('productList');
     productList.innerHTML = '';
     if(!currentCustomer) return;
+    let products = [];
     db.ref(`kunder/${currentCustomer.id}/produkter`).once('value', snapshot => {
         snapshot.forEach(child => {
             const prod = child.val();
+            products.push({ key: child.key, benamning: prod.benamning, lagerAntal: prod.lagerAntal });
+        });
+        products.forEach((prod, idx) => {
             const li = document.createElement('li');
-            li.innerHTML = `<span>${prod.benamning} (${prod.lagerAntal})</span> ` +
-                `<button onclick="editProduct('${child.key}', '${prod.benamning}', ${prod.lagerAntal})">Redigera</button> ` +
-                `<button onclick="deleteProduct('${child.key}')">Radera</button>`;
+            li.innerHTML = `<input type='radio' name='productSelect' id='productSelect${idx}' value='${prod.key}'> ` +
+                `<label for='productSelect${idx}'>${prod.benamning} (${prod.lagerAntal})</label>`;
             productList.appendChild(li);
         });
+        // Lägg till knappar under listan
+        const btnDiv = document.createElement('div');
+        btnDiv.style.marginTop = '16px';
+        btnDiv.innerHTML = `<button onclick='editSelectedProduct()'>Redigera vald</button> ` +
+            `<button onclick='deleteSelectedProduct()'>Radera vald</button>`;
+        productList.appendChild(btnDiv);
     });
 }
 
-function editProduct(key, benamning, lagerAntal) {
-    const productList = document.getElementById('productList');
-    const li = document.createElement('li');
-    li.innerHTML = `<input type='text' id='editBenamning' value='${benamning}'> ` +
-        `<input type='number' id='editAntal' value='${lagerAntal}'> ` +
-        `<button onclick="saveProductEdit('${key}')">Spara</button> ` +
-        `<button onclick="loadProducts()">Avbryt</button>`;
-    productList.innerHTML = '';
-    productList.appendChild(li);
+function getSelectedProductKey() {
+    const selected = document.querySelector('input[name="productSelect"]:checked');
+    return selected ? selected.value : null;
 }
 
-function saveProductEdit(key) {
-    const benamning = document.getElementById('editBenamning').value.trim();
-    const lagerAntal = parseInt(document.getElementById('editAntal').value);
-    if(benamning && !isNaN(lagerAntal) && currentCustomer) {
-        db.ref(`kunder/${currentCustomer.id}/produkter/${key}`).set({ benamning, lagerAntal }, loadProducts);
-    }
+function editSelectedProduct() {
+    const key = getSelectedProductKey();
+    if(!key || !currentCustomer) return;
+    db.ref(`kunder/${currentCustomer.id}/produkter/${key}`).once('value', snapshot => {
+        const prod = snapshot.val();
+        if(!prod) return;
+        const productList = document.getElementById('productList');
+        const li = document.createElement('li');
+        li.innerHTML = `<input type='text' id='editBenamning' value='${prod.benamning}'> ` +
+            `<input type='number' id='editAntal' value='${prod.lagerAntal}'> ` +
+            `<button onclick="saveProductEdit('${key}')">Spara</button> ` +
+            `<button onclick="loadProducts()">Avbryt</button>`;
+        productList.innerHTML = '';
+        productList.appendChild(li);
+    });
 }
 
-function deleteProduct(key) {
-    if(currentCustomer) {
+function deleteSelectedProduct() {
+    const key = getSelectedProductKey();
+    if(key && currentCustomer) {
         db.ref(`kunder/${currentCustomer.id}/produkter/${key}`).remove().then(loadProducts);
     }
 }
