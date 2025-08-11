@@ -840,3 +840,154 @@ function updateRecipientDisplay(pageType, recipientKey) {
     });
 }
 
+// =========================
+// STRECKKODSLÄSNING
+// =========================
+
+let barcodeScanner = {
+    isScanning: false,
+    currentTarget: null // 'lager' eller 'order'
+};
+
+// Funktion för att starta streckkodsläsning
+function startBarcodeScanning(target, containerId) {
+    if (barcodeScanner.isScanning) {
+        stopBarcodeScanning();
+    }
+    
+    barcodeScanner.currentTarget = target;
+    barcodeScanner.isScanning = true;
+    
+    const container = document.getElementById(containerId);
+    container.style.display = 'block';
+    
+    // Kontrollera om Quagga är tillgängligt
+    if (typeof Quagga === 'undefined') {
+        alert('Streckkodsläsaren kunde inte laddas. Kontrollera internetanslutningen.');
+        return;
+    }
+    
+    Quagga.init({
+        inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: `#${target === 'lager' ? 'interactive' : 'orderInteractive'}`,
+            constraints: {
+                width: 300,
+                height: 200,
+                facingMode: "environment" // Bakre kamera
+            }
+        },
+        locator: {
+            patchSize: "medium",
+            halfSample: true
+        },
+        numOfWorkers: 2,
+        decoder: {
+            readers: [
+                "code_128_reader",
+                "ean_reader",
+                "ean_8_reader",
+                "code_39_reader",
+                "code_39_vin_reader",
+                "codabar_reader",
+                "upc_reader",
+                "upc_e_reader"
+            ]
+        },
+        locate: true
+    }, function(err) {
+        if (err) {
+            console.log(err);
+            alert('Kunde inte starta kameran. Kontrollera att du har gett tillstånd för kameraåtkomst.');
+            stopBarcodeScanning();
+            return;
+        }
+        Quagga.start();
+    });
+    
+    // Lyssna på framgångsrik läsning
+    Quagga.onDetected(function(data) {
+        const code = data.codeResult.code;
+        handleBarcodeDetected(code, target);
+        stopBarcodeScanning();
+    });
+}
+
+// Funktion för att stoppa streckkodsläsning
+function stopBarcodeScanning() {
+    if (barcodeScanner.isScanning) {
+        Quagga.stop();
+        barcodeScanner.isScanning = false;
+        
+        // Dölj scanner-containrar
+        const lagerContainer = document.getElementById('barcodeScannerContainer');
+        const orderContainer = document.getElementById('barcodeOrderScannerContainer');
+        if (lagerContainer) lagerContainer.style.display = 'none';
+        if (orderContainer) orderContainer.style.display = 'none';
+    }
+}
+
+// Funktion för att hantera detekterad streckkod
+function handleBarcodeDetected(code, target) {
+    if (target === 'lager') {
+        // För lager - fyll i produktnummer-fältet
+        const produktnummerField = document.getElementById('produktnummer');
+        if (produktnummerField) {
+            produktnummerField.value = code;
+            produktnummerField.focus();
+        }
+        alert(`Streckkod skannad: ${code}\nProduktnummer ifyllt automatiskt.`);
+    } else if (target === 'order') {
+        // För order - fyll i produktnummer-fältet
+        const manualProductNumberField = document.getElementById('manualProductNumber');
+        if (manualProductNumberField) {
+            manualProductNumberField.value = code;
+            // Fokusera på produktnamn-fältet så användaren kan fylla i det
+            const productNameField = document.getElementById('manualProductName');
+            if (productNameField) productNameField.focus();
+        }
+        alert(`Streckkod skannad: ${code}\nProduktnummer ifyllt automatiskt. Fyll i produktnamn.`);
+    }
+}
+
+// Event listeners för streckkodsläsning
+document.addEventListener('DOMContentLoaded', function() {
+    // Lager streckkodsläsning
+    const startLagerScanner = document.getElementById('startBarcodeScanner');
+    const stopLagerScanner = document.getElementById('stopBarcodeScanner');
+    
+    if (startLagerScanner) {
+        startLagerScanner.addEventListener('click', function() {
+            startBarcodeScanning('lager', 'barcodeScannerContainer');
+        });
+    }
+    
+    if (stopLagerScanner) {
+        stopLagerScanner.addEventListener('click', function() {
+            stopBarcodeScanning();
+        });
+    }
+    
+    // Order streckkodsläsning
+    const startOrderScanner = document.getElementById('startBarcodeOrderScanner');
+    const stopOrderScanner = document.getElementById('stopBarcodeOrderScanner');
+    
+    if (startOrderScanner) {
+        startOrderScanner.addEventListener('click', function() {
+            startBarcodeScanning('order', 'barcodeOrderScannerContainer');
+        });
+    }
+    
+    if (stopOrderScanner) {
+        stopOrderScanner.addEventListener('click', function() {
+            stopBarcodeScanning();
+        });
+    }
+});
+
+// Stoppa scanning när användaren lämnar sidan
+window.addEventListener('beforeunload', function() {
+    stopBarcodeScanning();
+});
+
