@@ -25,7 +25,7 @@
             </section>
             <section id="start" class="hidden">
                 <h2 id="currentCustomerHeader"></h2>
-                <button onclick="showPage('inventering')">Inventering</button>
+                <button onclick="showPage('order')">Order</button>
                 <button onclick="showPage('lager')">Lager</button>
                 <button onclick="showPage('orders')">Beställningshistorik</button>
                 <button onclick="showPage('customerSelect')">Byt kund</button>
@@ -34,6 +34,11 @@
                 <h2>Beställningshistorik</h2>
                 <ul id="orderHistoryList"></ul>
                 <button onclick="showPage('start')">Tillbaka</button>
+            </section>
+            <section id="orderDetails" class="hidden">
+                <h2>Orderdetaljer</h2>
+                <ul id="orderDetailsList"></ul>
+                <button onclick="showPage('orders')">Tillbaka</button>
             </section>
             <section id="lager" class="hidden">
                 <h2>Lägg till produkt</h2>
@@ -46,10 +51,10 @@
                 <ul id="productList"></ul>
                 <button onclick="showPage('start')">Tillbaka</button>
             </section>
-            <section id="inventering" class="hidden">
-                <h2>Inventering</h2>
+            <section id="order" class="hidden">
+                <h2>Order</h2>
                 <form id="orderForm">
-                    <ul id="inventoryList"></ul>
+                    <ul id="orderList"></ul>
                     <button type="submit">Spara beställning</button>
                 </form>
                 <button onclick="showPage('start')">Tillbaka</button>
