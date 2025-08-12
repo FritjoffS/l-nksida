@@ -43,6 +43,7 @@
             </section>
             <section id="orders" class="hidden">
                 <div id="currentCustomerOrders" style="text-align:center;margin-bottom:16px;font-weight:bold;color:#555;"></div>
+                <div id="currentRecipientOrders" style="text-align:center;margin-bottom:16px;font-style:italic;color:#777;"></div>
                 <h2>Beställningshistorik</h2>
                 <ul id="orderHistoryList"></ul>
                 <button onclick="showPage('start')">Tillbaka</button>
@@ -50,7 +51,7 @@
             <section id="orderDetails" class="hidden">
                 <h2>Orderdetaljer</h2>
                 <ul id="orderDetailsList"></ul>
-                <button onclick="showPage('orders')">Tillbaka</button>
+                <button onclick="returnToOrderHistory()">Tillbaka</button>
             </section>
             <section id="lager" class="hidden">
                 <div id="currentCustomerLager" style="text-align:center;margin-bottom:16px;font-weight:bold;color:#555;"></div>
