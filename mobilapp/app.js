@@ -163,6 +163,8 @@ function showPage(page) {
                     window.selectRecipientForOrders = function(recipientKey) {
                         document.getElementById('recipientDialogOrders').remove();
                         window.selectedRecipientForOrder = recipientKey;
+                        // Uppdatera visning av vald godsmottagare
+                        updateRecipientDisplay('orders', recipientKey);
                         loadOrderHistory();
                     };
                     window.cancelRecipientDialogOrders = function() {
@@ -172,10 +174,12 @@ function showPage(page) {
                 } else {
                     // Ingen godsmottagare finns, ladda huvudkundens orderhistorik
                     window.selectedRecipientForOrder = null;
+                    updateRecipientDisplay('orders', null);
                     loadOrderHistory();
                 }
             });
         } else {
+            updateRecipientDisplay('orders', null);
             loadOrderHistory();
         }
     }
@@ -459,6 +463,9 @@ function loadOrderHistory() {
     const orderHistoryList = document.getElementById('orderHistoryList');
     orderHistoryList.innerHTML = '';
     if(!currentCustomer) return;
+    
+    // Uppdatera visning av vald godsmottagare
+    updateRecipientDisplay('orders', window.selectedRecipientForOrder);
     
     // Läs beställningar från vald godsmottagare om en är vald
     if(window.selectedRecipientForOrder) {
@@ -1296,5 +1303,27 @@ function cancelAddNewRecipient(context) {
             }
         }, 100);
     }
+}
+
+// Funktion för att gå tillbaka till beställningshistorik utan att visa dialogen igen
+function returnToOrderHistory() {
+    // Visa orders-sidan direkt utan att köra dialogen
+    document.querySelectorAll('section').forEach(sec => {
+        sec.classList.add('hidden');
+        sec.classList.remove('active');
+    });
+    const selected = document.getElementById('orders');
+    selected.classList.remove('hidden');
+    selected.classList.add('active');
+    
+    // Visa aktuell kund
+    const customerDisplay = document.getElementById('currentCustomerOrders');
+    if(customerDisplay) {
+        customerDisplay.textContent = currentCustomer ? `${currentCustomer.name}` : '';
+    }
+    
+    // Uppdatera visning av vald godsmottagare och ladda historik
+    updateRecipientDisplay('orders', window.selectedRecipientForOrder);
+    loadOrderHistory();
 }
 
