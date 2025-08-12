@@ -1173,8 +1173,10 @@ function stopBarcodeScanning() {
         // Dölj scanner-containrar
         const lagerContainer = document.getElementById('barcodeScannerContainer');
         const orderContainer = document.getElementById('barcodeOrderScannerContainer');
+        const editContainer = document.getElementById('barcodeEditScannerContainer');
         if (lagerContainer) lagerContainer.style.display = 'none';
         if (orderContainer) orderContainer.style.display = 'none';
+        if (editContainer) editContainer.style.display = 'none';
         
         // Ta bort instruktioner
         const instructions = document.getElementById('scanning-instructions');
@@ -1210,6 +1212,15 @@ function handleBarcodeDetected(code, target) {
             if (productNameField) productNameField.focus();
         }
          //alert(`Streckkod skannad: ${code}\nProduktnummer ifyllt automatiskt. Fyll i produktnamn.`);
+    } else if (target === 'edit') {
+        // För orderredigering - fyll i produktnummer-fältet
+        const editProductNumberField = document.getElementById('editManualProductNumber');
+        if (editProductNumberField) {
+            editProductNumberField.value = code;
+            // Fokusera på produktnamn-fältet så användaren kan fylla i det
+            const editProductNameField = document.getElementById('editManualProductName');
+            if (editProductNameField) editProductNameField.focus();
+        }
     }
 }
 
@@ -1243,6 +1254,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (stopOrderScanner) {
         stopOrderScanner.addEventListener('click', function() {
+            stopBarcodeScanning();
+        });
+    }
+    
+    // Edit streckkodsläsning
+    const startEditScanner = document.getElementById('startBarcodeEditScanner');
+    const stopEditScanner = document.getElementById('stopBarcodeEditScanner');
+    
+    if (startEditScanner) {
+        startEditScanner.addEventListener('click', function() {
+            startBarcodeScanning('edit', 'barcodeEditScannerContainer');
+        });
+    }
+    
+    if (stopEditScanner) {
+        stopEditScanner.addEventListener('click', function() {
             stopBarcodeScanning();
         });
     }
@@ -1656,6 +1683,22 @@ function setupEditManualOrderForm() {
                 form.reset();
             }
         };
+        
+        // Sätt upp streckkodsläsning för edit-läge
+        const startEditScanner = document.getElementById('startBarcodeEditScanner');
+        const stopEditScanner = document.getElementById('stopBarcodeEditScanner');
+        
+        if (startEditScanner) {
+            startEditScanner.onclick = function() {
+                startBarcodeScanning('edit', 'barcodeEditScannerContainer');
+            };
+        }
+        
+        if (stopEditScanner) {
+            stopEditScanner.onclick = function() {
+                stopBarcodeScanning();
+            };
+        }
     }
 }
 
