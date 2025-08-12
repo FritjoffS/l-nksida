@@ -186,6 +186,54 @@ function showPage(page) {
     if(page === 'orderDetails') {
         // laddas via showOrderDetails
     }
+    if(page === 'notes') {
+        // Visa aktuell kund
+        const customerDisplay = document.getElementById('currentCustomerNotes');
+        if(customerDisplay) {
+            customerDisplay.textContent = currentCustomer ? `${currentCustomer.name}` : '';
+        }
+        // Fråga om godsmottagare om det finns
+        if(currentCustomer) {
+            db.ref('kunder/' + currentCustomer.id + '/godsmottagare').once('value', snap => {
+                if(snap.exists()) {
+                    // Visa dialog för val av godsmottagare
+                    const recipients = [];
+                    snap.forEach(child => {
+                        recipients.push({ key: child.key, namn: child.val().namn });
+                    });
+                    let html = '<div id="recipientDialogNotes" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:9999;">';
+                    html += '<div style="background:#fff;padding:24px;border-radius:12px;max-width:320px;width:90vw;box-shadow:0 2px 8px rgba(0,0,0,0.15);">';
+                    html += '<h3>Välj godsmottagare för anteckningar</h3>';
+                    recipients.forEach(rec => {
+                        html += `<button style='width:100%;margin:8px 0;' onclick='window.selectRecipientForNotes("${rec.key}")'>${rec.namn}</button>`;
+                    });
+                    html += `<button style='width:100%;margin:8px 0;' onclick='window.selectRecipientForNotes(null)'>Visa huvudkundens anteckningar</button>`;
+                    html += `<button style='width:100%;margin-top:12px;' onclick='window.cancelRecipientDialogNotes()'>Avbryt</button>`;
+                    html += '</div></div>';
+                    document.body.insertAdjacentHTML('beforeend', html);
+                    window.selectRecipientForNotes = function(recipientKey) {
+                        document.getElementById('recipientDialogNotes').remove();
+                        window.selectedRecipientForNotes = recipientKey;
+                        updateRecipientDisplay('notes', recipientKey);
+                        loadNotes(recipientKey);
+                    };
+                    window.cancelRecipientDialogNotes = function() {
+                        document.getElementById('recipientDialogNotes').remove();
+                        showPage('start');
+                    };
+                } else {
+                    // Ingen godsmottagare finns, använd huvudkund
+                    window.selectedRecipientForNotes = null;
+                    updateRecipientDisplay('notes', null);
+                    loadNotes();
+                }
+            });
+        } else {
+            window.selectedRecipientForNotes = null;
+            updateRecipientDisplay('notes', null);
+            loadNotes();
+        }
+    }
 }
 
 // Lager: Lägg till produkt
@@ -1376,5 +1424,99 @@ function returnToOrderHistory() {
     // Uppdatera visning av vald godsmottagare och ladda historik
     updateRecipientDisplay('orders', window.selectedRecipientForOrder);
     loadOrderHistory();
+}
+
+// ===========================
+// ANTECKNINGAR FUNKTIONER
+// ===========================
+
+// Funktion för att ladda anteckningar
+function loadNotes(recipientKey) {
+    if(!currentCustomer) return;
+    
+    // Bestäm sökväg beroende på om godsmottagare är vald
+    const path = recipientKey ? 
+        `kunder/${currentCustomer.id}/godsmottagare/${recipientKey}/anteckningar` : 
+        `kunder/${currentCustomer.id}/anteckningar`;
+    
+    // Ladda befintliga anteckningar från Firebase
+    db.ref(path).once('value', snapshot => {
+        const notes = snapshot.val();
+        const textarea = document.getElementById('notesTextarea');
+        if(textarea) {
+            textarea.value = notes || '';
+        }
+        
+        // Uppdatera status
+        const statusDiv = document.getElementById('notesSaveStatus');
+        if(statusDiv) {
+            if(notes) {
+                statusDiv.textContent = 'Anteckningar laddade';
+                statusDiv.style.color = '#4CAF50';
+            } else {
+                statusDiv.textContent = 'Inga sparade anteckningar';
+                statusDiv.style.color = '#666';
+            }
+        }
+    });
+    
+    // Spara vald godsmottagare för anteckningar
+    window.selectedRecipientForNotes = recipientKey || null;
+}
+
+// Funktion för att spara anteckningar
+function saveNotes() {
+    if(!currentCustomer) {
+        alert('Ingen kund vald.');
+        return;
+    }
+    
+    const textarea = document.getElementById('notesTextarea');
+    const notes = textarea ? textarea.value.trim() : '';
+    
+    // Bestäm sökväg beroende på om godsmottagare är vald
+    const path = window.selectedRecipientForNotes ? 
+        `kunder/${currentCustomer.id}/godsmottagare/${window.selectedRecipientForNotes}/anteckningar` : 
+        `kunder/${currentCustomer.id}/anteckningar`;
+    
+    // Spara till Firebase
+    db.ref(path).set(notes).then(() => {
+        // Uppdatera status
+        const statusDiv = document.getElementById('notesSaveStatus');
+        if(statusDiv) {
+            statusDiv.textContent = 'Anteckningar sparade!';
+            statusDiv.style.color = '#4CAF50';
+            
+            // Rensa status efter 3 sekunder
+            setTimeout(() => {
+                statusDiv.textContent = '';
+            }, 3000);
+        }
+    }).catch(error => {
+        console.error('Fel vid sparning av anteckningar:', error);
+        const statusDiv = document.getElementById('notesSaveStatus');
+        if(statusDiv) {
+            statusDiv.textContent = 'Fel vid sparning!';
+            statusDiv.style.color = '#f44336';
+        }
+    });
+}
+
+// Funktion för att rensa anteckningar
+function clearNotes() {
+    if(confirm('Vill du verkligen rensa alla anteckningar?')) {
+        const textarea = document.getElementById('notesTextarea');
+        if(textarea) {
+            textarea.value = '';
+            textarea.focus();
+        }
+        
+        // Uppdatera status
+        const statusDiv = document.getElementById('notesSaveStatus');
+        if(statusDiv) {
+            statusDiv.textContent = 'Anteckningar rensade (inte sparade ännu)';
+            statusDiv.style.color = '#ff9800';
+        }
+    }
 }
 
