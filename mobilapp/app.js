@@ -92,6 +92,7 @@ function showPage(page) {
                     recipients.forEach(rec => {
                         html += `<button style='width:100%;margin:8px 0;' onclick='window.selectRecipientForOrder("${rec.key}")'>${rec.namn}</button>`;
                     });
+                    html += `<button style='width:100%;margin:8px 0;background:#4CAF50;color:white;' onclick='window.showAddNewRecipientForOrder()'>Lägg till Ny</button>`;
                     html += `<button style='width:100%;margin-top:12px;' onclick='window.cancelRecipientDialogOrder()'>Avbryt</button>`;
                     html += '</div></div>';
                     document.body.insertAdjacentHTML('beforeend', html);
@@ -105,6 +106,12 @@ function showPage(page) {
                     window.cancelRecipientDialogOrder = function() {
                         document.getElementById('recipientDialogOrder').remove();
                         showPage('start');
+                    };
+                    window.showAddNewRecipientForOrder = function() {
+                        // Dölj den befintliga dialogen först
+                        document.getElementById('recipientDialogOrder').remove();
+                        // Visa dialog för att lägga till ny godsmottagare
+                        showAddNewRecipientDialog('order');
                     };
                     return;
                 } else {
@@ -1120,4 +1127,174 @@ document.addEventListener('DOMContentLoaded', function() {
 window.addEventListener('beforeunload', function() {
     stopBarcodeScanning();
 });
+
+// Funktion för att bekräfta att användaren vill lämna ordersidan
+function confirmLeaveOrder() {
+    // Kontrollera om det finns osparade ändringar (produkter valda eller manuella rader)
+    const orderInputs = document.querySelectorAll('#orderForm input[type="number"][data-key]');
+    const hasOrderItems = Array.from(orderInputs).some(input => {
+        const antal = parseInt(input.value);
+        return !isNaN(antal) && antal > 0;
+    });
+    
+    const hasManualItems = manualOrderItems.length > 0;
+    
+    if (hasOrderItems || hasManualItems) {
+        // Visa varningsdialog
+        showLeaveOrderDialog();
+    } else {
+        // Inga osparade ändringar, gå direkt tillbaka
+        showPage('start');
+    }
+}
+
+// Funktion för att visa varningsdialogen
+function showLeaveOrderDialog() {
+    let html = '<div id="leaveOrderDialog" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;">';
+    html += '<div style="background:#fff;padding:24px;border-radius:12px;max-width:320px;width:90vw;box-shadow:0 4px 12px rgba(0,0,0,0.3);">';
+    html += '<h3 style="margin-top:0;color:#333;">Spara order?</h3>';
+    html += '<p style="color:#666;margin-bottom:20px;">Vill du spara ordern innan du lämnar sidan?</p>';
+    html += '<div style="display:flex;gap:8px;">';
+    html += '<button onclick="saveAndLeaveOrder()" style="flex:1;background:#4CAF50;color:white;border:none;padding:12px;border-radius:6px;cursor:pointer;">Spara</button>';
+    html += '<button onclick="leaveWithoutSaving()" style="flex:1;background:#f44336;color:white;border:none;padding:12px;border-radius:6px;cursor:pointer;">Lämna utan att spara</button>';
+    html += '</div>';
+    html += '<button onclick="cancelLeaveOrder()" style="width:100%;background:#ccc;color:#333;border:none;padding:8px;border-radius:6px;cursor:pointer;margin-top:8px;">Avbryt</button>';
+    html += '</div></div>';
+    
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+// Spara ordern och gå tillbaka
+function saveAndLeaveOrder() {
+    // Simulera klick på spara-knappen
+    const orderForm = document.getElementById('orderForm');
+    if (orderForm) {
+        // Trigga submit-eventet
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        orderForm.dispatchEvent(submitEvent);
+    }
+    
+    // Ta bort dialogen och gå tillbaka
+    const dialog = document.getElementById('leaveOrderDialog');
+    if (dialog) dialog.remove();
+    showPage('start');
+}
+
+// Lämna utan att spara
+function leaveWithoutSaving() {
+    // Rensa alla orderdata
+    const orderForm = document.getElementById('orderForm');
+    if (orderForm) orderForm.reset();
+    manualOrderItems = [];
+    updateManualOrderList();
+    
+    // Ta bort dialogen och gå tillbaka
+    const dialog = document.getElementById('leaveOrderDialog');
+    if (dialog) dialog.remove();
+    showPage('start');
+}
+
+// Avbryt och stanna kvar på ordersidan
+function cancelLeaveOrder() {
+    const dialog = document.getElementById('leaveOrderDialog');
+    if (dialog) dialog.remove();
+}
+
+// Funktion för att visa dialog för att lägga till ny godsmottagare
+function showAddNewRecipientDialog(context) {
+    let html = '<div id="addNewRecipientDialog" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;">';
+    html += '<div style="background:#fff;padding:24px;border-radius:12px;max-width:320px;width:90vw;box-shadow:0 4px 12px rgba(0,0,0,0.3);">';
+    html += '<h3 style="margin-top:0;color:#333;">Lägg till ny godsmottagare</h3>';
+    html += '<div style="margin-bottom:16px;">';
+    html += '<label for="newRecipientName" style="display:block;margin-bottom:4px;color:#555;">Namn på godsmottagare:</label>';
+    html += '<input type="text" id="newRecipientName" placeholder="Ange namn" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;box-sizing:border-box;">';
+    html += '</div>';
+    html += '<div style="display:flex;gap:8px;margin-top:20px;">';
+    html += `<button onclick="saveNewRecipient('${context}')" style="flex:1;background:#4CAF50;color:white;border:none;padding:12px;border-radius:6px;cursor:pointer;">Spara ny</button>`;
+    html += `<button onclick="cancelAddNewRecipient('${context}')" style="flex:1;background:#ccc;color:#333;border:none;padding:12px;border-radius:6px;cursor:pointer;">Avbryt</button>`;
+    html += '</div>';
+    html += '</div></div>';
+    
+    document.body.insertAdjacentHTML('beforeend', html);
+    
+    // Fokusera på input-fältet
+    setTimeout(() => {
+        const input = document.getElementById('newRecipientName');
+        if (input) input.focus();
+    }, 100);
+}
+
+// Funktion för att spara ny godsmottagare
+function saveNewRecipient(context) {
+    const nameInput = document.getElementById('newRecipientName');
+    const name = nameInput ? nameInput.value.trim() : '';
+    
+    if (!name) {
+        alert('Ange ett namn för godsmottagaren.');
+        if (nameInput) nameInput.focus();
+        return;
+    }
+    
+    if (!currentCustomer) {
+        alert('Ingen kund vald.');
+        return;
+    }
+    
+    // Spara den nya godsmottagaren i databasen
+    db.ref(`kunder/${currentCustomer.id}/godsmottagare`).push({ namn: name }).then((newRecipientRef) => {
+        // Ta bort dialogen
+        const dialog = document.getElementById('addNewRecipientDialog');
+        if (dialog) dialog.remove();
+        
+        // Välj den nya godsmottagaren automatiskt och fortsätt
+        const newRecipientKey = newRecipientRef.key;
+        
+        if (context === 'order') {
+            window.selectedRecipientForOrder = newRecipientKey;
+            updateRecipientDisplay('order', newRecipientKey);
+            loadOrder(newRecipientKey);
+        }
+        
+        // Visa bekräftelse
+        alert(`Godsmottagare "${name}" har lagts till och valts.`);
+        
+    }).catch((error) => {
+        console.error('Fel vid sparning av godsmottagare:', error);
+        alert('Kunde inte spara godsmottagaren. Försök igen.');
+    });
+}
+
+// Funktion för att avbryta tillägg av ny godsmottagare
+function cancelAddNewRecipient(context) {
+    // Ta bort dialogen
+    const dialog = document.getElementById('addNewRecipientDialog');
+    if (dialog) dialog.remove();
+    
+    // Visa den ursprungliga dialogen igen
+    if (context === 'order') {
+        // Återskapa recipient-dialogen för order
+        setTimeout(() => {
+            if (currentCustomer) {
+                db.ref('kunder/' + currentCustomer.id + '/godsmottagare').once('value', snap => {
+                    if (snap.exists()) {
+                        const recipients = [];
+                        snap.forEach(child => {
+                            recipients.push({ key: child.key, namn: child.val().namn });
+                        });
+                        let html = '<div id="recipientDialogOrder" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:9999;">';
+                        html += '<div style="background:#fff;padding:24px;border-radius:12px;max-width:320px;width:90vw;box-shadow:0 2px 8px rgba(0,0,0,0.15);">';
+                        html += '<h3>Välj godsmottagare för order</h3>';
+                        recipients.forEach(rec => {
+                            html += `<button style='width:100%;margin:8px 0;' onclick='window.selectRecipientForOrder("${rec.key}")'>${rec.namn}</button>`;
+                        });
+                        html += `<button style='width:100%;margin:8px 0;background:#4CAF50;color:white;' onclick='window.showAddNewRecipientForOrder()'>Lägg till Ny</button>`;
+                        html += `<button style='width:100%;margin-top:12px;' onclick='window.cancelRecipientDialogOrder()'>Avbryt</button>`;
+                        html += '</div></div>';
+                        document.body.insertAdjacentHTML('beforeend', html);
+                    }
+                });
+            }
+        }, 100);
+    }
+}
 
