@@ -1012,8 +1012,6 @@ function addScanningInstructions(containerId) {
         z-index: 1000;
     `;
     instructions.innerHTML = `
-        📷 Håll streckkoden inom den röda rutan<br>
-        💡 Se till att det finns tillräckligt med ljus<br>
         📱 Håll mobilen stadigt
     `;
     container.appendChild(instructions);
