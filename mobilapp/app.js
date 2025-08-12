@@ -424,6 +424,14 @@ if(orderForm) {
 let currentCustomer = null;
 let manualOrderItems = []; // För manuella orderrader
 
+// Globala variabler för orderredigering
+let currentEditingOrder = {
+    key: null,
+    recipientKey: null,
+    orderData: null,
+    productMap: null
+};
+
 // Hantera manuell orderrad-inmatning
 const manualOrderForm = document.getElementById('manualOrderForm');
 if(manualOrderForm) {
@@ -547,6 +555,10 @@ function showOrderDetails(orderKey, recipientKey) {
     orderDetailsList.innerHTML = '';
     if(!currentCustomer || !orderKey) return;
     
+    // Spara orderinformation för eventuell redigering
+    currentEditingOrder.key = orderKey;
+    currentEditingOrder.recipientKey = recipientKey;
+    
     // Läs orderdetaljer från rätt plats (godsmottagare eller huvudkund)
     const orderPath = recipientKey ? 
         `kunder/${currentCustomer.id}/godsmottagare/${recipientKey}/bestallningar/${orderKey}` :
@@ -555,6 +567,9 @@ function showOrderDetails(orderKey, recipientKey) {
     db.ref(orderPath).once('value', snapshot => {
         const order = snapshot.val();
         if(order) {
+            // Spara orderdata för redigering
+            currentEditingOrder.orderData = order;
+            
             // Visa produkter från lager
             if(order.bestallning && Object.keys(order.bestallning).length > 0) {
                 const headerLi = document.createElement('li');
@@ -572,6 +587,10 @@ function showOrderDetails(orderKey, recipientKey) {
                     prodSnap.forEach(prodChild => {
                         prodMap[prodChild.key] = prodChild.val().benamning;
                     });
+                    
+                    // Spara produktmappning för redigering
+                    currentEditingOrder.productMap = prodMap;
+                    
                     for(const key in order.bestallning) {
                         const li = document.createElement('li');
                         const namn = prodMap[key] || key;
@@ -1517,6 +1536,210 @@ function clearNotes() {
             statusDiv.textContent = 'Anteckningar rensade (inte sparade ännu)';
             statusDiv.style.color = '#ff9800';
         }
+    }
+}
+
+// ===========================
+// ORDERREDIGERING FUNKTIONER
+// ===========================
+
+// Funktion för att starta redigering av aktuell order
+function editCurrentOrder() {
+    if(!currentEditingOrder.orderData) {
+        alert('Ingen order att redigera.');
+        return;
+    }
+    
+    showPage('editOrder');
+    
+    // Visa orderdatum
+    const dateDiv = document.getElementById('editOrderDate');
+    if(dateDiv) {
+        const date = new Date(currentEditingOrder.orderData.tid);
+        dateDiv.textContent = `Order från: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+    }
+    
+    // Ladda lager-produkter för redigering
+    loadEditLagerProducts();
+    
+    // Ladda manuella orderrader för redigering
+    loadEditManualProducts();
+    
+    // Sätt upp formulär för nya manuella rader
+    setupEditManualOrderForm();
+}
+
+// Ladda lager-produkter för redigering
+function loadEditLagerProducts() {
+    const list = document.getElementById('editLagerProductsList');
+    const section = document.getElementById('editLagerProductsSection');
+    list.innerHTML = '';
+    
+    if(!currentEditingOrder.orderData.bestallning || Object.keys(currentEditingOrder.orderData.bestallning).length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    
+    section.style.display = 'block';
+    
+    for(const productKey in currentEditingOrder.orderData.bestallning) {
+        const quantity = currentEditingOrder.orderData.bestallning[productKey];
+        const productName = currentEditingOrder.productMap?.[productKey] || productKey;
+        
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
+                <span style="flex:1;">${productName}</span>
+                <input type="number" min="0" value="${quantity}" data-product-key="${productKey}" style="width:80px;" onchange="updateLagerProductQuantity('${productKey}', this.value)">
+                <button onclick="removeLagerProduct('${productKey}')" style="background:#f44336;color:white;border:none;padding:4px 8px;border-radius:4px;">Ta bort</button>
+            </div>
+        `;
+        list.appendChild(li);
+    }
+}
+
+// Ladda manuella orderrader för redigering
+function loadEditManualProducts() {
+    const list = document.getElementById('editManualProductsList');
+    const section = document.getElementById('editManualProductsSection');
+    list.innerHTML = '';
+    
+    if(!currentEditingOrder.orderData.manuellaRader || currentEditingOrder.orderData.manuellaRader.length === 0) {
+        // Visa sektionen ändå för att kunna lägga till nya rader
+        section.style.display = 'block';
+        return;
+    }
+    
+    section.style.display = 'block';
+    
+    currentEditingOrder.orderData.manuellaRader.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;margin:8px 0;flex-wrap:wrap;">
+                <input type="text" value="${item.name}" placeholder="Produktnamn" style="flex:1;min-width:120px;" onchange="updateManualProductName(${index}, this.value)">
+                <input type="text" value="${item.productNumber || ''}" placeholder="Produktnummer" style="width:100px;" onchange="updateManualProductNumber(${index}, this.value)">
+                <input type="number" min="1" value="${item.quantity}" style="width:60px;" onchange="updateManualProductQuantity(${index}, this.value)">
+                <button onclick="removeManualProduct(${index})" style="background:#f44336;color:white;border:none;padding:4px 8px;border-radius:4px;">Ta bort</button>
+            </div>
+        `;
+        list.appendChild(li);
+    });
+}
+
+// Sätt upp formulär för nya manuella orderrader
+function setupEditManualOrderForm() {
+    const form = document.getElementById('editAddManualOrderForm');
+    if(form) {
+        form.onsubmit = function(e) {
+            e.preventDefault();
+            const name = document.getElementById('editManualProductName').value.trim();
+            const productNumber = document.getElementById('editManualProductNumber').value.trim();
+            const quantity = parseInt(document.getElementById('editManualQuantity').value);
+            
+            if(name && !isNaN(quantity) && quantity > 0) {
+                // Lägg till i den redigerade ordern
+                if(!currentEditingOrder.orderData.manuellaRader) {
+                    currentEditingOrder.orderData.manuellaRader = [];
+                }
+                
+                currentEditingOrder.orderData.manuellaRader.push({
+                    id: 'manual_' + Date.now(),
+                    name: name,
+                    productNumber: productNumber || '',
+                    quantity: quantity
+                });
+                
+                // Uppdatera visningen
+                loadEditManualProducts();
+                
+                // Rensa formuläret
+                form.reset();
+            }
+        };
+    }
+}
+
+// Uppdatera antal för lager-produkt
+function updateLagerProductQuantity(productKey, newQuantity) {
+    const quantity = parseInt(newQuantity);
+    if(!isNaN(quantity) && quantity >= 0) {
+        if(quantity === 0) {
+            // Ta bort produkten om antalet är 0
+            delete currentEditingOrder.orderData.bestallning[productKey];
+        } else {
+            currentEditingOrder.orderData.bestallning[productKey] = quantity;
+        }
+    }
+}
+
+// Ta bort lager-produkt
+function removeLagerProduct(productKey) {
+    if(confirm('Vill du ta bort denna produkt från ordern?')) {
+        delete currentEditingOrder.orderData.bestallning[productKey];
+        loadEditLagerProducts();
+    }
+}
+
+// Uppdatera manuell produkts namn
+function updateManualProductName(index, newName) {
+    if(currentEditingOrder.orderData.manuellaRader && currentEditingOrder.orderData.manuellaRader[index]) {
+        currentEditingOrder.orderData.manuellaRader[index].name = newName;
+    }
+}
+
+// Uppdatera manuell produkts produktnummer
+function updateManualProductNumber(index, newProductNumber) {
+    if(currentEditingOrder.orderData.manuellaRader && currentEditingOrder.orderData.manuellaRader[index]) {
+        currentEditingOrder.orderData.manuellaRader[index].productNumber = newProductNumber;
+    }
+}
+
+// Uppdatera manuell produkts antal
+function updateManualProductQuantity(index, newQuantity) {
+    const quantity = parseInt(newQuantity);
+    if(!isNaN(quantity) && quantity > 0 && currentEditingOrder.orderData.manuellaRader && currentEditingOrder.orderData.manuellaRader[index]) {
+        currentEditingOrder.orderData.manuellaRader[index].quantity = quantity;
+    }
+}
+
+// Ta bort manuell produkt
+function removeManualProduct(index) {
+    if(confirm('Vill du ta bort denna orderrad?')) {
+        if(currentEditingOrder.orderData.manuellaRader) {
+            currentEditingOrder.orderData.manuellaRader.splice(index, 1);
+            loadEditManualProducts();
+        }
+    }
+}
+
+// Spara den redigerade ordern
+function saveEditedOrder() {
+    if(!currentEditingOrder.key || !currentEditingOrder.orderData) {
+        alert('Ingen order att spara.');
+        return;
+    }
+    
+    // Bestäm sökväg
+    const orderPath = currentEditingOrder.recipientKey ? 
+        `kunder/${currentCustomer.id}/godsmottagare/${currentEditingOrder.recipientKey}/bestallningar/${currentEditingOrder.key}` :
+        `kunder/${currentCustomer.id}/bestallningar/${currentEditingOrder.key}`;
+    
+    // Spara till Firebase
+    db.ref(orderPath).set(currentEditingOrder.orderData).then(() => {
+        alert('Order sparad!');
+        // Gå tillbaka till orderdetaljer för att visa uppdaterad order
+        showOrderDetails(currentEditingOrder.key, currentEditingOrder.recipientKey);
+    }).catch(error => {
+        console.error('Fel vid sparning av order:', error);
+        alert('Kunde inte spara ordern. Försök igen.');
+    });
+}
+
+// Avbryt orderredigering
+function cancelEditOrder() {
+    if(confirm('Vill du avbryta redigeringen? Alla ändringar går förlorade.')) {
+        // Gå tillbaka till orderdetaljer
+        showOrderDetails(currentEditingOrder.key, currentEditingOrder.recipientKey);
     }
 }
 
