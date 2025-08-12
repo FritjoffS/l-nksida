@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Industri</title>
+  <!-- Adjusted relative paths -->
+  <link rel="stylesheet" href="../styles/global.css" />
+  <link rel="stylesheet" href="../styles/admin_styles.css" />
+  <link rel="stylesheet" href="../styles/navbar.css" />
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+  <script src="../scripts/firebase-init.js"></script>
+
+  <script>
+
+
+  </script>
+</head>
+
+<body>
+  <div id="navbar"></div> <!-- Placeholder for the navbar -->
+
+  <div class="mainContainer">
+
+    <div class="container">
+
+      <div class="innerContainer">
+
+        <div class="topContainer">
+
+          <h1>Industri</h1>
+          <h2>Administration</h2>
+
+          <h2>Lägg Upp Ny Post</h2>
+
+          <div>
+            <label for="newKey">Benämning:</label>
+            <br>
+            <input type="text" id="newKey" placeholder="Benämning" />
+            <br />
+            <label for="newValue">Beskrivning:</label>
+            <br>
+            <textarea id="newValue" placeholder="Text"></textarea>
+            <br />
+            <button onclick="addEntry()">Spara Post</button>
+          </div>
+
+        </div>
+
+        <div class="bottomContainer">
+
+          <h2>SPARADE LÄNKAR</h2>
+          <table border="1">
+            <thead>
+              <tr>
+                <th>Benämning</th>
+                <!-- <th>Value</th> -->
+                <th>Åtgärd</th>
+              </tr>
+            </thead>
+            <tbody id="entriesTableBody">
+              <!-- Entries will be dynamically loaded here -->
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Modal for editing text -->
+  <div id="editModal">
+    <h3>Redigera Avisering</h3>
+    <label for="editKeyInput">Benämning:</label>
+    <input id="editKeyInput" type="text" />
+    <label for="editTextarea">Beskrivning:</label>
+    <textarea id="editTextarea"></textarea>
+    <br />
+    <button class="saveButton" onclick="saveEdit()">Spara</button>
+    <button class="closeButton" onclick="closeModal()">Avbryt</button>
+  </div>
+
+  <div id="modalOverlay" onclick="closeModal()"></div>
+
+  <script src="admin-script.js"></script>
+  <script src="script.js"></script>
+  <script src="../scripts/loadNavbar.js"></script>
+
+</body>
+
+</html>
