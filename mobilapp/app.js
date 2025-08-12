@@ -846,7 +846,10 @@ function updateRecipientDisplay(pageType, recipientKey) {
 
 let barcodeScanner = {
     isScanning: false,
-    currentTarget: null // 'lager' eller 'order'
+    currentTarget: null, // 'lager' eller 'order'
+    lastDetectedCode: null,
+    lastDetectionTime: 0,
+    debounceDelay: 2000 // 2 sekunder mellan samma streckkod
 };
 
 // Funktion för att starta streckkodsläsning
@@ -924,14 +927,30 @@ function startBarcodeScanning(target, containerId) {
     
     // Lyssna på framgångsrik läsning
     Quagga.onDetected(function(data) {
-        console.log("Barcode detected:", data.codeResult.code);
         const code = data.codeResult.code;
+        const currentTime = Date.now();
+        
+        // Kontrollera om detta är samma kod som just detekterades
+        if (barcodeScanner.lastDetectedCode === code && 
+            currentTime - barcodeScanner.lastDetectionTime < barcodeScanner.debounceDelay) {
+            console.log("Duplicate barcode detection ignored:", code);
+            return; // Ignorera duplicat
+        }
+        
+        console.log("Barcode detected:", code);
+        
+        // Uppdatera senaste detektering
+        barcodeScanner.lastDetectedCode = code;
+        barcodeScanner.lastDetectionTime = currentTime;
         
         // Spela ljud för feedback
         playBeepSound();
         
-        handleBarcodeDetected(code, target);
+        // Stoppa scanning omedelbart för att förhindra fler detekteringar
         stopBarcodeScanning();
+        
+        // Hantera den detekterade koden
+        handleBarcodeDetected(code, target);
     });
     
     // Debug: Lyssna på processade frames
@@ -1015,6 +1034,10 @@ function stopBarcodeScanning() {
         Quagga.stop();
         barcodeScanner.isScanning = false;
         
+        // Rensa event listeners
+        Quagga.offDetected();
+        Quagga.offProcessed();
+        
         // Dölj scanner-containrar
         const lagerContainer = document.getElementById('barcodeScannerContainer');
         const orderContainer = document.getElementById('barcodeOrderScannerContainer');
@@ -1026,6 +1049,12 @@ function stopBarcodeScanning() {
         if (instructions) {
             instructions.remove();
         }
+        
+        // Rensa senaste detektering efter en kort fördröjning
+        setTimeout(() => {
+            barcodeScanner.lastDetectedCode = null;
+            barcodeScanner.lastDetectionTime = 0;
+        }, 1000);
     }
 }
 
