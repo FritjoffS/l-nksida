@@ -1067,7 +1067,7 @@ function handleBarcodeDetected(code, target) {
             produktnummerField.value = code;
             produktnummerField.focus();
         }
-        alert(`Streckkod skannad: ${code}\nProduktnummer ifyllt automatiskt.`);
+         //alert(`Streckkod skannad: ${code}\nProduktnummer ifyllt automatiskt.`);
     } else if (target === 'order') {
         // För order - fyll i produktnummer-fältet
         const manualProductNumberField = document.getElementById('manualProductNumber');
@@ -1077,7 +1077,7 @@ function handleBarcodeDetected(code, target) {
             const productNameField = document.getElementById('manualProductName');
             if (productNameField) productNameField.focus();
         }
-        alert(`Streckkod skannad: ${code}\nProduktnummer ifyllt automatiskt. Fyll i produktnamn.`);
+         //alert(`Streckkod skannad: ${code}\nProduktnummer ifyllt automatiskt. Fyll i produktnamn.`);
     }
 }
 
