@@ -867,51 +867,146 @@ function startBarcodeScanning(target, containerId) {
         return;
     }
     
+    const targetElement = target === 'lager' ? 'interactive' : 'orderInteractive';
+    
     Quagga.init({
         inputStream: {
             name: "Live",
             type: "LiveStream",
-            target: `#${target === 'lager' ? 'interactive' : 'orderInteractive'}`,
+            target: `#${targetElement}`,
             constraints: {
-                width: 300,
-                height: 200,
-                facingMode: "environment" // Bakre kamera
+                width: 640,
+                height: 480,
+                facingMode: "environment",
+                aspectRatio: {
+                    min: 1,
+                    max: 2
+                }
             }
         },
         locator: {
-            patchSize: "medium",
-            halfSample: true
+            patchSize: "large",
+            halfSample: false
         },
-        numOfWorkers: 2,
+        numOfWorkers: 4,
+        frequency: 10,
         decoder: {
             readers: [
                 "code_128_reader",
                 "ean_reader",
                 "ean_8_reader",
                 "code_39_reader",
-                "code_39_vin_reader",
-                "codabar_reader",
                 "upc_reader",
                 "upc_e_reader"
-            ]
+            ],
+            debug: {
+                drawBoundingBox: true,
+                showFrequency: true,
+                drawScanline: true,
+                showPattern: true
+            }
         },
-        locate: true
+        locate: true,
+        debug: false
     }, function(err) {
         if (err) {
-            console.log(err);
+            console.log("Quagga initialization error:", err);
             alert('Kunde inte starta kameran. Kontrollera att du har gett tillstånd för kameraåtkomst.');
             stopBarcodeScanning();
             return;
         }
+        console.log("Quagga initialized successfully");
         Quagga.start();
+        
+        // Lägg till visuell feedback
+        addScanningInstructions(containerId);
     });
     
     // Lyssna på framgångsrik läsning
     Quagga.onDetected(function(data) {
+        console.log("Barcode detected:", data.codeResult.code);
         const code = data.codeResult.code;
+        
+        // Spela ljud för feedback
+        playBeepSound();
+        
         handleBarcodeDetected(code, target);
         stopBarcodeScanning();
     });
+    
+    // Debug: Lyssna på processade frames
+    Quagga.onProcessed(function(result) {
+        var drawingCtx = Quagga.canvas.ctx.overlay,
+            drawingCanvas = Quagga.canvas.dom.overlay;
+
+        if (result) {
+            if (result.boxes) {
+                drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+                result.boxes.filter(function (box) {
+                    return box !== result.box;
+                }).forEach(function (box) {
+                    Quagga.ImageDebug.drawPath(box, {x: 0, y: 1}, drawingCtx, {color: "green", lineWidth: 2});
+                });
+            }
+
+            if (result.box) {
+                Quagga.ImageDebug.drawPath(result.box, {x: 0, y: 1}, drawingCtx, {color: "#00F", lineWidth: 2});
+            }
+
+            if (result.codeResult && result.codeResult.code) {
+                Quagga.ImageDebug.drawPath(result.line, {x: 'x', y: 'y'}, drawingCtx, {color: 'red', lineWidth: 3});
+            }
+        }
+    });
+}
+
+// Lägg till instruktioner för användaren
+function addScanningInstructions(containerId) {
+    const container = document.getElementById(containerId);
+    const instructions = document.createElement('div');
+    instructions.id = 'scanning-instructions';
+    instructions.style.cssText = `
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 14px;
+        text-align: center;
+        z-index: 1000;
+    `;
+    instructions.innerHTML = `
+        📷 Håll streckkoden inom den röda rutan<br>
+        💡 Se till att det finns tillräckligt med ljus<br>
+        📱 Håll mobilen stadigt
+    `;
+    container.appendChild(instructions);
+}
+
+// Spela ljud när streckkod hittas
+function playBeepSound() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        oscillator.type = 'square';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (e) {
+        console.log("Could not play beep sound:", e);
+    }
 }
 
 // Funktion för att stoppa streckkodsläsning
@@ -925,6 +1020,12 @@ function stopBarcodeScanning() {
         const orderContainer = document.getElementById('barcodeOrderScannerContainer');
         if (lagerContainer) lagerContainer.style.display = 'none';
         if (orderContainer) orderContainer.style.display = 'none';
+        
+        // Ta bort instruktioner
+        const instructions = document.getElementById('scanning-instructions');
+        if (instructions) {
+            instructions.remove();
+        }
     }
 }
 
