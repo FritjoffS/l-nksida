@@ -37,7 +37,7 @@
             <section id="start" class="hidden">
                 <h2 id="currentCustomerHeader"></h2>
                 <button onclick="showPage('order')">Order</button>
-                <button onclick="showPage('lager')">Lager</button>
+                <button onclick="showPage('lager')">Lagerlagda Artiklar</button>
                 <button onclick="showPage('orders')">Beställningshistorik</button>
                 <button onclick="showPage('customerSelect')">Byt kund</button>
             </section>
@@ -107,7 +107,7 @@
                     <ul id="manualOrderList"></ul>
                     <button type="submit">Spara beställning</button>
                 </form>
-                <button onclick="showPage('start')">Tillbaka</button>
+                <button onclick="confirmLeaveOrder()">Tillbaka</button>
             </section>
         </main>
     </div>
