@@ -39,6 +39,7 @@
                 <button onclick="showPage('order')">Order</button>
                 <button onclick="showPage('lager')">Lagerlagda Artiklar</button>
                 <button onclick="showPage('orders')">Beställningshistorik</button>
+                <button onclick="showPage('notes')">Anteckningar</button>
                 <button onclick="showPage('customerSelect')">Byt kund</button>
             </section>
             <section id="orders" class="hidden">
@@ -109,6 +110,24 @@
                     <button type="submit">Spara beställning</button>
                 </form>
                 <button onclick="confirmLeaveOrder()">Tillbaka</button>
+            </section>
+            <section id="notes" class="hidden">
+                <div id="currentCustomerNotes" style="text-align:center;margin-bottom:16px;font-weight:bold;color:#555;"></div>
+                <div id="currentRecipientNotes" style="text-align:center;margin-bottom:16px;font-style:italic;color:#777;"></div>
+                <h2>Anteckningar</h2>
+                
+                <div style="margin-bottom:16px;">
+                    <textarea id="notesTextarea" placeholder="Skriv dina anteckningar här..." style="width:100%;height:300px;box-sizing:border-box;padding:12px;border:1px solid #ddd;border-radius:4px;font-family:Arial,sans-serif;font-size:14px;resize:vertical;"></textarea>
+                </div>
+                
+                <div style="display:flex;gap:8px;margin-bottom:16px;">
+                    <button onclick="saveNotes()" style="flex:1;background:#4CAF50;color:white;border:none;padding:12px;border-radius:4px;cursor:pointer;">💾 Spara anteckningar</button>
+                    <button onclick="clearNotes()" style="flex:1;background:#ff9800;color:white;border:none;padding:12px;border-radius:4px;cursor:pointer;">🗑️ Rensa</button>
+                </div>
+                
+                <div id="notesSaveStatus" style="text-align:center;margin-bottom:16px;font-style:italic;color:#666;"></div>
+                
+                <button onclick="showPage('start')">Tillbaka</button>
             </section>
         </main>
     </div>
