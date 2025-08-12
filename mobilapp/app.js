@@ -1066,9 +1066,6 @@ function addScanningInstructions(containerId) {
     `;
     instructions.innerHTML = `
         📱 Håll mobilen stadigt<br>
-        🔍 Håll streckkoden 5-15cm från kameran<br>
-        💡 Se till att det finns tillräckligt med ljus<br>
-        📷 Kameran försöker använda makro-läge automatiskt
     `;
     container.appendChild(instructions);
 }
