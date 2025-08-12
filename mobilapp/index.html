@@ -52,7 +52,42 @@
             <section id="orderDetails" class="hidden">
                 <h2>Orderdetaljer</h2>
                 <ul id="orderDetailsList"></ul>
-                <button onclick="returnToOrderHistory()">Tillbaka</button>
+                <div style="display:flex;gap:8px;margin:16px 0;">
+                    <button onclick="editCurrentOrder()" style="flex:1;background:#ff9800;color:white;border:none;padding:12px;border-radius:4px;">✏️ Redigera order</button>
+                    <button onclick="returnToOrderHistory()" style="flex:1;background:#ccc;color:#333;border:none;padding:12px;border-radius:4px;">Tillbaka</button>
+                </div>
+            </section>
+            <section id="editOrder" class="hidden">
+                <h2>Redigera order</h2>
+                <div id="editOrderDate" style="text-align:center;margin-bottom:16px;font-weight:bold;color:#555;"></div>
+                
+                <!-- Produkter från lager -->
+                <div id="editLagerProductsSection" style="margin-bottom:20px;">
+                    <h3>Produkter från Lagerlagda Artiklar:</h3>
+                    <ul id="editLagerProductsList"></ul>
+                </div>
+                
+                <!-- Manuella orderrader -->
+                <div id="editManualProductsSection" style="margin-bottom:20px;">
+                    <h3>Manuella orderrader:</h3>
+                    <ul id="editManualProductsList"></ul>
+                    
+                    <!-- Lägg till ny manuell orderrad -->
+                    <div style="border:1px solid #ddd;padding:12px;margin:16px 0;border-radius:8px;background:#f9f9f9;">
+                        <h4 style="margin:0 0 12px 0;font-size:14px;">Lägg till ny orderrad</h4>
+                        <form id="editAddManualOrderForm">
+                            <input type="text" id="editManualProductName" placeholder="Produktnamn" required style="width:100%;box-sizing:border-box;margin-bottom:8px;">
+                            <input type="text" id="editManualProductNumber" placeholder="Produktnummer (valfritt)" style="width:100%;box-sizing:border-box;margin-bottom:8px;">
+                            <input type="number" id="editManualQuantity" placeholder="Antal" required min="1" style="width:100%;box-sizing:border-box;margin-bottom:8px;">
+                            <button type="submit" style="width:100%;background:#4CAF50;color:white;border:none;padding:8px;border-radius:4px;">Lägg till</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div style="display:flex;gap:8px;margin:16px 0;">
+                    <button onclick="saveEditedOrder()" style="flex:1;background:#4CAF50;color:white;border:none;padding:12px;border-radius:4px;">💾 Spara ändringar</button>
+                    <button onclick="cancelEditOrder()" style="flex:1;background:#f44336;color:white;border:none;padding:12px;border-radius:4px;">❌ Avbryt</button>
+                </div>
             </section>
             <section id="lager" class="hidden">
                 <div id="currentCustomerLager" style="text-align:center;margin-bottom:16px;font-weight:bold;color:#555;"></div>
