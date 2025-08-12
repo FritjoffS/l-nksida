@@ -895,10 +895,16 @@ function startBarcodeScanning(target, containerId) {
                 width: 640,
                 height: 480,
                 facingMode: "environment",
+                focusMode: "continuous",
                 aspectRatio: {
                     min: 1,
                     max: 2
-                }
+                },
+                advanced: [
+                    { focusMode: "macro" },
+                    { focusDistance: { min: 0.1, ideal: 0.3, max: 1.0 } },
+                    { zoom: { min: 1, ideal: 2, max: 3 } }
+                ]
             }
         },
         locator: {
@@ -927,12 +933,59 @@ function startBarcodeScanning(target, containerId) {
         debug: false
     }, function(err) {
         if (err) {
-            console.log("Quagga initialization error:", err);
-            alert('Kunde inte starta kameran. Kontrollera att du har gett tillstånd för kameraåtkomst.');
-            stopBarcodeScanning();
+            console.log("Quagga initialization error with advanced settings:", err);
+            // Försök med enklare inställningar om avancerade misslyckas
+            console.log("Trying fallback camera configuration...");
+            
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: `#${targetElement}`,
+                    constraints: {
+                        width: 640,
+                        height: 480,
+                        facingMode: "environment"
+                    }
+                },
+                locator: {
+                    patchSize: "large",
+                    halfSample: false
+                },
+                numOfWorkers: 4,
+                frequency: 10,
+                decoder: {
+                    readers: [
+                        "code_128_reader",
+                        "ean_reader",
+                        "ean_8_reader",
+                        "code_39_reader",
+                        "upc_reader",
+                        "upc_e_reader"
+                    ],
+                    debug: {
+                        drawBoundingBox: true,
+                        showFrequency: true,
+                        drawScanline: true,
+                        showPattern: true
+                    }
+                },
+                locate: true,
+                debug: false
+            }, function(fallbackErr) {
+                if (fallbackErr) {
+                    console.log("Fallback initialization also failed:", fallbackErr);
+                    alert('Kunde inte starta kameran. Kontrollera att du har gett tillstånd för kameraåtkomst.');
+                    stopBarcodeScanning();
+                    return;
+                }
+                console.log("Quagga initialized successfully with fallback settings");
+                Quagga.start();
+                addScanningInstructions(containerId);
+            });
             return;
         }
-        console.log("Quagga initialized successfully");
+        console.log("Quagga initialized successfully with advanced camera settings");
         Quagga.start();
         
         // Lägg till visuell feedback
@@ -1012,7 +1065,10 @@ function addScanningInstructions(containerId) {
         z-index: 1000;
     `;
     instructions.innerHTML = `
-        📱 Håll mobilen stadigt
+        📱 Håll mobilen stadigt<br>
+        🔍 Håll streckkoden 5-15cm från kameran<br>
+        💡 Se till att det finns tillräckligt med ljus<br>
+        📷 Kameran försöker använda makro-läge automatiskt
     `;
     container.appendChild(instructions);
 }
