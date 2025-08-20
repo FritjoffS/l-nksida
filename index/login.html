@@ -1,24 +1,37 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Login Page</title>
+
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#ff6600" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Järnhandel" />
+  <link rel="apple-touch-icon" href="../logo.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
+
+
   <link rel="stylesheet" href="../styles/global.css" />
   <link rel="stylesheet" href="../styles/login.css" />
   <!-- Add Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
-  
-  
+
+
   <script>
     // Initialize Firebase with your project's config
     var firebaseConfig = {
-        apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
-        authDomain: "l-nksida.firebaseapp.com",
-        databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "l-nksida",
-        storageBucket: "l-nksida.firebasestorage.app",
-        messagingSenderId: "258147870107",
-        appId: "1:258147870107:web:ce637517bc30b7578cad3e"
+      apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
+      authDomain: "l-nksida.firebaseapp.com",
+      databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "l-nksida",
+      storageBucket: "l-nksida.firebasestorage.app",
+      messagingSenderId: "258147870107",
+      appId: "1:258147870107:web:ce637517bc30b7578cad3e"
     };
     firebase.initializeApp(firebaseConfig);
   </script>
@@ -26,7 +39,7 @@
   <script>
     // Function to check if a user is logged in or not
     function checkAuthState() {
-      firebase.auth().onAuthStateChanged(function(user) {
+      firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
           // User is signed in, proceed to the website
           window.location.href = "index.html";
@@ -44,11 +57,11 @@
       var password = document.getElementById("password").value;
 
       firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(function() {
+        .then(function () {
           // Login successful, redirect to the homepage
           window.location.href = "index.html";
         })
-        .catch(function(error) {
+        .catch(function (error) {
           // Handle errors here
           var errorCode = error.code;
           var errorMessage = error.message;
@@ -56,8 +69,9 @@
         });
     }
   </script>
-  
+
 </head>
+
 <body onload="checkAuthState()">
   <h1 style="display: none;">Login Page</h1>
   <form autocomplete="off">
@@ -70,5 +84,5 @@
   <!-- Add a note for users redirected after logout -->
   <!-- <p>If you were logged out, please log in again to continue.</p> -->
 </body>
-</html>
 
+</html>
