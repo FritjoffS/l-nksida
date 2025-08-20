@@ -6,6 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta author="Fredrik Söderberg" />
   <title>Home</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#ff6600" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Järnhandel" />
+  <link rel="apple-touch-icon" href="../logo.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
+  
   <link rel="stylesheet" href="../styles/global.css" />
   <link rel="stylesheet" href="../styles/date_time.css" />
   <link rel="stylesheet" href="../styles/search.css" />
@@ -57,6 +68,20 @@
   <script src="../scripts/script.js"></script>
   <script src="../scripts/clock.js"></script>
   <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
+  
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('../sw.js')
+          .then(function(registration) {
+            console.log('PWA Service Worker registered successfully:', registration.scope);
+          }, function(err) {
+            console.log('PWA Service Worker registration failed: ', err);
+          });
+      });
+    }
+  </script>
 </body>
 
 </html>
