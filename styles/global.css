@@ -41,4 +41,93 @@
     opacity: 0.8;
     filter: grayscale(100%);
   }
+
+/* ========================================
+   RESPONSIVE DESIGN - MEDIA QUERIES
+   ======================================== */
+
+/* Tablet och mindre desktop (768px - 1024px) */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .container {
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  button {
+    width: 180px;
+    height: 120px;
+    margin: 15px;
+    font-size: 18px;
+  }
+  
+  body {
+    background-size: 45%;
+    background-position: 50% 15%;
+  }
+}
+
+/* Desktop (större än 1024px) */
+@media screen and (min-width: 1025px) {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  button {
+    width: 220px;
+    height: 150px;
+    margin: 20px;
+    font-size: 22px;
+  }
+  
+  button:hover {
+    transform: scale(1.05); /* Mindre hover-effekt på desktop */
+  }
+  
+  body {
+    background-size: 35%;
+    background-position: 50% 10%;
+    padding-top: 120px;
+  }
+}
+
+/* Stor desktop (större än 1440px) */
+@media screen and (min-width: 1441px) {
+  .container {
+    max-width: 1400px;
+  }
+  
+  button {
+    width: 240px;
+    height: 160px;
+    font-size: 24px;
+  }
+  
+  body {
+    background-size: 30%;
+    padding-top: 140px;
+  }
+}
+
+/* Mobil landscape läge */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  body {
+    padding-top: 80px;
+    background-size: 25%;
+    background-position: 50% 5%;
+  }
+  
+  button {
+    width: 160px;
+    height: 100px;
+    margin: 10px;
+    font-size: 16px;
+  }
+  
+  .container {
+    gap: 10px;
+  }
+}
   

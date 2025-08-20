@@ -54,4 +54,70 @@ nav {
   text-decoration: underline;
 }
 
+/* ========================================
+   RESPONSIVE NAVBAR
+   ======================================== */
+
+/* Mobil navbar */
+@media screen and (max-width: 767px) {
+  .navbar {
+    flex-direction: column;
+    display: none; /* Hidden by default on mobile */
+  }
+  
+  .navbar.active {
+    display: flex;
+  }
+  
+  .navbar li {
+    float: none;
+    width: 100%;
+  }
+  
+  .navbar a {
+    padding: 12px 16px;
+    border-bottom: 1px solid #333;
+  }
+  
+  /* Hamburger menu button */
+  .menu-toggle {
+    display: block;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    padding: 15px;
+    cursor: pointer;
+  }
+}
+
+/* Tablet och Desktop navbar */
+@media screen and (min-width: 768px) {
+  .navbar {
+    display: flex !important;
+    justify-content: center;
+  }
+  
+  .navbar li {
+    float: none;
+  }
+  
+  .navbar a {
+    padding: 1.2rem 1.5rem;
+    font-size: 1.1em;
+  }
+  
+  .menu-toggle {
+    display: none;
+  }
+}
+
+/* Desktop navbar */
+@media screen and (min-width: 1024px) {
+  .navbar a {
+    padding: 1.5rem 2rem;
+    font-size: 1.2em;
+  }
+}
+
 /* Add padding to the body to prevent content overlap */

@@ -71,3 +71,81 @@ li:last-child {
         padding: 10px;
     }
 }
+
+/* ========================================
+   RESPONSIVE DESIGN FOR MOBILAPP
+   ======================================== */
+
+/* Tablet och Desktop */
+@media screen and (min-width: 768px) {
+    #app {
+        max-width: 600px;
+        padding: 24px;
+        margin: 20px auto;
+    }
+    
+    button {
+        font-size: 1.2em;
+        padding: 14px;
+    }
+    
+    input, textarea, select {
+        font-size: 1.1em;
+        padding: 12px;
+    }
+    
+    .form-group {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+    }
+    
+    .form-group label {
+        min-width: 120px;
+        text-align: right;
+    }
+}
+
+/* Stor Desktop */
+@media screen and (min-width: 1024px) {
+    #app {
+        max-width: 800px;
+        padding: 32px;
+    }
+    
+    button {
+        font-size: 1.3em;
+        padding: 16px;
+    }
+    
+    /* Grid layout för formulär på desktop */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .form-grid .full-width {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Landscape mobilläge */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    #app {
+        max-width: 90%;
+        padding: 12px;
+        margin: 10px auto;
+    }
+    
+    button {
+        padding: 8px;
+        margin: 4px 0;
+        font-size: 1em;
+    }
+    
+    header h1 {
+        font-size: 1.5em;
+        margin: 8px 0;
+    }
+}
