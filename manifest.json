@@ -2,7 +2,7 @@
   "name": "Sollebrunns Järnhandel",
   "short_name": "Järnhandel",
   "description": "Länksida för Sollebrunns Järnhandel",
-  "start_url": "/index/index.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ff6600",
