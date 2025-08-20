@@ -3,7 +3,7 @@
   "short_name": "Järnhandel",
   "description": "Länksida för Sollebrunns Järnhandel",
   "start_url": "/l-nksida/index/index.html",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#ffffff",
   "theme_color": "#ff6600",
   "orientation": "portrait-primary",
