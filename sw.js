@@ -1,5 +1,5 @@
 // Service Worker för Sollebrunns Järnhandel PWA
-const CACHE_NAME = 'jarnhandel-v1.1';
+const CACHE_NAME = 'jarnhandel-v1';
 const urlsToCache = [
   '/',
   '/manifest.json',
