@@ -2,6 +2,13 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.1.0] - 2025-08-20
+
+### Anpassat utseende för mobila enheter
+ - Navbar anpassad
+ - time_date.css anpassd
+ - search.css anpassad
+
 ## [2.0.0] - 2025-08-20
 
 ### Tillagt
