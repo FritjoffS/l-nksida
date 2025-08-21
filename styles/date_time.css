@@ -20,3 +20,94 @@
     padding: 20px;
     width: 300px;
   }
+
+/* ========================================
+   RESPONSIVE DESIGN FOR DATE & TIME
+   ======================================== */
+
+/* Mobil enheter (portrait) */
+@media screen and (max-width: 767px) {
+  #clock {
+    font-size: 4rem; /* Mycket mindre på mobil */
+  }
+  
+  #date {
+    font-size: 1.2rem; /* Anpassad mobilstorlek */
+    border-radius: 10px;
+    padding: 8px 16px;
+  }
+  
+  .flexCenter {
+    width: 90%; /* Responsiv bredd */
+    max-width: 300px;
+    padding: 10px;
+  }
+}
+
+/* Extra små mobiler */
+@media screen and (max-width: 480px) {
+  #clock {
+    font-size: 3rem; /* Ännu mindre för små skärmar */
+  }
+  
+  #date {
+    font-size: 1rem;
+    padding: 6px 12px;
+  }
+  
+  .flexCenter {
+    width: 95%;
+    padding: 8px;
+  }
+}
+
+/* Mobil landscape läge */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  #clock {
+    font-size: 2.5rem; /* Kompakt för landscape */
+  }
+  
+  #date {
+    font-size: 0.9rem;
+    padding: 4px 8px;
+  }
+  
+  .flexCenter {
+    padding: 5px;
+    width: 250px;
+  }
+}
+
+/* Tablet */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  #clock {
+    font-size: 8rem; /* Mellanstor för tablet */
+  }
+  
+  #date {
+    font-size: 2rem;
+    padding: 12px 20px;
+  }
+  
+  .flexCenter {
+    width: 400px;
+    padding: 15px;
+  }
+}
+
+/* Desktop (behåller original storlek) */
+@media screen and (min-width: 1025px) {
+  #clock {
+    font-size: 16rem; /* Original desktop-storlek */
+  }
+  
+  #date {
+    font-size: 3rem;
+    padding: 16px 24px;
+  }
+  
+  .flexCenter {
+    width: 300px;
+    padding: 20px;
+  }
+}
