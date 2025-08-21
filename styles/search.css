@@ -3,33 +3,143 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px; /* Flexbox gap istället för margin */
+    padding: 0 20px; /* Padding för mobilsäkerhet */
+  }
+  
+  .search-bar form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+    max-width: 500px; /* Max bredd för desktop */
   }
   
   .search-bar input[type="text"] {
-    padding: 10px;
-    font-size: 17px;
+    padding: 12px 16px;
+    font-size: 16px; /* 16px förhindrar zoom på iOS */
     border: 1px solid grey;
-    float: left;
-    width: 400px;
-    height: 2rem;
+    flex: 1; /* Tar tillgängligt utrymme */
+    min-width: 200px;
+    height: 44px; /* Touch-vänlig höjd */
     background: #f1f1f1;
     border-radius: 10px;
-    margin-left: 50px;
-    margin-top: 50px;
+    box-sizing: border-box;
   }
   
   .search-bar button {
-    float: left;
-    padding: 10px;
+    padding: 12px 20px;
     background: #2196f3;
     color: white;
-    font-size: 17px;
+    font-size: 16px;
     border: 1px solid grey;
-    border-left: none;
     cursor: pointer;
     border-radius: 10px;
-    margin-left: 20px;
-    margin-top: 50px;
-    width: 5rem;
-    height: 3rem;
+    height: 44px; /* Samma höjd som input */
+    min-width: 80px;
+    white-space: nowrap;
+    box-sizing: border-box;
   }
+
+/* ========================================
+   RESPONSIVE DESIGN FOR SEARCH BAR
+   ======================================== */
+
+/* Mobil enheter */
+@media screen and (max-width: 767px) {
+  .search-bar {
+    margin-top: 30px;
+    padding: 0 15px;
+  }
+  
+  .search-bar form {
+    flex-direction: column; /* Stapla på mobil */
+    gap: 15px;
+    width: 100%;
+  }
+  
+  .search-bar input[type="text"] {
+    width: 100%;
+    min-width: unset;
+    font-size: 16px; /* Förhindrar zoom */
+  }
+  
+  .search-bar button {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* Extra små mobiler */
+@media screen and (max-width: 480px) {
+  .search-bar {
+    margin-top: 20px;
+    padding: 0 10px;
+  }
+  
+  .search-bar input[type="text"],
+  .search-bar button {
+    padding: 10px 12px;
+    height: 40px;
+    font-size: 14px;
+  }
+}
+
+/* Mobil landscape läge */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .search-bar {
+    margin-top: 15px;
+  }
+  
+  .search-bar form {
+    flex-direction: row; /* Horisontell i landscape */
+    max-width: 400px;
+  }
+  
+  .search-bar input[type="text"],
+  .search-bar button {
+    height: 36px;
+    font-size: 14px;
+  }
+}
+
+/* Tablet */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .search-bar {
+    margin-top: 40px;
+  }
+  
+  .search-bar form {
+    flex-direction: row;
+    max-width: 450px;
+  }
+  
+  .search-bar input[type="text"] {
+    min-width: 250px;
+  }
+  
+  .search-bar button {
+    min-width: 100px;
+  }
+}
+
+/* Desktop */
+@media screen and (min-width: 1025px) {
+  .search-bar {
+    margin-top: 50px;
+  }
+  
+  .search-bar form {
+    flex-direction: row;
+    max-width: 500px;
+  }
+  
+  .search-bar input[type="text"] {
+    min-width: 300px;
+  }
+  
+  .search-bar button {
+    min-width: 120px;
+  }
+}
