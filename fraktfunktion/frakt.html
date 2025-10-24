@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avståndsberäkning med felhantering</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 40px;
+            text-align: center;
+        }
+        #container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 18px;
+            margin-top: 8px;
+            font-size: 16px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005fa3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Beräkna Fraktkostnad</h1>
+        <p>Ange leveransadress (adress eller ort):</p>
+        <input type="text" id="destination" placeholder="Exempel: Göteborg, Sverige">
+
+        <h3>Fraktinställningar</h3>
+        <p>Fyll i fraktregler (exempelvärden finns för snabb testning)</p>
+        <div style="margin: 10px 0; text-align: left;">
+            <label>Fast avgift (inom bas-km) SEK:</label><br>
+            <input type="number" id="baseFee" value="595" step="0.5" min="0">
+        </div>
+        <div style="margin: 10px 0; text-align: left;">
+            <label>Basdistans (km) utan extra kostnad:</label><br>
+            <input type="number" id="baseKm" value="20" step="0.1" min="0">
+        </div>
+        <div style="margin: 10px 0; text-align: left;">
+            <label>Avgift per km över basdistansen (SEK / km):</label><br>
+            <input type="number" id="perKmFee" value="28" step="0.1" min="0">
+        </div>
+
+        <button onclick="calculateDistance()">Beräkna avstånd & frakt</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Helper: beräkna frakt baserat på distans (km)
+        function calculateShipping(distanceKm, baseFee, baseKm, perKmFee) {
+            // säkerställ numeriska värden
+            distanceKm = Number(distanceKm) || 0;
+            baseFee = Number(baseFee) || 0;
+            baseKm = Number(baseKm) || 0;
+            perKmFee = Number(perKmFee) || 0;
+
+            if (distanceKm <= baseKm) {
+                return {
+                    total: roundToTwo(baseFee),
+                    breakdown: `${baseFee.toFixed(2)} SEK (fast avgift för upp till ${baseKm} km)`
+                };
+            }
+
+            const extraKm = distanceKm - baseKm;
+            const extraCost = extraKm * perKmFee;
+            const total = baseFee + extraCost;
+
+            return {
+                total: roundToTwo(total),
+                breakdown: `${baseFee.toFixed(2)} SEK (fast) + ${extraKm.toFixed(2)} km × ${perKmFee.toFixed(2)} SEK/km = ${extraCost.toFixed(2)} SEK`
+            };
+        }
+
+        function roundToTwo(v) {
+            return Math.round(v * 100) / 100;
+        }
+
+        function calculateDistance() {
+            const destination = document.getElementById("destination").value;
+            const resultDiv = document.getElementById("result");
+
+            // läs fraktparametrar
+            const baseFee = parseFloat(document.getElementById('baseFee').value);
+            const baseKm = parseFloat(document.getElementById('baseKm').value);
+            const perKmFee = parseFloat(document.getElementById('perKmFee').value);
+
+            if (!destination) {
+                alert("Ange ett resmål först!");
+                return;
+            }
+
+            resultDiv.innerHTML = "Försöker hämta din plats...";
+
+            if (!navigator.geolocation) {
+                resultDiv.innerHTML = "Din webbläsare stöder inte platsdelning.";
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                successCallback,
+                errorCallback,
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+
+            function successCallback(position) {
+                const userLat = position.coords.latitude;
+                const userLon = position.coords.longitude;
+
+                if (typeof google === 'undefined' || !google.maps || !google.maps.DistanceMatrixService) {
+                    resultDiv.innerHTML = "Kart-API ej laddat. Försök ladda om sidan eller kontrollera API-nyckeln.";
+                    return;
+                }
+
+                const service = new google.maps.DistanceMatrixService();
+
+                service.getDistanceMatrix({
+                    origins: [{ lat: userLat, lng: userLon }],
+                    destinations: [destination],
+                    travelMode: 'DRIVING',
+                    unitSystem: google.maps.UnitSystem.METRIC
+                }, (response, status) => {
+                    if (status !== 'OK') {
+                        resultDiv.innerHTML = "Kunde inte hämta avstånd: " + status;
+                        return;
+                    }
+
+                    const element = response.rows[0].elements[0];
+                    if (element.status === "OK") {
+                        const distanceMeters = element.distance.value; // meter
+                        const distanceKm = distanceMeters / 1000;
+                        const durationText = element.duration ? element.duration.text : '';
+
+                        const shipping = calculateShipping(distanceKm, baseFee, baseKm, perKmFee);
+
+                        resultDiv.innerHTML = `Avstånd: ${element.distance.text} <br> Tid: ${durationText} <br><br> Frakt: <strong>${shipping.total.toFixed(2)} SEK</strong><br> (${shipping.breakdown})`;
+                    } else {
+                        resultDiv.innerHTML = "Kunde inte hitta resmålet.";
+                    }
+                });
+            }
+
+            // Felhantering vid platsdetektering
+            function errorCallback(error) {
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        resultDiv.innerHTML = "Du nekade åtkomst till platsdata. Aktivera platstjänster för att använda appen.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        resultDiv.innerHTML = "Platsinformation är inte tillgänglig. Kontrollera GPS eller nätverksanslutning.";
+                        break;
+                    case error.TIMEOUT:
+                        resultDiv.innerHTML = "Förfrågan tog för lång tid. Försök igen.";
+                        break;
+                    case error.UNKNOWN_ERROR:
+                    default:
+                        resultDiv.innerHTML = "Ett okänt fel inträffade vid hämtning av plats.";
+                        break;
+                }
+            }
+        }
+    </script>
+
+    <script async
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1amhuBT0CsBMGwLOd5lmVS_8kfnub014&libraries=places">
+    </script>
+</body>
+</html>
