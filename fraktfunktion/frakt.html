@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avståndsberäkning med felhantering</title>
+    <title>Fraktkostnad</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -50,7 +50,6 @@
 <body>
     <div id="container">
         <h1>Beräkna Fraktkostnad</h1>
-        <h2>Fraktkostnad avser enkel väg</h2>
         <p>Ange leveransadress:</p>
         <input type="text" id="destination" placeholder="Exempel: Göteborg, Sverige">
 
@@ -66,7 +65,7 @@
         </div>
         <div style="margin: 10px 0; text-align: left;">
             <label>Avgift per km över basdistansen (SEK / km):</label><br>
-            <input type="number" id="perKmFee" value="28" step="0.1" min="0">
+            <input type="number" id="perKmFee" value="35" step="0.1" min="0">
         </div>
 
         <button onclick="calculateDistance()">Beräkna avstånd & frakt</button>
