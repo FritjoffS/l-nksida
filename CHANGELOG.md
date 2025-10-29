@@ -2,6 +2,10 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.1.1] - 25-10-28
+
+### Test av update-version.bat
+
 ## [2.1.0] - 2025-08-20
 
 ### Anpassat utseende för mobila enheter
