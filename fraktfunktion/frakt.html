@@ -298,6 +298,10 @@
                         `;
                     }
 
+                    const encodedOrigin = encodeURIComponent(origin);
+                    const encodedDestination = encodeURIComponent(destination);
+                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodedOrigin}&destination=${encodedDestination}&travelmode=driving`;
+
                     resultDiv.innerHTML = `
                         <div style="text-align: left; background: #f0f8ff; padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px solid #0078d7;">
                             <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
@@ -316,6 +320,12 @@
                                 <div style="font-size: 16px; margin-bottom: 5px;">💰 FRAKTKOSTNAD</div>
                                 <div style="font-size: 28px; font-weight: bold;">${shipping.total.toFixed(2)} SEK</div>
                                 <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">(enkel väg)</div>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 10px;">
+                                <a href="${mapsUrl}" target="_blank" style="display: inline-block; background: #34a853; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+                                    🗺️ Visa resväg på karta
+                                </a>
                             </div>
                         </div>
                     `;
