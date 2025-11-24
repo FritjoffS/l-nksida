@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="sv">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta author="Name" content="Fredrik Söderberg">
     <title>Fraktkostnad</title>
+
+    <link rel="stylesheet" href="../styles/navbar.css">
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -47,7 +52,11 @@
         }
     </style>
 </head>
+
 <body>
+
+    <!-- <div id="navbar"></div> <!-- Placeholder for the navbar -->
+
     <div id="container">
         <h1>Beräkna Fraktkostnad</h1>
         
@@ -80,6 +89,10 @@
         <button onclick="calculateDistance()">Beräkna avstånd & frakt</button>
         <div id="result"></div>
     </div>
+
+    <script src="../scripts/frakt.js"></script>
+    <script src="../scripts/loadNavbar.js"></script>
+
 
     <script>
         // beräkna frakt baserat på distans (km)
