@@ -50,22 +50,31 @@
 <body>
     <div id="container">
         <h1>Beräkna Fraktkostnad</h1>
-        <p>Ange leveransadress:</p>
-        <input type="text" id="destination" placeholder="Exempel: Göteborg, Sverige">
+        
+        <div style="margin: 15px 0; text-align: left; background: #e7f3ff; padding: 15px; border-radius: 8px;">
+            <label><strong>Avsändaradress:</strong></label><br>
+            <input type="text" id="senderAddress" placeholder="T.ex. Storgatan 1, Stockholm" style="width: 95%; margin-top: 5px;">
+            <small style="display: block; margin-top: 5px; color: #666;">Fyll i din fasta avsändaradress här</small>
+        </div>
+        
+        <div style="margin: 15px 0; text-align: left;">
+            <label><strong>Leveransadress:</strong></label><br>
+            <input type="text" id="destination" placeholder="Exempel: Göteborg, Sverige" style="width: 95%; margin-top: 5px;">
+        </div>
 
         <h3>Fraktinställningar</h3>
-        <p>Fyll i fraktregler</p>
+        
         <div style="margin: 10px 0; text-align: left;">
-            <label>Fast avgift (inom bas-km) SEK:</label><br>
-            <input type="number" id="baseFee" value="595" step="0.5" min="0">
+            <label><strong>Fast fraktavgift:</strong> <small>(gäller upp till basdistansen)</small></label><br>
+            <input type="number" id="baseFee" value="595" step="0.5" min="0" style="width: 150px;"> SEK
         </div>
         <div style="margin: 10px 0; text-align: left;">
-            <label>Basdistans (km) utan extra kostnad:</label><br>
-            <input type="number" id="baseKm" value="20" step="0.1" min="0">
+            <label><strong>Basdistans:</strong> <small>(ingår i fast avgift)</small></label><br>
+            <input type="number" id="baseKm" value="20" step="0.1" min="0" style="width: 150px;"> km
         </div>
         <div style="margin: 10px 0; text-align: left;">
-            <label>Avgift per km över basdistansen (SEK / km):</label><br>
-            <input type="number" id="perKmFee" value="35" step="0.1" min="0">
+            <label><strong>Tillägg per km:</strong> <small>(utöver basdistansen)</small></label><br>
+            <input type="number" id="perKmFee" value="35" step="0.1" min="0" style="width: 150px;"> SEK/km
         </div>
 
         <button onclick="calculateDistance()">Beräkna avstånd & frakt</button>
@@ -84,7 +93,13 @@
             if (distanceKm <= baseKm) {
                 return {
                     total: roundToTwo(baseFee),
-                    breakdown: `${baseFee.toFixed(2)} SEK (fast avgift för upp till ${baseKm} km)`
+                    breakdown: `Fast avgift (distans ${distanceKm.toFixed(1)} km ≤ ${baseKm} km)`,
+                    details: {
+                        withinBase: true,
+                        distance: distanceKm,
+                        baseFee: baseFee,
+                        baseKm: baseKm
+                    }
                 };
             }
 
@@ -94,7 +109,16 @@
 
             return {
                 total: roundToTwo(total),
-                breakdown: `${baseFee.toFixed(2)} SEK (fast) + ${extraKm.toFixed(2)} km × ${perKmFee.toFixed(2)} SEK/km = ${extraCost.toFixed(2)} SEK`
+                breakdown: `Fast avgift + tillägg för extra km`,
+                details: {
+                    withinBase: false,
+                    distance: distanceKm,
+                    baseFee: baseFee,
+                    baseKm: baseKm,
+                    extraKm: extraKm,
+                    perKmFee: perKmFee,
+                    extraCost: extraCost
+                }
             };
         }
 
@@ -103,7 +127,8 @@
         }
 
         function calculateDistance() {
-            const destination = document.getElementById("destination").value;
+            const senderAddress = document.getElementById("senderAddress").value.trim();
+            const destination = document.getElementById("destination").value.trim();
             const resultDiv = document.getElementById("result");
 
             // läs fraktparametrar
@@ -112,14 +137,22 @@
             const perKmFee = parseFloat(document.getElementById('perKmFee').value);
 
             if (!destination) {
-                alert("Ange ett resmål först!");
+                alert("Ange en leveransadress!");
                 return;
             }
 
+            // Om avsändaradress är angiven, använd den direkt
+            if (senderAddress) {
+                resultDiv.innerHTML = "Beräknar avstånd från avsändaradress...";
+                calculateWithAddresses(senderAddress, destination, baseFee, baseKm, perKmFee);
+                return;
+            }
+
+            // Annars försök använda geolocation
             resultDiv.innerHTML = "Försöker hämta din plats...";
 
             if (!navigator.geolocation) {
-                resultDiv.innerHTML = "Din webbläsare stöder inte platsdelning.";
+                resultDiv.innerHTML = "Din webbläsare stöder inte platsdelning. Fyll i avsändaradress istället.";
                 return;
             }
 
@@ -168,22 +201,128 @@
 
             // Felhantering vid platsdetektering
             function errorCallback(error) {
+                let message = "";
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                        resultDiv.innerHTML = "Du nekade åtkomst till platsdata. Aktivera platstjänster för att använda appen.";
+                        message = "Du nekade åtkomst till platsdata.";
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        resultDiv.innerHTML = "Platsinformation är inte tillgänglig. Kontrollera GPS eller nätverksanslutning.";
+                        message = "Platsinformation är inte tillgänglig.";
                         break;
                     case error.TIMEOUT:
-                        resultDiv.innerHTML = "Förfrågan tog för lång tid. Försök igen.";
+                        message = "Förfrågan tog för lång tid.";
                         break;
                     case error.UNKNOWN_ERROR:
                     default:
-                        resultDiv.innerHTML = "Ett okänt fel inträffade vid hämtning av plats.";
+                        message = "Ett okänt fel inträffade vid hämtning av plats.";
                         break;
                 }
+                resultDiv.innerHTML = message + " <br><strong>Fyll i avsändaradress ovan och försök igen.</strong>";
             }
+        }
+
+        // Ny hjälpfunktion för att beräkna avstånd mellan två adresser
+        function calculateWithAddresses(origin, destination, baseFee, baseKm, perKmFee) {
+            const resultDiv = document.getElementById("result");
+
+            if (typeof google === 'undefined' || !google.maps || !google.maps.DistanceMatrixService) {
+                resultDiv.innerHTML = "Kart-API ej laddat. Försök ladda om sidan eller kontrollera API-nyckeln.";
+                return;
+            }
+
+            const service = new google.maps.DistanceMatrixService();
+
+            service.getDistanceMatrix({
+                origins: [origin],
+                destinations: [destination],
+                travelMode: 'DRIVING',
+                unitSystem: google.maps.UnitSystem.METRIC
+            }, (response, status) => {
+                if (status !== 'OK') {
+                    resultDiv.innerHTML = "Kunde inte hämta avstånd: " + status + "<br>Kontrollera att adresserna är korrekta.";
+                    return;
+                }
+
+                const element = response.rows[0].elements[0];
+                if (element.status === "OK") {
+                    const distanceMeters = element.distance.value;
+                    const distanceKm = distanceMeters / 1000;
+                    const durationText = element.duration ? element.duration.text : '';
+
+                    const shipping = calculateShipping(distanceKm, baseFee, baseKm, perKmFee);
+                    
+                    let calculationDetails = '';
+                    if (shipping.details.withinBase) {
+                        calculationDetails = `
+                            <div style="background: #e8f5e9; padding: 10px; border-radius: 4px; margin: 8px 0; border-left: 4px solid #4caf50;">
+                                <div style="font-weight: bold; color: #2e7d32; margin-bottom: 5px;">✓ Inom basdistansen</div>
+                                <div style="color: #555; font-size: 14px;">
+                                    Distans: ${shipping.details.distance.toFixed(1)} km<br>
+                                    Basdistans: ${shipping.details.baseKm} km<br>
+                                    Fast avgift: ${shipping.details.baseFee.toFixed(2)} SEK
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        calculationDetails = `
+                            <div style="background: #fff3e0; padding: 10px; border-radius: 4px; margin: 8px 0; border-left: 4px solid #ff9800;">
+                                <div style="font-weight: bold; color: #e65100; margin-bottom: 8px;">📊 Specifikation:</div>
+                                <table style="width: 100%; font-size: 14px; color: #555;">
+                                    <tr>
+                                        <td>Total distans:</td>
+                                        <td style="text-align: right;"><strong>${shipping.details.distance.toFixed(1)} km</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Basdistans (ingår i Fast avgift):</td>
+                                        <td style="text-align: right;">${shipping.details.baseKm} km</td>
+                                    </tr>
+                                    <tr style="border-top: 1px solid #ddd;">
+                                        <td>Extra kilometer:</td>
+                                        <td style="text-align: right;"><strong>${shipping.details.extraKm.toFixed(1)} km</strong></td>
+                                    </tr>
+                                    <tr style="height: 8px;"></tr>
+                                    <tr>
+                                        <td>Fast avgift:</td>
+                                        <td style="text-align: right;">${shipping.details.baseFee.toFixed(2)} SEK</td>
+                                    </tr>
+                                    <tr>
+                                        <td>${shipping.details.extraKm.toFixed(1)} km × ${shipping.details.perKmFee.toFixed(2)} SEK/km:</td>
+                                        <td style="text-align: right;">+ ${shipping.details.extraCost.toFixed(2)} SEK</td>
+                                    </tr>
+                                    <tr style="border-top: 2px solid #ff9800; font-weight: bold;">
+                                        <td>Totalt tillägg:</td>
+                                        <td style="text-align: right;">${shipping.details.extraCost.toFixed(2)} SEK</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        `;
+                    }
+
+                    resultDiv.innerHTML = `
+                        <div style="text-align: left; background: #f0f8ff; padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px solid #0078d7;">
+                            <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                                <strong>📍 Från:</strong> ${origin}<br>
+                                <strong>📍 Till:</strong> ${destination}<br>
+                            </div>
+                            
+                            <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
+                                <strong>🚗 Avstånd:</strong> ${element.distance.text}<br>
+                                <strong>⏱️ Beräknad tid:</strong> ${durationText}
+                            </div>
+                            
+                            ${calculationDetails}
+                            
+                            <div style="background: #0078d7; color: white; padding: 15px; border-radius: 6px; margin-top: 10px; text-align: center;">
+                                <div style="font-size: 16px; margin-bottom: 5px;">💰 FRAKTKOSTNAD</div>
+                                <div style="font-size: 28px; font-weight: bold;">${shipping.total.toFixed(2)} SEK</div>
+                                <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">(enkel väg)</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = "Kunde inte hitta rutten mellan adresserna. Kontrollera att båda adresserna är korrekta.";
+                }
+            });
         }
     </script>
 
