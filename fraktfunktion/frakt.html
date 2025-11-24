@@ -53,13 +53,13 @@
         
         <div style="margin: 15px 0; text-align: left; background: #e7f3ff; padding: 15px; border-radius: 8px;">
             <label><strong>Avsändaradress:</strong></label><br>
-            <input type="text" id="senderAddress" placeholder="T.ex. Storgatan 1, Stockholm" style="width: 95%; margin-top: 5px;">
+            <input type="text" id="senderAddress" placeholder="T.ex. Gräfsnäsvägen 2, Sollebrunn" style="width: 95%; margin-top: 5px;">
             <small style="display: block; margin-top: 5px; color: #666;">Fyll i din avsändaradress här</small>
         </div>
         
         <div style="margin: 15px 0; text-align: left;">
             <label><strong>Leveransadress:</strong></label><br>
-            <input type="text" id="destination" placeholder="Exempel: Göteborg, Sverige" style="width: 95%; margin-top: 5px;">
+            <input type="text" id="destination" placeholder="T.ex. Nossebro" style="width: 95%; margin-top: 5px;">
         </div>
 
         <h3>Fraktinställningar</h3>
@@ -82,7 +82,7 @@
     </div>
 
     <script>
-        // Helper: beräkna frakt baserat på distans (km)
+        // beräkna frakt baserat på distans (km)
         function calculateShipping(distanceKm, baseFee, baseKm, perKmFee) {
             // säkerställ numeriska värden
             distanceKm = Number(distanceKm) || 0;
