@@ -15,32 +15,6 @@
     <script src="../scripts/firebase-init.js"></script>
     <script src="../scripts/loadNavbar.js"></script>
 
-    <script>
-
-
-        // Function to check if a user is logged in or not
-        function checkAuthState() {
-            firebase.auth().onAuthStateChanged(function (user) {
-                if (!user) {
-                    // User is not signed in, redirect to the login page
-                    window.location.href = "../index/login.html";
-                }
-                console.log("User is signed in");
-            });
-        }
-
-        // Function to log out the user
-        function logout() {
-            firebase.auth().signOut().then(function () {
-                // Sign-out successful, redirect to login page
-                window.location.href = "../index/login.html";
-            }).catch(function (error) {
-                // Handle errors here
-                console.error("Logout error:", error);
-            });
-        }
-    </script>
-
 </head>
 
 <body onload="checkAuthState()">
