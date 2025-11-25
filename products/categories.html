@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hantera Kategorier</title>
+    <link rel="stylesheet" href="../styles/navbar.css">
+
+    <style>
+        body {
+            padding-top: 50px;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .add-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .add-section h2 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .add-form {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .form-field {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-field label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .form-field input,
+        .form-field select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .category-tree {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-tree h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .category-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .category-header .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .category-header .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .subcategory-list {
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
+        .subcategory-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .subcategory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .subcategory-name {
+            font-weight: bold;
+            color: #495057;
+            font-size: 15px;
+        }
+
+        .subtype-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .subtype-tag {
+            background: #e9ecef;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #495057;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .subtype-tag .remove {
+            cursor: pointer;
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .subtype-tag .remove:hover {
+            color: #a71d2a;
+        }
+
+        .empty-message {
+            color: #999;
+            font-style: italic;
+            padding: 10px;
+        }
+
+        .status-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .status-message.success {
+            background: #28a745;
+        }
+
+        .status-message.error {
+            background: #dc3545;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 15px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .product-count {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            margin-left: 10px;
+        }
+    </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+    <script src="../scripts/firebase-init.js"></script>
+    <script src="../scripts/loadNavbar.js"></script>
+</head>
+
+<body>
+    <div id="navbar"></div>
+
+    <div class="header">
+        <a href="admin.html" class="back-link">← Tillbaka till produkter</a>
+        <h1>🏷️ Hantera Fabrikat och Kategorier</h1>
+    </div>
+
+    <div class="container">
+        <!-- Add Category -->
+        <div class="add-section">
+            <h2>➕ Lägg till nytt Fabrikat</h2>
+            <div class="add-form">
+                <div class="form-field">
+                    <label>Fabrikatnamn</label>
+                    <input type="text" id="newCategoryName" placeholder="t.ex. Honda">
+                </div>
+                <button class="btn btn-success" onclick="addCategory()">Lägg till</button>
+            </div>
+        </div>
+
+        <!-- Add Subcategory -->
+        <div class="add-section">
+            <h2>➕ Lägg till Underkategori</h2>
+            <div class="add-form">
+                <div class="form-field">
+                    <label>Välj Fabrikat</label>
+                    <select id="subcategoryFabrikat">
+                        <option value="">Välj Fabrikat</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Underkategori</label>
+                    <input type="text" id="newSubcategoryName" placeholder="t.ex. Luftfilter">
+                </div>
+                <button class="btn btn-success" onclick="addSubcategory()">Lägg till</button>
+            </div>
+        </div>
+
+        <!-- Add Subtype -->
+        <div class="add-section">
+            <h2>➕ Lägg till Undertyp</h2>
+            <div class="add-form">
+                <div class="form-field">
+                    <label>Välj Fabrikat</label>
+                    <select id="subtypeFabrikat" onchange="updateSubcategorySelect()">
+                        <option value="">Välj Fabrikat</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Välj Underkategori</label>
+                    <select id="subtypeSubcategory" disabled>
+                        <option value="">Välj underkategori</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Undertyp</label>
+                    <input type="text" id="newSubtypeName" placeholder="t.ex. Panel typ">
+                </div>
+                <button class="btn btn-success" onclick="addSubtype()">Lägg till</button>
+            </div>
+        </div>
+
+        <!-- Category Tree -->
+        <div class="category-tree">
+            <h2>📋 Nuvarande Struktur</h2>
+            <div id="categoryTreeContainer">
+                <div class="empty-message">Laddar kategorier...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let productsData = { categories: [] };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            checkAuthState();
+        });
+
+        function checkAuthState() {
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (!user) {
+                    window.location.href = "../index/login.html";
+                } else {
+                    loadData();
+                }
+            });
+        }
+
+        async function loadData() {
+            try {
+                const productsRef = firebase.database().ref('products');
+                const snapshot = await productsRef.once('value');
+                const data = snapshot.val();
+
+                if (data) {
+                    productsData.categories = Object.keys(data).map(key => data[key]);
+                    populateSelects();
+                    displayCategoryTree();
+                }
+            } catch (error) {
+                showStatus('Fel vid laddning: ' + error.message, 'error');
+            }
+        }
+
+        function populateSelects() {
+            const selects = ['subcategoryFabrikat', 'subtypeFabrikat'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Välj Fabrikat</option>';
+
+                productsData.categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.name;
+                    option.textContent = category.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function updateSubcategorySelect() {
+            const fabrikat = document.getElementById('subtypeFabrikat').value;
+            const select = document.getElementById('subtypeSubcategory');
+
+            select.innerHTML = '<option value="">Välj underkategori</option>';
+            select.disabled = !fabrikat;
+
+            if (fabrikat) {
+                const category = productsData.categories.find(c => c.name === fabrikat);
+                if (category && category.subgroups) {
+                    category.subgroups.forEach(subgroup => {
+                        const option = document.createElement('option');
+                        option.value = subgroup.name;
+                        option.textContent = subgroup.name;
+                        select.appendChild(option);
+                    });
+                }
+            }
+        }
+
+        async function addCategory() {
+            const name = document.getElementById('newCategoryName').value.trim();
+
+            if (!name) {
+                showStatus('Ange ett fabrikatnamn', 'error');
+                return;
+            }
+
+            try {
+                const categoryRef = firebase.database().ref(`products/${name}`);
+                const snapshot = await categoryRef.once('value');
+
+                if (snapshot.exists()) {
+                    showStatus('Fabrikatet finns redan', 'error');
+                    return;
+                }
+
+                await categoryRef.set({
+                    name: name,
+                    subgroups: [],
+                    products: []
+                });
+
+                showStatus(`Fabrikat "${name}" tillagt!`, 'success');
+                document.getElementById('newCategoryName').value = '';
+                await loadData();
+
+            } catch (error) {
+                showStatus('Fel: ' + error.message, 'error');
+            }
+        }
+
+        async function addSubcategory() {
+            const fabrikat = document.getElementById('subcategoryFabrikat').value;
+            const name = document.getElementById('newSubcategoryName').value.trim();
+
+            if (!fabrikat || !name) {
+                showStatus('Välj fabrikat och ange namn', 'error');
+                return;
+            }
+
+            try {
+                const categoryRef = firebase.database().ref(`products/${fabrikat}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+
+                if (!categoryData) {
+                    showStatus('Fabrikatet finns inte', 'error');
+                    return;
+                }
+
+                if (!categoryData.subgroups) {
+                    categoryData.subgroups = [];
+                }
+
+                if (categoryData.subgroups.find(sg => sg.name === name)) {
+                    showStatus('Underkategorin finns redan', 'error');
+                    return;
+                }
+
+                categoryData.subgroups.push({
+                    name: name,
+                    subtypes: []
+                });
+
+                await categoryRef.set(categoryData);
+
+                showStatus(`Underkategori "${name}" tillagd!`, 'success');
+                document.getElementById('newSubcategoryName').value = '';
+                await loadData();
+
+            } catch (error) {
+                showStatus('Fel: ' + error.message, 'error');
+            }
+        }
+
+        async function addSubtype() {
+            const fabrikat = document.getElementById('subtypeFabrikat').value;
+            const subcategory = document.getElementById('subtypeSubcategory').value;
+            const name = document.getElementById('newSubtypeName').value.trim();
+
+            if (!fabrikat || !subcategory || !name) {
+                showStatus('Fyll i alla fält', 'error');
+                return;
+            }
+
+            try {
+                const categoryRef = firebase.database().ref(`products/${fabrikat}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+
+                const subgroup = categoryData.subgroups.find(sg => sg.name === subcategory);
+                if (!subgroup) {
+                    showStatus('Underkategorin finns inte', 'error');
+                    return;
+                }
+
+                if (!subgroup.subtypes) {
+                    subgroup.subtypes = [];
+                }
+
+                if (subgroup.subtypes.includes(name)) {
+                    showStatus('Undertypen finns redan', 'error');
+                    return;
+                }
+
+                subgroup.subtypes.push(name);
+                await categoryRef.set(categoryData);
+
+                showStatus(`Undertyp "${name}" tillagd!`, 'success');
+                document.getElementById('newSubtypeName').value = '';
+                await loadData();
+
+            } catch (error) {
+                showStatus('Fel: ' + error.message, 'error');
+            }
+        }
+
+        function displayCategoryTree() {
+            const container = document.getElementById('categoryTreeContainer');
+
+            if (productsData.categories.length === 0) {
+                container.innerHTML = '<div class="empty-message">Inga kategorier finns ännu</div>';
+                return;
+            }
+
+            container.innerHTML = productsData.categories.map(category => {
+                const productCount = category.products ? category.products.length : 0;
+                
+                return `
+                    <div class="category-item">
+                        <div class="category-header">
+                            <div>
+                                ${category.name}
+                                <span class="product-count">${productCount} produkter</span>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-danger" onclick="deleteCategory('${category.name}')">
+                                    🗑️ Ta bort
+                                </button>
+                            </div>
+                        </div>
+                        <div class="subcategory-list">
+                            ${category.subgroups && category.subgroups.length > 0 ? 
+                                category.subgroups.map(subgroup => `
+                                    <div class="subcategory-item">
+                                        <div class="subcategory-header">
+                                            <span class="subcategory-name">${subgroup.name}</span>
+                                            <button class="icon-btn" onclick="deleteSubcategory('${category.name}', '${subgroup.name}')" title="Ta bort">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                        ${subgroup.subtypes && subgroup.subtypes.length > 0 ? `
+                                            <div class="subtype-tags">
+                                                ${subgroup.subtypes.map(subtype => `
+                                                    <span class="subtype-tag">
+                                                        ${subtype}
+                                                        <span class="remove" onclick="deleteSubtype('${category.name}', '${subgroup.name}', '${subtype}')" title="Ta bort">×</span>
+                                                    </span>
+                                                `).join('')}
+                                            </div>
+                                        ` : '<div class="empty-message">Inga undertyper</div>'}
+                                    </div>
+                                `).join('') : 
+                                '<div class="empty-message">Inga underkategorier</div>'
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function deleteCategory(categoryName) {
+            const category = productsData.categories.find(c => c.name === categoryName);
+            const productCount = category.products ? category.products.length : 0;
+
+            if (!confirm(`Är du säker på att du vill ta bort "${categoryName}"?\n\nDetta kommer också ta bort ${productCount} produkter!`)) {
+                return;
+            }
+
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                await categoryRef.remove();
+
+                showStatus(`Fabrikat "${categoryName}" borttaget`, 'success');
+                await loadData();
+
+            } catch (error) {
+                showStatus('Fel: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteSubcategory(categoryName, subcategoryName) {
+            if (!confirm(`Ta bort underkategorin "${subcategoryName}"?`)) {
+                return;
+            }
+
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+
+                categoryData.subgroups = categoryData.subgroups.filter(sg => sg.name !== subcategoryName);
+                await categoryRef.set(categoryData);
+
+                showStatus(`Underkategori "${subcategoryName}" borttagen`, 'success');
+                await loadData();
+
+            } catch (error) {
+                showStatus('Fel: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteSubtype(categoryName, subcategoryName, subtypeName) {
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+
+                const subgroup = categoryData.subgroups.find(sg => sg.name === subcategoryName);
+                subgroup.subtypes = subgroup.subtypes.filter(st => st !== subtypeName);
+
+                await categoryRef.set(categoryData);
+
+                showStatus(`Undertyp "${subtypeName}" borttagen`, 'success');
+                await loadData();
+
+            } catch (error) {
+                showStatus('Fel: ' + error.message, 'error');
+            }
+        }
+
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.textContent = message;
+            document.body.appendChild(statusDiv);
+
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
