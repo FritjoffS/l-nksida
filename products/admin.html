@@ -225,13 +225,48 @@
 
         .form-group input,
         .form-group select,
-        .form-group textarea {
+        .form-group select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
             box-sizing: border-box;
+        }
+
+        .select-with-action {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .select-with-action select {
+            flex: 1;
+        }
+
+        .edit-icon-btn {
+            background: #ffc107;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .edit-icon-btn:hover {
+            background: #e0a800;
+            transform: scale(1.05);
+        }
+
+        .edit-icon-btn:disabled {
+            background: #e0e0e0;
+            cursor: not-allowed;
+            opacity: 0.5;
         }
 
         .form-group textarea {
@@ -341,11 +376,6 @@
                 <div>Produkter</div>
             </div>
         </div>
-        <div style="margin-top: 15px;">
-            <a href="categories.html" style="display: inline-block; background: #667eea; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
-                🏷️ Hantera Fabrikat & Kategorier
-            </a>
-        </div>
     </div>
 
     <div class="filter-section">
@@ -375,23 +405,41 @@
             <form id="productForm" onsubmit="saveProduct(event)">
                 <div class="form-group">
                     <label for="productCategory">Fabrikat *</label>
-                    <select id="productCategory" required onchange="updateSubcategories()">
-                        <option value="">Välj Fabrikat</option>
-                    </select>
+                    <div class="select-with-action">
+                        <select id="productCategory" required onchange="updateSubcategories()">
+                            <option value="">Välj Fabrikat</option>
+                            <option value="__NEW__" style="color: #28a745; font-weight: bold;">➕ Nytt Fabrikat</option>
+                        </select>
+                        <button type="button" class="edit-icon-btn" id="editCategoryBtn" onclick="openEditCategory()" disabled title="Redigera fabrikat">
+                            ✏️
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="productSubcategory">Underkategori *</label>
-                    <select id="productSubcategory" required>
-                        <option value="">Välj underkategori</option>
-                    </select>
+                    <div class="select-with-action">
+                        <select id="productSubcategory" required onchange="updateSubtypes()">
+                            <option value="">Välj underkategori</option>
+                            <option value="__NEW__" style="color: #28a745; font-weight: bold;">➕ Ny Underkategori</option>
+                        </select>
+                        <button type="button" class="edit-icon-btn" id="editSubcategoryBtn" onclick="openEditSubcategory()" disabled title="Redigera underkategori">
+                            ✏️
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="productSubtype">Undertyp</label>
-                    <select id="productSubtype">
-                        <option value="">Ingen undertyp</option>
-                    </select>
+                    <div class="select-with-action">
+                        <select id="productSubtype">
+                            <option value="">Ingen undertyp</option>
+                            <option value="__NEW__" style="color: #28a745; font-weight: bold;">➕ Ny Undertyp</option>
+                        </select>
+                        <button type="button" class="edit-icon-btn" id="editSubtypeBtn" onclick="openEditSubtype()" disabled title="Redigera undertyp">
+                            ✏️
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -427,10 +475,71 @@
         </div>
     </div>
 
+    <!-- Category Management Modals -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 id="categoryModalTitle">Lägg till Fabrikat</h2>
+                <button class="close-btn" onclick="closeCategoryModal()">&times;</button>
+            </div>
+            <form onsubmit="saveCategoryFromModal(event)">
+                <div class="form-group">
+                    <label for="modalCategoryName">Fabrikatnamn *</label>
+                    <input type="text" id="modalCategoryName" required placeholder="t.ex. Honda">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Avbryt</button>
+                    <button type="submit" class="btn btn-success">Spara</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="subcategoryModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 id="subcategoryModalTitle">Lägg till Underkategori</h2>
+                <button class="close-btn" onclick="closeSubcategoryModal()">&times;</button>
+            </div>
+            <form onsubmit="saveSubcategoryFromModal(event)">
+                <div class="form-group">
+                    <label for="modalSubcategoryName">Underkategori *</label>
+                    <input type="text" id="modalSubcategoryName" required placeholder="t.ex. Luftfilter">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeSubcategoryModal()">Avbryt</button>
+                    <button type="submit" class="btn btn-success">Spara</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="subtypeModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 id="subtypeModalTitle">Lägg till Undertyp</h2>
+                <button class="close-btn" onclick="closeSubtypeModal()">&times;</button>
+            </div>
+            <form onsubmit="saveSubtypeFromModal(event)">
+                <div class="form-group">
+                    <label for="modalSubtypeName">Undertyp *</label>
+                    <input type="text" id="modalSubtypeName" required placeholder="t.ex. Panel typ">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeSubtypeModal()">Avbryt</button>
+                    <button type="submit" class="btn btn-success">Spara</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         let productsData = { categories: [] };
         let isDataLoaded = false;
         let currentEditProduct = null;
+        let currentCategoryForEdit = '';
+        let currentSubcategoryForEdit = '';
+        let isEditingCategory = false;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function () {
@@ -473,7 +582,13 @@
             categorySelects.forEach(selectId => {
                 const select = document.getElementById(selectId);
                 const isMainFilter = selectId === 'mainCategory';
+                const isProductCategory = selectId === 'productCategory';
+                
                 select.innerHTML = isMainFilter ? '<option value="">Alla Fabrikat</option>' : '<option value="">Välj Fabrikat</option>';
+                
+                if (isProductCategory) {
+                    select.innerHTML += '<option value="__NEW__" style="color: #28a745; font-weight: bold;">➕ Nytt Fabrikat</option>';
+                }
 
                 productsData.categories.forEach(category => {
                     const option = document.createElement('option');
@@ -687,9 +802,23 @@
             const categoryName = document.getElementById('productCategory').value;
             const subcategorySelect = document.getElementById('productSubcategory');
             const subtypeSelect = document.getElementById('productSubtype');
+            const editCategoryBtn = document.getElementById('editCategoryBtn');
+            const editSubcategoryBtn = document.getElementById('editSubcategoryBtn');
+
+            // Handle "New Category" selection
+            if (categoryName === '__NEW__') {
+                openAddCategory();
+                return;
+            }
+
+            // Enable/disable edit button
+            editCategoryBtn.disabled = !categoryName;
 
             subcategorySelect.innerHTML = '<option value="">Välj underkategori</option>';
+            subcategorySelect.innerHTML += '<option value="__NEW__" style="color: #28a745; font-weight: bold;">➕ Ny Underkategori</option>';
             subtypeSelect.innerHTML = '<option value="">Ingen undertyp</option>';
+            subtypeSelect.innerHTML += '<option value="__NEW__" style="color: #28a745; font-weight: bold;">➕ Ny Undertyp</option>';
+            editSubcategoryBtn.disabled = true;
 
             if (categoryName) {
                 const category = productsData.categories.find(c => c.name === categoryName);
@@ -708,8 +837,26 @@
             const categoryName = document.getElementById('productCategory').value;
             const subcategoryName = document.getElementById('productSubcategory').value;
             const subtypeSelect = document.getElementById('productSubtype');
+            const editSubcategoryBtn = document.getElementById('editSubcategoryBtn');
+            const editSubtypeBtn = document.getElementById('editSubtypeBtn');
+
+            // Handle "New Subcategory" selection
+            if (subcategoryName === '__NEW__') {
+                if (!categoryName) {
+                    showStatus('Välj först ett fabrikat', 'error');
+                    document.getElementById('productSubcategory').value = '';
+                    return;
+                }
+                openAddSubcategory();
+                return;
+            }
+
+            // Enable/disable edit buttons
+            editSubcategoryBtn.disabled = !subcategoryName;
+            editSubtypeBtn.disabled = true;
 
             subtypeSelect.innerHTML = '<option value="">Ingen undertyp</option>';
+            subtypeSelect.innerHTML += '<option value="__NEW__" style="color: #28a745; font-weight: bold;">➕ Ny Undertyp</option>';
 
             if (categoryName && subcategoryName) {
                 const category = productsData.categories.find(c => c.name === categoryName);
@@ -722,10 +869,26 @@
                             option.textContent = subtype;
                             subtypeSelect.appendChild(option);
                         });
+                        editSubtypeBtn.disabled = false;
                     }
                 }
             }
         }
+
+        // Handle subtype selection
+        document.getElementById('productSubtype').addEventListener('change', function() {
+            if (this.value === '__NEW__') {
+                const categoryName = document.getElementById('productCategory').value;
+                const subcategoryName = document.getElementById('productSubcategory').value;
+                
+                if (!categoryName || !subcategoryName) {
+                    showStatus('Välj först fabrikat och underkategori', 'error');
+                    this.value = '';
+                    return;
+                }
+                openAddSubtype();
+            }
+        });
 
         function showStatus(message, type = 'success') {
             const statusDiv = document.createElement('div');
@@ -736,6 +899,332 @@
             setTimeout(() => {
                 statusDiv.remove();
             }, 3000);
+        }
+
+        // Category Management Functions
+        function openAddCategory() {
+            isEditingCategory = false;
+            currentCategoryForEdit = '';
+            document.getElementById('categoryModalTitle').textContent = 'Lägg till Fabrikat';
+            document.getElementById('modalCategoryName').value = '';
+            document.getElementById('productCategory').value = '';
+            document.getElementById('categoryModal').classList.add('active');
+        }
+
+        function openEditCategory() {
+            const categoryName = document.getElementById('productCategory').value;
+            if (!categoryName) return;
+
+            isEditingCategory = true;
+            currentCategoryForEdit = categoryName;
+            document.getElementById('categoryModalTitle').textContent = 'Redigera Fabrikat';
+            document.getElementById('modalCategoryName').value = categoryName;
+            document.getElementById('categoryModal').classList.add('active');
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.remove('active');
+            // Reset product category select if it was on __NEW__
+            if (document.getElementById('productCategory').value === '__NEW__') {
+                document.getElementById('productCategory').value = '';
+            }
+        }
+
+        async function saveCategoryFromModal(event) {
+            event.preventDefault();
+            const newName = document.getElementById('modalCategoryName').value.trim();
+
+            if (!newName) {
+                showStatus('Ange ett fabrikatnamn', 'error');
+                return;
+            }
+
+            try {
+                if (isEditingCategory && currentCategoryForEdit) {
+                    // Editing existing category
+                    if (newName !== currentCategoryForEdit) {
+                        const oldCategoryRef = firebase.database().ref(`products/${currentCategoryForEdit}`);
+                        const snapshot = await oldCategoryRef.once('value');
+                        const categoryData = snapshot.val();
+
+                        // Check if new name already exists
+                        const newCategoryRef = firebase.database().ref(`products/${newName}`);
+                        const newSnapshot = await newCategoryRef.once('value');
+                        if (newSnapshot.exists()) {
+                            showStatus('Ett fabrikat med detta namn finns redan', 'error');
+                            return;
+                        }
+
+                        // Create with new name and delete old
+                        categoryData.name = newName;
+                        await newCategoryRef.set(categoryData);
+                        await oldCategoryRef.remove();
+
+                        showStatus(`Fabrikat ändrat till "${newName}"`, 'success');
+                    }
+                } else {
+                    // Adding new category
+                    const categoryRef = firebase.database().ref(`products/${newName}`);
+                    const snapshot = await categoryRef.once('value');
+
+                    if (snapshot.exists()) {
+                        showStatus('Fabrikatet finns redan', 'error');
+                        return;
+                    }
+
+                    await categoryRef.set({
+                        name: newName,
+                        subgroups: [],
+                        products: []
+                    });
+
+                    showStatus(`Fabrikat "${newName}" tillagt!`, 'success');
+                }
+
+                closeCategoryModal();
+                await loadAllData();
+                
+                // Set the new/edited category as selected
+                document.getElementById('productCategory').value = newName;
+                updateSubcategories();
+
+            } catch (error) {
+                showStatus('Fel: ' + error.message, 'error');
+            }
+        }
+
+        function openAddSubcategory() {
+            const categoryName = document.getElementById('productCategory').value;
+            if (!categoryName) {
+                showStatus('Välj först ett fabrikat', 'error');
+                return;
+            }
+
+            isEditingCategory = false;
+            currentCategoryForEdit = categoryName;
+            currentSubcategoryForEdit = '';
+            document.getElementById('subcategoryModalTitle').textContent = 'Lägg till Underkategori';
+            document.getElementById('modalSubcategoryName').value = '';
+            document.getElementById('productSubcategory').value = '';
+            document.getElementById('subcategoryModal').classList.add('active');
+        }
+
+        function openEditSubcategory() {
+            const categoryName = document.getElementById('productCategory').value;
+            const subcategoryName = document.getElementById('productSubcategory').value;
+            if (!categoryName || !subcategoryName) return;
+
+            isEditingCategory = true;
+            currentCategoryForEdit = categoryName;
+            currentSubcategoryForEdit = subcategoryName;
+            document.getElementById('subcategoryModalTitle').textContent = 'Redigera Underkategori';
+            document.getElementById('modalSubcategoryName').value = subcategoryName;
+            document.getElementById('subcategoryModal').classList.add('active');
+        }
+
+        function closeSubcategoryModal() {
+            document.getElementById('subcategoryModal').classList.remove('active');
+            if (document.getElementById('productSubcategory').value === '__NEW__') {
+                document.getElementById('productSubcategory').value = '';
+            }
+        }
+
+        async function saveSubcategoryFromModal(event) {
+            event.preventDefault();
+            const categoryName = currentCategoryForEdit;
+            const newName = document.getElementById('modalSubcategoryName').value.trim();
+
+            if (!newName) {
+                showStatus('Ange ett underkategorinamn', 'error');
+                return;
+            }
+
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+
+                if (!categoryData) {
+                    showStatus('Fabrikatet finns inte', 'error');
+                    return;
+                }
+
+                if (!categoryData.subgroups) {
+                    categoryData.subgroups = [];
+                }
+
+                if (isEditingCategory && currentSubcategoryForEdit) {
+                    // Editing existing subcategory
+                    const subgroup = categoryData.subgroups.find(sg => sg.name === currentSubcategoryForEdit);
+                    if (!subgroup) {
+                        showStatus('Underkategorin finns inte', 'error');
+                        return;
+                    }
+
+                    if (newName !== currentSubcategoryForEdit) {
+                        if (categoryData.subgroups.find(sg => sg.name === newName)) {
+                            showStatus('En underkategori med detta namn finns redan', 'error');
+                            return;
+                        }
+                        subgroup.name = newName;
+                        
+                        // Update all products in this subcategory
+                        if (categoryData.products) {
+                            categoryData.products.forEach(product => {
+                                if (product.subcategory === currentSubcategoryForEdit) {
+                                    product.subcategory = newName;
+                                }
+                            });
+                        }
+                    }
+
+                    showStatus(`Underkategori ändrad till "${newName}"`, 'success');
+                } else {
+                    // Adding new subcategory
+                    if (categoryData.subgroups.find(sg => sg.name === newName)) {
+                        showStatus('Underkategorin finns redan', 'error');
+                        return;
+                    }
+
+                    categoryData.subgroups.push({
+                        name: newName,
+                        subtypes: []
+                    });
+
+                    showStatus(`Underkategori "${newName}" tillagd!`, 'success');
+                }
+
+                await categoryRef.set(categoryData);
+                closeSubcategoryModal();
+                await loadAllData();
+
+                document.getElementById('productCategory').value = categoryName;
+                updateSubcategories();
+                document.getElementById('productSubcategory').value = newName;
+                updateSubtypes();
+
+            } catch (error) {
+                showStatus('Fel: ' + error.message, 'error');
+            }
+        }
+
+        function openAddSubtype() {
+            const categoryName = document.getElementById('productCategory').value;
+            const subcategoryName = document.getElementById('productSubcategory').value;
+            
+            if (!categoryName || !subcategoryName) {
+                showStatus('Välj först fabrikat och underkategori', 'error');
+                return;
+            }
+
+            isEditingCategory = false;
+            currentCategoryForEdit = categoryName;
+            currentSubcategoryForEdit = subcategoryName;
+            document.getElementById('subtypeModalTitle').textContent = 'Lägg till Undertyp';
+            document.getElementById('modalSubtypeName').value = '';
+            document.getElementById('productSubtype').value = '';
+            document.getElementById('subtypeModal').classList.add('active');
+        }
+
+        function openEditSubtype() {
+            const categoryName = document.getElementById('productCategory').value;
+            const subcategoryName = document.getElementById('productSubcategory').value;
+            const subtypeName = document.getElementById('productSubtype').value;
+            
+            if (!categoryName || !subcategoryName || !subtypeName) return;
+
+            isEditingCategory = true;
+            currentCategoryForEdit = categoryName;
+            currentSubcategoryForEdit = subcategoryName;
+            document.getElementById('subtypeModalTitle').textContent = 'Redigera Undertyp';
+            document.getElementById('modalSubtypeName').value = subtypeName;
+            document.getElementById('subtypeModal').classList.add('active');
+        }
+
+        function closeSubtypeModal() {
+            document.getElementById('subtypeModal').classList.remove('active');
+            if (document.getElementById('productSubtype').value === '__NEW__') {
+                document.getElementById('productSubtype').value = '';
+            }
+        }
+
+        async function saveSubtypeFromModal(event) {
+            event.preventDefault();
+            const categoryName = currentCategoryForEdit;
+            const subcategoryName = currentSubcategoryForEdit;
+            const oldSubtypeName = isEditingCategory ? document.getElementById('productSubtype').value : '';
+            const newName = document.getElementById('modalSubtypeName').value.trim();
+
+            if (!newName) {
+                showStatus('Ange ett undertypsnamn', 'error');
+                return;
+            }
+
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+
+                const subgroup = categoryData.subgroups.find(sg => sg.name === subcategoryName);
+                if (!subgroup) {
+                    showStatus('Underkategorin finns inte', 'error');
+                    return;
+                }
+
+                if (!subgroup.subtypes) {
+                    subgroup.subtypes = [];
+                }
+
+                if (isEditingCategory && oldSubtypeName) {
+                    // Editing existing subtype
+                    const index = subgroup.subtypes.indexOf(oldSubtypeName);
+                    if (index === -1) {
+                        showStatus('Undertypen finns inte', 'error');
+                        return;
+                    }
+
+                    if (newName !== oldSubtypeName) {
+                        if (subgroup.subtypes.includes(newName)) {
+                            showStatus('En undertyp med detta namn finns redan', 'error');
+                            return;
+                        }
+                        subgroup.subtypes[index] = newName;
+
+                        // Update all products with this subtype
+                        if (categoryData.products) {
+                            categoryData.products.forEach(product => {
+                                if (product.subcategory === subcategoryName && product.subtype === oldSubtypeName) {
+                                    product.subtype = newName;
+                                }
+                            });
+                        }
+                    }
+
+                    showStatus(`Undertyp ändrad till "${newName}"`, 'success');
+                } else {
+                    // Adding new subtype
+                    if (subgroup.subtypes.includes(newName)) {
+                        showStatus('Undertypen finns redan', 'error');
+                        return;
+                    }
+
+                    subgroup.subtypes.push(newName);
+                    showStatus(`Undertyp "${newName}" tillagd!`, 'success');
+                }
+
+                await categoryRef.set(categoryData);
+                closeSubtypeModal();
+                await loadAllData();
+
+                document.getElementById('productCategory').value = categoryName;
+                updateSubcategories();
+                document.getElementById('productSubcategory').value = subcategoryName;
+                updateSubtypes();
+                document.getElementById('productSubtype').value = newName;
+
+            } catch (error) {
+                showStatus('Fel: ' + error.message, 'error');
+            }
         }
 
         // Filter event listeners
@@ -764,12 +1253,29 @@
             displayProducts();
         });
         document.getElementById('subCategory').addEventListener('change', displayProducts);
-        document.getElementById('productSubcategory').addEventListener('change', updateSubtypes);
 
-        // Close modal on outside click
+        // Close modals on outside click
         document.getElementById('productModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
+            }
+        });
+
+        document.getElementById('categoryModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCategoryModal();
+            }
+        });
+
+        document.getElementById('subcategoryModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSubcategoryModal();
+            }
+        });
+
+        document.getElementById('subtypeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSubtypeModal();
             }
         });
     </script>
