@@ -240,16 +240,6 @@
         <input type="text" id="searchInput" placeholder="Sök efter produkt eller artikelnummer...">
         <select id="mainCategory">
             <option value="">Alla Fabrikat</option>
-            <option value="Briggs & Stratton">Briggs & Stratton</option>
-            <option value="Stiga">Stiga</option>
-            <option value="Husqvarna">Husqvarna</option>
-            <!-- <option value="Klippo">Klippo</option> -->
-            <option value="Honda">Honda</option>
-            <option value="Kawasaki">Kawasaki</option>
-            <option value="Stihl">Stihl</option>
-            <option value="Kohler">Kohler</option>
-            <option value="Övriga">Övriga</option>
-
         </select>
 
         <select id="subCategory" disabled>
@@ -453,6 +443,7 @@
                 document.getElementById('productContainer').style.display = 'grid';
                 
                 // Update interface after data is loaded
+                populateMainCategoryFilter();
                 updateResults();
                 
             } catch (error) {
@@ -493,6 +484,28 @@
             document.getElementById('mainCategory').addEventListener('change', updateSubcategories);
             document.getElementById('subCategory').addEventListener('change', updateSubtypes);
             document.getElementById('subType').addEventListener('change', updateResults);
+        }
+
+        // Fyll filterdropdown med fabrikat från databasen
+        function populateMainCategoryFilter() {
+            if (!isDataLoaded) return;
+            
+            const select = document.getElementById('mainCategory');
+            const currentValue = select.value;
+            
+            select.innerHTML = '<option value="">Alla Fabrikat</option>';
+            
+            productsDB.categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.name;
+                option.textContent = category.name;
+                select.appendChild(option);
+            });
+            
+            // Behåll valt värde om det finns kvar
+            if (currentValue && productsDB.categories.some(c => c.name === currentValue)) {
+                select.value = currentValue;
+            }
         }
 
         // Uppdatera underkategorier
@@ -1057,6 +1070,9 @@
                 populateModalCategories();
                 document.getElementById('productCategory').value = newName;
                 updateModalSubcategories();
+                
+                // Uppdatera huvudfiltret också
+                populateMainCategoryFilter();
 
             } catch (error) {
                 showStatus('Fel: ' + error.message, 'error');
@@ -1171,6 +1187,10 @@
                 updateModalSubcategories();
                 document.getElementById('productSubcategory').value = newName;
                 updateModalSubtypes();
+                
+                // Uppdatera huvudfiltret
+                populateMainCategoryFilter();
+                updateSubcategories();
 
             } catch (error) {
                 showStatus('Fel: ' + error.message, 'error');
@@ -1289,6 +1309,11 @@
                 document.getElementById('productSubcategory').value = subcategoryName;
                 updateModalSubtypes();
                 document.getElementById('productSubtype').value = newName;
+                
+                // Uppdatera huvudfiltret
+                populateMainCategoryFilter();
+                updateSubcategories();
+                updateSubtypes();
 
             } catch (error) {
                 showStatus('Fel: ' + error.message, 'error');
