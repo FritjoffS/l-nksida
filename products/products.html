@@ -8,6 +8,178 @@
     <link rel="stylesheet" href="../styles/navbar.css">
     <link rel="stylesheet" href="../styles/products.css">
 
+    <style>
+        .product-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .icon-btn {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .icon-btn.edit:hover {
+            background: #ffc107;
+            border-color: #ffc107;
+        }
+
+        .product-card {
+            position: relative;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+            line-height: 1;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .status-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .status-message.success {
+            background: #28a745;
+        }
+
+        .status-message.error {
+            background: #dc3545;
+        }
+    </style>
+
     <!-- Add Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
@@ -54,11 +226,74 @@
         <p>Laddar produkter...</p>
     </div>
 
+    <!-- Edit Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Redigera produkt</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="productForm" onsubmit="saveProduct(event)">
+                <div class="form-group">
+                    <label for="productCategory">Fabrikat *</label>
+                    <select id="productCategory" required onchange="updateModalSubcategories()">
+                        <option value="">Välj Fabrikat</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="productSubcategory">Underkategori *</label>
+                    <select id="productSubcategory" required onchange="updateModalSubtypes()">
+                        <option value="">Välj underkategori</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="productSubtype">Undertyp</label>
+                    <select id="productSubtype">
+                        <option value="">Ingen undertyp</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="productNumber">Produktnummer *</label>
+                    <input type="text" id="productNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="productName">Produktnamn *</label>
+                    <input type="text" id="productName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="productInfo">Beskrivning *</label>
+                    <textarea id="productInfo" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="productImage">Bildsökväg</label>
+                    <input type="text" id="productImage" placeholder="images/category/product.png">
+                </div>
+
+                <div class="form-group">
+                    <label for="productSpecs">Specifikationer (JSON)</label>
+                    <textarea id="productSpecs" placeholder='{"Fabrikat": "Brand", "Storlek": "Large"}'></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Avbryt</button>
+                    <button type="submit" class="btn btn-success">Spara</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     
     <script>
         // Global variables
         let productsDB = { categories: [] };
         let isDataLoaded = false;
+        let currentEditProduct = null;
 
         // Load data from Firebase
         async function loadProductsFromFirebase() {
@@ -257,32 +492,46 @@
                     return;
                 }
 
-                container.innerHTML = filteredProducts.map(product => {
-                    // Säkerhetskontroller för produktdata
-                    const productName = product.name || 'Okänt produktnamn';
-                    const productNumber = product.productNumber || 'Okänt nummer';
-                    const productInfo = product.info || 'Ingen info tillgänglig';
-                    const productImage = product.image || '../images/placeholder.png';
-                    const productSpecs = product.specs || {};
+                container.innerHTML = productsDB.categories.flatMap(category => {
+                    if (!category.products) return [];
+                    
+                    return category.products.filter(product => {
+                        return filteredProducts.some(fp => 
+                            fp.name === product.name && 
+                            fp.productNumber === product.productNumber
+                        );
+                    }).map(product => {
+                        // Säkerhetskontroller för produktdata
+                        const productName = product.name || 'Okänt produktnamn';
+                        const productNumber = product.productNumber || 'Okänt nummer';
+                        const productInfo = product.info || 'Ingen info tillgänglig';
+                        const productImage = product.image || '../images/placeholder.png';
+                        const productSpecs = product.specs || {};
 
-                    return `
-                        <div class="product-card">
-                            <img src="${productImage}" class="product-image" alt="${productName}" onerror="this.src='../images/placeholder.png'">
-                            <div class="product-info">
-                                <h3>${productName}</h3>
-                                <div class="product-number-container" style="display: flex; align-items: center;">
-                                    <p class="product-number" style="margin-right: 8px;">${productNumber}</p>
-                                    <button class="copy-button" data-product-number="${productNumber}" style="background-image: url('../images/copy.jpg'); background-size: contain; background-repeat: no-repeat; width: 24px; height: 24px; border: none; cursor: pointer;"></button>
-                                </div>                        
-                                <p>${productInfo}</p>
-                                <div class="specs">
-                                    ${Object.entries(productSpecs).map(([key, value]) => `
-                                        <p><strong>${key}:</strong> ${value || 'N/A'}</p>
-                                    `).join('')}
+                        return `
+                            <div class="product-card">
+                                <div class="product-actions">
+                                    <button class="icon-btn edit" onclick='editProduct(${JSON.stringify(product).replace(/'/g, "&apos;")}, "${category.name}")' title="Redigera produkt">
+                                        ✏️
+                                    </button>
+                                </div>
+                                <img src="${productImage}" class="product-image" alt="${productName}" onerror="this.src='../images/placeholder.png'">
+                                <div class="product-info">
+                                    <h3>${productName}</h3>
+                                    <div class="product-number-container" style="display: flex; align-items: center;">
+                                        <p class="product-number" style="margin-right: 8px;">${productNumber}</p>
+                                        <button class="copy-button" data-product-number="${productNumber}" style="background-image: url('../images/copy.jpg'); background-size: contain; background-repeat: no-repeat; width: 24px; height: 24px; border: none; cursor: pointer;"></button>
+                                    </div>                        
+                                    <p>${productInfo}</p>
+                                    <div class="specs">
+                                        ${Object.entries(productSpecs).map(([key, value]) => `
+                                            <p><strong>${key}:</strong> ${value || 'N/A'}</p>
+                                        `).join('')}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    });
                 }).join('');
 
                 // Lägg till event listeners för kopieringsknapparna
@@ -337,6 +586,187 @@
             checkAuthState();
             init();
         };
+
+        // Edit Product Functions
+        function editProduct(product, categoryName) {
+            currentEditProduct = { ...product, categoryName };
+            document.getElementById('modalTitle').textContent = 'Redigera produkt';
+            
+            populateModalCategories();
+            document.getElementById('productCategory').value = categoryName;
+            updateModalSubcategories();
+
+            setTimeout(() => {
+                document.getElementById('productSubcategory').value = product.subcategory;
+                updateModalSubtypes();
+
+                setTimeout(() => {
+                    document.getElementById('productSubtype').value = product.subtype || '';
+                    document.getElementById('productNumber').value = product.productNumber;
+                    document.getElementById('productName').value = product.name;
+                    document.getElementById('productInfo').value = product.info;
+                    document.getElementById('productImage').value = product.image;
+                    document.getElementById('productSpecs').value = product.specs ? JSON.stringify(product.specs, null, 2) : '';
+                }, 50);
+            }, 50);
+
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('productModal').classList.remove('active');
+            currentEditProduct = null;
+        }
+
+        function populateModalCategories() {
+            const select = document.getElementById('productCategory');
+            select.innerHTML = '<option value="">Välj Fabrikat</option>';
+
+            productsDB.categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.name;
+                option.textContent = category.name;
+                select.appendChild(option);
+            });
+        }
+
+        function updateModalSubcategories() {
+            const categoryName = document.getElementById('productCategory').value;
+            const subcategorySelect = document.getElementById('productSubcategory');
+            const subtypeSelect = document.getElementById('productSubtype');
+
+            subcategorySelect.innerHTML = '<option value="">Välj underkategori</option>';
+            subtypeSelect.innerHTML = '<option value="">Ingen undertyp</option>';
+
+            if (categoryName) {
+                const category = productsDB.categories.find(c => c.name === categoryName);
+                if (category && category.subgroups) {
+                    category.subgroups.forEach(subgroup => {
+                        const option = document.createElement('option');
+                        option.value = subgroup.name;
+                        option.textContent = subgroup.name;
+                        subcategorySelect.appendChild(option);
+                    });
+                }
+            }
+        }
+
+        function updateModalSubtypes() {
+            const categoryName = document.getElementById('productCategory').value;
+            const subcategoryName = document.getElementById('productSubcategory').value;
+            const subtypeSelect = document.getElementById('productSubtype');
+
+            subtypeSelect.innerHTML = '<option value="">Ingen undertyp</option>';
+
+            if (categoryName && subcategoryName) {
+                const category = productsDB.categories.find(c => c.name === categoryName);
+                if (category && category.subgroups) {
+                    const subgroup = category.subgroups.find(sg => sg.name === subcategoryName);
+                    if (subgroup && subgroup.subtypes) {
+                        subgroup.subtypes.forEach(subtype => {
+                            const option = document.createElement('option');
+                            option.value = subtype;
+                            option.textContent = subtype;
+                            subtypeSelect.appendChild(option);
+                        });
+                    }
+                }
+            }
+        }
+
+        async function saveProduct(event) {
+            event.preventDefault();
+
+            try {
+                const categoryName = document.getElementById('productCategory').value;
+                const subcategoryName = document.getElementById('productSubcategory').value;
+                const subtypeName = document.getElementById('productSubtype').value;
+                const productNumber = document.getElementById('productNumber').value;
+                const productName = document.getElementById('productName').value;
+                const productInfo = document.getElementById('productInfo').value;
+                const productImage = document.getElementById('productImage').value;
+                const productSpecsText = document.getElementById('productSpecs').value;
+
+                let specs = {};
+                if (productSpecsText.trim()) {
+                    try {
+                        specs = JSON.parse(productSpecsText);
+                    } catch (e) {
+                        showStatus('Ogiltigt JSON-format i specifikationer', 'error');
+                        return;
+                    }
+                }
+
+                const productData = {
+                    name: productName,
+                    subcategory: subcategoryName,
+                    subtype: subtypeName,
+                    image: productImage || `images/${categoryName.toLowerCase()}/${productNumber}.png`,
+                    info: productInfo,
+                    productNumber: productNumber,
+                    specs: specs
+                };
+
+                // Get current category data
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const categorySnapshot = await categoryRef.once('value');
+                const categoryData = categorySnapshot.val();
+
+                if (!categoryData) {
+                    showStatus('Kategorin finns inte', 'error');
+                    return;
+                }
+
+                if (!categoryData.products) {
+                    categoryData.products = [];
+                }
+
+                // If editing and category changed, remove from old category
+                if (currentEditProduct && currentEditProduct.categoryName !== categoryName) {
+                    const oldCategoryRef = firebase.database().ref(`products/${currentEditProduct.categoryName}`);
+                    const oldSnapshot = await oldCategoryRef.once('value');
+                    const oldCategoryData = oldSnapshot.val();
+                    oldCategoryData.products = oldCategoryData.products.filter(p => p.productNumber !== currentEditProduct.productNumber);
+                    await oldCategoryRef.set(oldCategoryData);
+                }
+
+                const existingIndex = categoryData.products.findIndex(p => p.productNumber === productNumber);
+
+                if (existingIndex !== -1) {
+                    categoryData.products[existingIndex] = productData;
+                    showStatus('Produkt uppdaterad!', 'success');
+                } else {
+                    categoryData.products.push(productData);
+                    showStatus('Produkt tillagd!', 'success');
+                }
+
+                await categoryRef.set(categoryData);
+
+                closeModal();
+                await loadProductsFromFirebase();
+
+            } catch (error) {
+                showStatus('Fel vid sparande: ' + error.message, 'error');
+            }
+        }
+
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.textContent = message;
+            document.body.appendChild(statusDiv);
+
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 3000);
+        }
+
+        // Close modal on outside click
+        document.getElementById('productModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
     </script>
 </body>
 
