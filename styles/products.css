@@ -10,6 +10,11 @@ body {
     /*background-color: #f5f6fa;*/
 }
 
+button {
+    all: unset;
+    cursor: pointer;
+}
+
 .filter-section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
