@@ -40,6 +40,12 @@
             border-color: #ffc107;
         }
 
+        .icon-btn.delete:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
         .product-card {
             position: relative;
         }
@@ -514,6 +520,9 @@
                                     <button class="icon-btn edit" onclick='editProduct(${JSON.stringify(product).replace(/'/g, "&apos;")}, "${category.name}")' title="Redigera produkt">
                                         ✏️
                                     </button>
+                                    <button class="icon-btn delete" onclick='deleteProduct("${category.name}", "${productNumber}")' title="Ta bort produkt">
+                                        🗑️
+                                    </button>
                                 </div>
                                 <img src="${productImage}" class="product-image" alt="${productName}" onerror="this.src='../images/placeholder.png'">
                                 <div class="product-info">
@@ -747,6 +756,32 @@
 
             } catch (error) {
                 showStatus('Fel vid sparande: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteProduct(categoryName, productNumber) {
+            if (!confirm(`Är du säker på att du vill ta bort produkten ${productNumber}?`)) {
+                return;
+            }
+
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+
+                if (!categoryData || !categoryData.products) {
+                    showStatus('Kategorin eller produkterna finns inte', 'error');
+                    return;
+                }
+
+                categoryData.products = categoryData.products.filter(p => p.productNumber !== productNumber);
+                await categoryRef.set(categoryData);
+
+                showStatus('Produkt borttagen', 'success');
+                await loadProductsFromFirebase();
+
+            } catch (error) {
+                showStatus('Fel vid borttagning: ' + error.message, 'error');
             }
         }
 
