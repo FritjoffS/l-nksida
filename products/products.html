@@ -276,6 +276,9 @@
                         <button type="button" class="edit-icon-btn" id="editCategoryBtn" onclick="openEditCategory()" disabled title="Redigera fabrikat">
                             ✏️
                         </button>
+                        <button type="button" class="edit-icon-btn" id="deleteCategoryBtn" onclick="deleteCategory()" disabled title="Ta bort fabrikat" style="color: #dc3545;">
+                            🗑️
+                        </button>
                     </div>
                 </div>
 
@@ -289,6 +292,9 @@
                         <button type="button" class="edit-icon-btn" id="editSubcategoryBtn" onclick="openEditSubcategory()" disabled title="Redigera underkategori">
                             ✏️
                         </button>
+                        <button type="button" class="edit-icon-btn" id="deleteSubcategoryBtn" onclick="deleteSubcategory()" disabled title="Ta bort underkategori" style="color: #dc3545;">
+                            🗑️
+                        </button>
                     </div>
                 </div>
 
@@ -301,6 +307,9 @@
                         </select>
                         <button type="button" class="edit-icon-btn" id="editSubtypeBtn" onclick="openEditSubtype()" disabled title="Redigera undertyp">
                             ✏️
+                        </button>
+                        <button type="button" class="edit-icon-btn" id="deleteSubtypeBtn" onclick="deleteSubtype()" disabled title="Ta bort undertyp" style="color: #dc3545;">
+                            🗑️
                         </button>
                     </div>
                 </div>
@@ -780,6 +789,8 @@
             const subtypeSelect = document.getElementById('productSubtype');
             const editCategoryBtn = document.getElementById('editCategoryBtn');
             const editSubcategoryBtn = document.getElementById('editSubcategoryBtn');
+            const deleteCategoryBtn = document.getElementById('deleteCategoryBtn');
+            const deleteSubcategoryBtn = document.getElementById('deleteSubcategoryBtn');
 
             // Handle "New Category" selection
             if (categoryName === '__NEW__') {
@@ -790,7 +801,9 @@
             subcategorySelect.innerHTML = '<option value="">Välj underkategori</option>';
             subtypeSelect.innerHTML = '<option value="">Ingen undertyp</option>';
             editCategoryBtn.disabled = !categoryName;
+            deleteCategoryBtn.disabled = !categoryName;
             editSubcategoryBtn.disabled = true;
+            deleteSubcategoryBtn.disabled = true;
 
             if (categoryName) {
                 const category = productsDB.categories.find(c => c.name === categoryName);
@@ -825,6 +838,8 @@
             const subtypeSelect = document.getElementById('productSubtype');
             const editSubcategoryBtn = document.getElementById('editSubcategoryBtn');
             const editSubtypeBtn = document.getElementById('editSubtypeBtn');
+            const deleteSubcategoryBtn = document.getElementById('deleteSubcategoryBtn');
+            const deleteSubtypeBtn = document.getElementById('deleteSubtypeBtn');
 
             // Handle "New Subcategory" selection
             if (subcategoryName === '__NEW__') {
@@ -834,7 +849,9 @@
 
             subtypeSelect.innerHTML = '<option value="">Ingen undertyp</option>';
             editSubcategoryBtn.disabled = !subcategoryName;
+            deleteSubcategoryBtn.disabled = !subcategoryName;
             editSubtypeBtn.disabled = true;
+            deleteSubtypeBtn.disabled = true;
 
             if (categoryName && subcategoryName) {
                 const category = productsDB.categories.find(c => c.name === categoryName);
@@ -848,6 +865,7 @@
                             subtypeSelect.appendChild(option);
                         });
                         editSubtypeBtn.disabled = false;
+                        deleteSubtypeBtn.disabled = false;
                     }
                 }
             }
@@ -1016,6 +1034,37 @@
             }
         }
 
+        async function deleteCategory() {
+            const categoryName = document.getElementById('productCategory').value;
+            if (!categoryName) return;
+
+            // Kontrollera om det finns produkter i kategorin
+            const category = productsDB.categories.find(c => c.name === categoryName);
+            if (category && category.products && category.products.length > 0) {
+                if (!confirm(`Fabrikat "${categoryName}" innehåller ${category.products.length} produkter. Är du säker på att du vill ta bort fabrikatet och alla dess produkter?`)) {
+                    return;
+                }
+            } else if (!confirm(`Är du säker på att du vill ta bort fabrikat "${categoryName}"?`)) {
+                return;
+            }
+
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                await categoryRef.remove();
+
+                showStatus(`Fabrikat "${categoryName}" borttaget`, 'success');
+                
+                await loadProductsFromFirebase();
+                populateModalCategories();
+                document.getElementById('productCategory').value = '';
+                updateModalSubcategories();
+                populateMainCategoryFilter();
+
+            } catch (error) {
+                showStatus('Fel vid borttagning: ' + error.message, 'error');
+            }
+        }
+
         async function saveCategoryFromModal(event) {
             event.preventDefault();
             const newName = document.getElementById('modalCategoryName').value.trim();
@@ -1112,6 +1161,55 @@
             document.getElementById('subcategoryModal').classList.remove('active');
             if (document.getElementById('productSubcategory').value === '__NEW__') {
                 document.getElementById('productSubcategory').value = '';
+            }
+        }
+
+        async function deleteSubcategory() {
+            const categoryName = document.getElementById('productCategory').value;
+            const subcategoryName = document.getElementById('productSubcategory').value;
+            if (!categoryName || !subcategoryName) return;
+
+            const category = productsDB.categories.find(c => c.name === categoryName);
+            if (!category) return;
+
+            // Kontrollera om det finns produkter i underkategorin
+            const productsInSubcategory = category.products ? category.products.filter(p => p.subcategory === subcategoryName).length : 0;
+            
+            if (productsInSubcategory > 0) {
+                if (!confirm(`Underkategori "${subcategoryName}" innehåller ${productsInSubcategory} produkter. Är du säker på att du vill ta bort underkategorin och alla dess produkter?`)) {
+                    return;
+                }
+            } else if (!confirm(`Är du säker på att du vill ta bort underkategori "${subcategoryName}"?`)) {
+                return;
+            }
+
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+
+                // Ta bort underkategorin från subgroups
+                categoryData.subgroups = categoryData.subgroups.filter(sg => sg.name !== subcategoryName);
+                
+                // Ta bort alla produkter i underkategorin
+                if (categoryData.products) {
+                    categoryData.products = categoryData.products.filter(p => p.subcategory !== subcategoryName);
+                }
+
+                await categoryRef.set(categoryData);
+
+                showStatus(`Underkategori "${subcategoryName}" borttagen`, 'success');
+                
+                await loadProductsFromFirebase();
+                populateModalCategories();
+                document.getElementById('productCategory').value = categoryName;
+                updateModalSubcategories();
+                document.getElementById('productSubcategory').value = '';
+                populateMainCategoryFilter();
+                updateSubcategories();
+
+            } catch (error) {
+                showStatus('Fel vid borttagning: ' + error.message, 'error');
             }
         }
 
@@ -1234,6 +1332,73 @@
             document.getElementById('subtypeModal').classList.remove('active');
             if (document.getElementById('productSubtype').value === '__NEW__') {
                 document.getElementById('productSubtype').value = '';
+            }
+        }
+
+        async function deleteSubtype() {
+            const categoryName = document.getElementById('productCategory').value;
+            const subcategoryName = document.getElementById('productSubcategory').value;
+            const subtypeName = document.getElementById('productSubtype').value;
+            
+            if (!categoryName || !subcategoryName || !subtypeName) return;
+
+            const category = productsDB.categories.find(c => c.name === categoryName);
+            if (!category) return;
+
+            // Kontrollera om det finns produkter med denna undertyp
+            const productsWithSubtype = category.products ? 
+                category.products.filter(p => p.subcategory === subcategoryName && p.subtype === subtypeName).length : 0;
+            
+            if (productsWithSubtype > 0) {
+                if (!confirm(`Undertyp "${subtypeName}" används av ${productsWithSubtype} produkter. Är du säker på att du vill ta bort undertypen? Produkterna kommer att bli utan undertyp.`)) {
+                    return;
+                }
+            } else if (!confirm(`Är du säker på att du vill ta bort undertyp "${subtypeName}"?`)) {
+                return;
+            }
+
+            try {
+                const categoryRef = firebase.database().ref(`products/${categoryName}`);
+                const snapshot = await categoryRef.once('value');
+                const categoryData = snapshot.val();
+
+                const subgroup = categoryData.subgroups.find(sg => sg.name === subcategoryName);
+                if (!subgroup) {
+                    showStatus('Underkategorin finns inte', 'error');
+                    return;
+                }
+
+                // Ta bort undertypen från subtypes array
+                if (subgroup.subtypes) {
+                    subgroup.subtypes = subgroup.subtypes.filter(st => st !== subtypeName);
+                }
+
+                // Ta bort undertyp från produkter (sätt till tom sträng)
+                if (categoryData.products) {
+                    categoryData.products.forEach(product => {
+                        if (product.subcategory === subcategoryName && product.subtype === subtypeName) {
+                            product.subtype = '';
+                        }
+                    });
+                }
+
+                await categoryRef.set(categoryData);
+
+                showStatus(`Undertyp "${subtypeName}" borttagen`, 'success');
+                
+                await loadProductsFromFirebase();
+                populateModalCategories();
+                document.getElementById('productCategory').value = categoryName;
+                updateModalSubcategories();
+                document.getElementById('productSubcategory').value = subcategoryName;
+                updateModalSubtypes();
+                document.getElementById('productSubtype').value = '';
+                populateMainCategoryFilter();
+                updateSubcategories();
+                updateSubtypes();
+
+            } catch (error) {
+                showStatus('Fel vid borttagning: ' + error.message, 'error');
             }
         }
 
