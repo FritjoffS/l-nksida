@@ -86,6 +86,33 @@
             cursor: not-allowed;
         }
 
+        /* Add Product Button */
+        .add-product-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .add-product-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .add-product-btn:active {
+            transform: translateY(0);
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -249,6 +276,10 @@
         <select id="subType" disabled>
             <option value="">Välj underkategori</option>
         </select>
+
+        <button class="add-product-btn" onclick="openAddProductModal()" title="Lägg till ny produkt">
+            ➕ Lägg till produkt
+        </button>
     </div>
 
     <div id="productContainer" class="product-grid"></div>
@@ -756,6 +787,19 @@
                 }, 50);
             }, 50);
 
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function openAddProductModal() {
+            currentEditProduct = null;
+            document.getElementById('modalTitle').textContent = 'Lägg till ny produkt';
+            
+            // Rensa formuläret
+            document.getElementById('productForm').reset();
+            
+            populateModalCategories();
+            updateModalSubcategories();
+            
             document.getElementById('productModal').classList.add('active');
         }
 
