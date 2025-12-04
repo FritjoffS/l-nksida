@@ -106,9 +106,14 @@ redeemCardButton.addEventListener("click", async () => {
     try {
         const serialNumber = serialNumberInput.value.trim();
         const redeemAmount = parseFloat(redeemAmountInput.value);
+        const redeemSeller = document.getElementById("redeemSeller").value.trim();
 
         if (!serialNumber || isNaN(redeemAmount) || redeemAmount <= 0) {
             return alert("Ange giltiga värden!");
+        }
+        
+        if (!redeemSeller) {
+            return alert("Ange säljare!");
         }
 
         redeemCardButton.disabled = true;
@@ -132,12 +137,11 @@ redeemCardButton.addEventListener("click", async () => {
 
         // Save redeem history with consistent structure
         const historyRef = ref(db, `presentkort/${serialNumber}/history`);
-        const currentUser = auth.currentUser;
         const newHistoryEntry = {
             type: "redeem",
             amount: -redeemAmount,
             timestamp: new Date().toISOString(),
-            user: currentUser ? currentUser.email : "Unknown"
+            seller: redeemSeller
         };
         await push(historyRef, newHistoryEntry);
 
@@ -146,6 +150,7 @@ redeemCardButton.addEventListener("click", async () => {
         const formattedExpirationDate = `${expirationDate.getFullYear()}-${String(expirationDate.getMonth() + 1).padStart(2, '0')}-${String(expirationDate.getDate()).padStart(2, '0')}`;
         cardValueParagraph.innerHTML = `Aktuellt Saldo: ${newValue} kr<br>Utgångsdatum: ${formattedExpirationDate}`;
         redeemAmountInput.value = "";
+        document.getElementById("redeemSeller").value = "";
     } catch (error) {
         console.error("Error redeeming card:", error);
         alert("Ett fel uppstod vid inlösen: " + error.message);
