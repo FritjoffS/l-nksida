@@ -342,6 +342,13 @@ applyFiltersButton.addEventListener("click", () => {
     const activatedFrom = document.getElementById("activatedFrom").value;
     const activatedTo = document.getElementById("activatedTo").value;
 
+    // Save filter state to sessionStorage
+    sessionStorage.setItem('filterDialogOpen', 'true');
+    sessionStorage.setItem('filterShowActive', showActive);
+    sessionStorage.setItem('filterShowExpired', showExpired);
+    sessionStorage.setItem('filterActivatedFrom', activatedFrom);
+    sessionStorage.setItem('filterActivatedTo', activatedTo);
+
     // Build query parameters
     const queryParams = new URLSearchParams({
         showActive,
@@ -506,3 +513,24 @@ async function generateGiftCardPDF(startNumber, quantity) {
 document.getElementById("closeHistory").addEventListener("click", () => {
     document.getElementById("historyDialog").style.display = "none";
 });
+
+// Check if we should open filter dialog on page load
+if (sessionStorage.getItem('filterDialogOpen') === 'true') {
+    // Restore filter values from sessionStorage
+    const showActive = sessionStorage.getItem('filterShowActive');
+    const showExpired = sessionStorage.getItem('filterShowExpired');
+    const activatedFrom = sessionStorage.getItem('filterActivatedFrom');
+    const activatedTo = sessionStorage.getItem('filterActivatedTo');
+    
+    if (showActive) document.getElementById('showActiveCards').checked = showActive === 'true';
+    if (showExpired) document.getElementById('showExpiredCards').checked = showExpired === 'true';
+    if (activatedFrom) document.getElementById('activatedFrom').value = activatedFrom;
+    if (activatedTo) document.getElementById('activatedTo').value = activatedTo;
+    
+    // Show filter dialog
+    filterDialog.style.display = 'block';
+    
+    // Clear the flag so it doesn't reopen on next page load
+    sessionStorage.removeItem('filterDialogOpen');
+}
+
