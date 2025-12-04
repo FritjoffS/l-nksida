@@ -295,9 +295,10 @@ async function generateGiftCardPDF(startNumber, quantity) {
             
             // Add number in top right corner of front page
             // Adjusted: 5mm left = ~14.17pt, 5mm down = ~14.17pt
+            // Additional: 3mm left = +8.5pt, 2mm up = +5.66pt, 1mm down = -2.83pt
             frontPage.drawText(text, {
-                x: width - textWidth - 20 - 14.17,
-                y: height - 30 - 14.17,
+                x: width - textWidth - 20 - 14.17 - 8.5,
+                y: height - 30 - 14.17 + 5.66 - 2.83,
                 size: fontSize,
                 font: font,
                 color: rgb(0, 0, 0),
@@ -310,9 +311,10 @@ async function generateGiftCardPDF(startNumber, quantity) {
                 
                 // Add number in top right corner of back page
                 // Adjusted: 5mm left = ~14.17pt, 5mm down = ~14.17pt
+                // Additional: 3mm left = +8.5pt, 2mm up = +5.66pt, 1mm down = -2.83pt
                 backPage.drawText(text, {
-                    x: width - textWidth - 20 - 14.17,
-                    y: height - 30 - 14.17,
+                    x: width - textWidth - 20 - 14.17 - 8.5,
+                    y: height - 30 - 14.17 + 5.66 - 2.83,
                     size: fontSize,
                     font: font,
                     color: rgb(0, 0, 0),
