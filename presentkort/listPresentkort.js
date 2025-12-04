@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -15,6 +16,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 
 // Get query parameters
 const urlParams = new URLSearchParams(window.location.search);
@@ -73,15 +75,24 @@ const fetchFilteredCards = async () => {
 
             // If no cards match the filters
             if (cardTableBody.children.length === 0) {
-                cardTableBody.innerHTML = "<tr><td colspan='4' style='text-align: center;'>Inga presentkort matchar filtren.</td></tr>";
+                cardTableBody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>Inga presentkort matchar filtren.</td></tr>";
             }
         } else {
-            cardTableBody.innerHTML = "<tr><td colspan='4' style='text-align: center;'>Inga presentkort hittades.</td></tr>";
+            cardTableBody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>Inga presentkort hittades.</td></tr>";
         }
     } catch (error) {
         console.error("Error fetching cards:", error);
-        cardTableBody.innerHTML = "<tr><td colspan='4' style='text-align: center;'>Kunde inte hämta presentkort.</td></tr>";
+        cardTableBody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>Kunde inte hämta presentkort. Kontrollera att du är inloggad.</td></tr>";
     }
 };
 
-fetchFilteredCards();
+// Wait for authentication before fetching data
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log("User authenticated, fetching cards...");
+        fetchFilteredCards();
+    } else {
+        console.log("No user authenticated");
+        window.location.href = "../index/login.html";
+    }
+});
