@@ -2,18 +2,25 @@ body {
     font-family: Arial, sans-serif;
 }
 
+button {
+    all: unset;
+    cursor: pointer;
+}
+
 #presentkortContainer {
     position: absolute;
     top: 55%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 500px;
-    height: 590px;
+    min-height: 590px;
+    max-height: 90vh;
     padding: 20px;
     border: 2px solid #333;
     border-radius: 10px;
     background-color: #f9f9f9;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);    
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
 }
 
 #listaPresentkortContainer {
@@ -28,10 +35,12 @@ body {
     border-radius: 10px;
     background-color: #f9f9f9;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-y: auto;
+    /* Enable vertical scrolling */
 }
 
-h1, h2 {
+h1,
+h2 {
     text-align: center;
     margin-top: 10px;
     color: #333;
@@ -57,9 +66,12 @@ h1, h2 {
     border-radius: 10px;
 }
 
-#cardInfo label, #cardInfo input {
-    text-align: center; /* Center text inside the label and input */
-    margin: 0 auto; /* Center the input field itself */
+#cardInfo label,
+#cardInfo input {
+    text-align: center;
+    /* Center text inside the label and input */
+    margin: 0 auto;
+    /* Center the input field itself */
 }
 
 #cardValue {
@@ -81,7 +93,9 @@ h1, h2 {
     /* padding: 20px; */
 }
 
-#serialNumber, #redeemAmount, #cardValueInput {
+#serialNumber,
+#redeemAmount,
+#cardValueInput {
     width: 150px;
 }
 
@@ -101,7 +115,7 @@ h1, h2 {
     margin: 10px 0;
 }
 
-#activateCard div > div {
+#activateCard div>div {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -125,33 +139,30 @@ label {
     margin-bottom: 5px;
 }
 
-input{
+input {
     padding: 8px;
     width: 200px;
     margin-bottom: 10px;
     box-sizing: border-box;
 }
 
-button:hover {
-    background-color: #0056b3;
-}
-
-#getNextSerialNumber, #activateCard button, #checkCard, #redeemCard, #viewHistory, #backToPresentkort, #listCards, #applyFilters {
-    padding: 5px 10px; /* Reduced padding */
-    font-size: 14px;  /* Smaller font size */
+button {
+    padding: 5px 10px;
+    font-size: 14px;
     background-color: rgb(85, 85, 85);
     color: white;
     cursor: pointer;
     display: block;
     margin: 0 auto;
-    width: 150px; /* Set a fixed width */
-    height: 50px; /* Set a fixed height */
+    width: 150px;
+    height: 50px;
     background-image: none;
     border-radius: 5px;
+    text-align: center;
 }
 
-#viewHistory {
-    margin-top: 10px;
+button:hover {
+    background-color: #0056b3;
 }
 
 #backToPresentkort {
@@ -168,7 +179,8 @@ table {
     margin-top: 20px;
 }
 
-th, td {
+th,
+td {
     border: 1px solid #333;
     padding: 8px;
     text-align: left;
@@ -185,7 +197,8 @@ td {
 
 .dateRange {
     display: flex;
-    gap: 20px; /* Add spacing between the fields */
+    gap: 20px;
+    /* Add spacing between the fields */
     align-items: center;
 }
 
@@ -193,5 +206,3 @@ td {
     display: flex;
     flex-direction: column;
 }
-
-

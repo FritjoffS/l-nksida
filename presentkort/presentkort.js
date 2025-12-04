@@ -18,6 +18,22 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
+// Check authentication state
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        window.location.href = "../index/login.html";
+    }
+});
+
+// Logout function (accessible from navbar)
+window.logout = () => {
+    auth.signOut().then(() => {
+        window.location.href = "../index/login.html";
+    }).catch((error) => {
+        console.error("Logout error:", error);
+    });
+};
+
 // DOM elements
 const serialNumberInput = document.getElementById("serialNumber");
 const checkCardButton = document.getElementById("checkCard");
@@ -43,11 +59,23 @@ const nextPrintNumberSpan = document.getElementById("nextPrintNumber");
 const generatePDFButton = document.getElementById("generatePDF");
 const cancelPrintButton = document.getElementById("cancelPrint");
 
+// Helper function to hide all dialogs
+function hideAllDialogs() {
+    cardInfoDiv.style.display = "none";
+    activateCardDiv.style.display = "none";
+    filterDialog.style.display = "none";
+    printDialog.style.display = "none";
+    document.getElementById("historyDialog").style.display = "none";
+}
+
 // Check card
 checkCardButton.addEventListener("click", async () => {
     try {
         const serialNumber = serialNumberInput.value.trim();
         if (!serialNumber) return alert("Ange ett serienummer!");
+
+        checkCardButton.disabled = true;
+        checkCardButton.textContent = "Hämtar...";
 
         const cardRef = ref(db, `presentkort/${serialNumber}`);
         const snapshot = await get(cardRef);
@@ -58,112 +86,241 @@ checkCardButton.addEventListener("click", async () => {
             const formattedExpirationDate = `${expirationDate.getFullYear()}-${String(expirationDate.getMonth() + 1).padStart(2, '0')}-${String(expirationDate.getDate()).padStart(2, '0')}`;
 
             cardValueParagraph.innerHTML = `Aktuellt Saldo: ${cardData.value} kr<br>Utgångsdatum: ${formattedExpirationDate}`;
+            hideAllDialogs();
             cardInfoDiv.style.display = "block";
         } else {
-            alert("Presentkortet hittades inte!");
-            cardInfoDiv.style.display = "none";
+            alert("Presentkortet ej aktiverat!");
+            hideAllDialogs();
         }
     } catch (error) {
         console.error("Error fetching card:", error);
-        alert("Ett fel uppstod vid hämtning av presentkort.");
+        alert("Ett fel uppstod vid hämtning av presentkort: " + error.message);
+    } finally {
+        checkCardButton.disabled = false;
+        checkCardButton.textContent = "Lös in / Kontrollera Presentkort";
     }
 });
 
 // Redeem card
 redeemCardButton.addEventListener("click", async () => {
-    const serialNumber = serialNumberInput.value.trim();
-    const redeemAmount = parseFloat(redeemAmountInput.value);
+    try {
+        const serialNumber = serialNumberInput.value.trim();
+        const redeemAmount = parseFloat(redeemAmountInput.value);
 
-    if (!serialNumber || isNaN(redeemAmount)) return alert("Ange giltiga värden!");
+        if (!serialNumber || isNaN(redeemAmount) || redeemAmount <= 0) {
+            return alert("Ange giltiga värden!");
+        }
 
-    const cardRef = ref(db, `presentkort/${serialNumber}`);
-    const snapshot = await get(cardRef);
+        redeemCardButton.disabled = true;
+        redeemCardButton.textContent = "Löser in...";
 
-    if (snapshot.exists()) {
+        const cardRef = ref(db, `presentkort/${serialNumber}`);
+        const snapshot = await get(cardRef);
+
+        if (!snapshot.exists()) {
+            return alert("Presentkortet ej aktiverat!");
+        }
+
         const cardData = snapshot.val();
         const newValue = cardData.value - redeemAmount;
 
-        if (newValue < 0) return alert("Otillräckligt saldo!");
+        if (newValue < 0) {
+            return alert("Otillräckligt saldo! Aktuellt saldo: " + cardData.value + " kr");
+        }
 
         await update(cardRef, { value: newValue });
 
-        // Save redeem history
+        // Save redeem history with consistent structure
         const historyRef = ref(db, `presentkort/${serialNumber}/history`);
+        const currentUser = auth.currentUser;
         const newHistoryEntry = {
-            redeemedAmount: redeemAmount,
+            type: "redeem",
+            amount: -redeemAmount,
             timestamp: new Date().toISOString(),
+            user: currentUser ? currentUser.email : "Unknown"
         };
         await push(historyRef, newHistoryEntry);
 
         alert("Beloppet har lösts in!");
-        cardValueParagraph.textContent = `Aktuellt Saldo: ${newValue} kr`;
+        const expirationDate = new Date(cardData.expirationDate);
+        const formattedExpirationDate = `${expirationDate.getFullYear()}-${String(expirationDate.getMonth() + 1).padStart(2, '0')}-${String(expirationDate.getDate()).padStart(2, '0')}`;
+        cardValueParagraph.innerHTML = `Aktuellt Saldo: ${newValue} kr<br>Utgångsdatum: ${formattedExpirationDate}`;
+        redeemAmountInput.value = "";
+    } catch (error) {
+        console.error("Error redeeming card:", error);
+        alert("Ett fel uppstod vid inlösen: " + error.message);
+    } finally {
+        redeemCardButton.disabled = false;
+        redeemCardButton.textContent = "Lös in";
     }
 });
 
 // Activate card
 activateCardButton.addEventListener("click", async () => {
-    const serialNumber = serialNumberInput.value.trim();
-    const cardValue = parseFloat(cardValueInput.value);
-    const sellerName = sellerNameInput.value.trim();
+    try {
+        const serialNumber = serialNumberInput.value.trim();
+        const cardValue = parseFloat(cardValueInput.value);
+        const sellerName = sellerNameInput.value.trim();
 
-    if (!serialNumber || isNaN(cardValue) || !sellerName) return alert("Ange giltiga värden!");
+        if (!serialNumber || isNaN(cardValue) || cardValue <= 0 || !sellerName) {
+            return alert("Ange giltiga värden!");
+        }
 
-    const cardRef = ref(db, `presentkort/${serialNumber}`);
-    const activationDate = new Date();
-    const expirationDate = new Date(activationDate); // Clone activation date
-    expirationDate.setFullYear(expirationDate.getFullYear() + 2); // Add 2 years
+        activateCardButton.disabled = true;
+        activateCardButton.textContent = "Aktiverar...";
 
-    const newCardData = {
-        value: cardValue,
-        addedValue: cardValue,
-        seller: sellerName,
-        date: activationDate.toISOString(),
-        expirationDate: expirationDate.toISOString() // Save expiration date
-    };
+        const cardRef = ref(db, `presentkort/${serialNumber}`);
+        
+        // Check if card already exists
+        const existingCard = await get(cardRef);
+        if (existingCard.exists()) {
+            const confirmOverwrite = confirm("Presentkort " + serialNumber + " finns redan! Vill du skriva över det?");
+            if (!confirmOverwrite) {
+                return;
+            }
+        }
 
-    await set(cardRef, newCardData);
+        const activationDate = new Date();
+        const expirationDate = new Date(activationDate);
+        expirationDate.setFullYear(expirationDate.getFullYear() + 2);
 
-    // Save activation history
-    const historyRef = ref(db, `presentkort/${serialNumber}/history`);
-    const activationHistoryEntry = {
-        addedValue: cardValue,
-        timestamp: activationDate.toISOString(),
-    };
-    await push(historyRef, activationHistoryEntry);
+        const newCardData = {
+            value: cardValue,
+            seller: sellerName,
+            date: activationDate.toISOString(),
+            expirationDate: expirationDate.toISOString()
+        };
 
-    alert("Presentkortet har aktiverats!");
-    activateCardDiv.style.display = "none";
+        await set(cardRef, newCardData);
+
+        // Save activation history with consistent structure
+        const historyRef = ref(db, `presentkort/${serialNumber}/history`);
+        const activationHistoryEntry = {
+            type: "activation",
+            amount: cardValue,
+            timestamp: activationDate.toISOString(),
+            seller: sellerName
+        };
+        await push(historyRef, activationHistoryEntry);
+
+        alert(`Presentkort ${serialNumber} har skapats med värde ${cardValue} kr!\nUtgångsdatum: ${expirationDate.toLocaleDateString('sv-SE')}`);
+        
+        // Clear form fields
+        serialNumberInput.value = "";
+        cardValueInput.value = "";
+        sellerNameInput.value = "";
+        activateCardDiv.style.display = "none";
+    } catch (error) {
+        console.error("Error activating card:", error);
+        alert("Ett fel uppstod vid aktivering: " + error.message);
+    } finally {
+        activateCardButton.disabled = false;
+        activateCardButton.textContent = "Ladda Presentkort";
+    }
 });
 
 // View history
-viewHistoryButton.addEventListener("click", () => {
+viewHistoryButton.addEventListener("click", async () => {
     const serialNumber = serialNumberInput.value.trim();
     if (!serialNumber) return alert("Ange ett serienummer!");
-    window.location.href = `historik.html?serialNumber=${encodeURIComponent(serialNumber)}`;
+    
+    try {
+        viewHistoryButton.disabled = true;
+        viewHistoryButton.textContent = "Hämtar...";
+        
+        const cardRef = ref(db, `presentkort/${serialNumber}`);
+        const snapshot = await get(cardRef);
+        
+        if (!snapshot.exists()) {
+            return alert("Presentkortet ej aktiverat!");
+        }
+        
+        const cardData = snapshot.val();
+        const historyRef = ref(db, `presentkort/${serialNumber}/history`);
+        const historySnapshot = await get(historyRef);
+        
+        let historyHTML = `<h3>Presentkort: ${serialNumber}</h3>`;
+        historyHTML += `<p><strong>Aktuellt saldo:</strong> ${cardData.value} kr</p>`;
+        historyHTML += `<p><strong>Aktiverat:</strong> ${new Date(cardData.date).toLocaleString('sv-SE')}</p>`;
+        historyHTML += `<p><strong>Utgår:</strong> ${new Date(cardData.expirationDate).toLocaleDateString('sv-SE')}</p>`;
+        historyHTML += `<p><strong>Säljare:</strong> ${cardData.seller || 'Okänd'}</p>`;
+        historyHTML += `<hr style="margin: 15px 0;">`;
+        historyHTML += `<h4>Transaktionshistorik:</h4>`;
+        
+        if (historySnapshot.exists()) {
+            const history = historySnapshot.val();
+            const historyArray = Object.entries(history).map(([key, value]) => ({
+                ...value,
+                key
+            })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            historyHTML += `<div style="max-height: 300px; overflow-y: auto;">`;
+            historyArray.forEach(entry => {
+                const date = new Date(entry.timestamp).toLocaleString('sv-SE');
+                const type = entry.type === 'activation' ? '🎉 Aktivering' : 
+                            entry.type === 'redeem' ? '💵 Inlösen' : 
+                            entry.type === 'reload' ? '🔄 Påladdning' : '📝 Transaktion';
+                const amount = entry.amount > 0 ? `+${entry.amount}` : entry.amount;
+                const user = entry.seller || entry.user || 'System';
+                
+                historyHTML += `
+                    <div style="padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; border-left: 3px solid ${entry.amount > 0 ? '#28a745' : '#dc3545'};">
+                        <div><strong>${type}</strong> - ${date}</div>
+                        <div>Belopp: <strong>${amount} kr</strong></div>
+                        <div>Användare: ${user}</div>
+                    </div>
+                `;
+            });
+            historyHTML += `</div>`;
+        } else {
+            historyHTML += `<p>Ingen transaktionshistorik hittades.</p>`;
+        }
+        
+        document.getElementById("historyContent").innerHTML = historyHTML;
+        hideAllDialogs();
+        document.getElementById("historyDialog").style.display = "block";
+        
+    } catch (error) {
+        console.error("Error fetching history:", error);
+        alert("Ett fel uppstod vid hämtning av historik: " + error.message);
+    } finally {
+        viewHistoryButton.disabled = false;
+        viewHistoryButton.textContent = "Visa Historik";
+    }
 });
 
-// Get next available serial number
+// Get next available serial number (using print number system)
 getNextSerialNumberButton.addEventListener("click", async () => {
-    const cardsRef = ref(db, "presentkort");
     try {
-        const snapshot = await get(cardsRef);
-        if (snapshot.exists()) {
-            const cards = snapshot.val();
-            const serialNumbers = Object.keys(cards).map(Number).sort((a, b) => a - b);
-            const nextSerialNumber = serialNumbers.length > 0 ? Math.max(...serialNumbers) + 1 : 1;
-            serialNumberInput.value = nextSerialNumber.toString().padStart(6, "0"); // Format as 6-digit number
-            alert(`Nästa lediga serienummer är: ${serialNumberInput.value}`);
-        } else {
-            serialNumberInput.value = "000001"; // Start from 000001 if no cards exist
-            alert(`Nästa lediga serienummer är: ${serialNumberInput.value}`);
+        const serialNumber = serialNumberInput.value.trim();
+        
+        if (!serialNumber) {
+            return alert("Ange löpnumret från det tryckta presentkortet som du vill sälja.");
         }
-
-        // Show activateCard section
-        cardInfoDiv.style.display = "none";
+        
+        getNextSerialNumberButton.disabled = true;
+        getNextSerialNumberButton.textContent = "Kontrollerar...";
+        
+        // Check if card already exists
+        const cardRef = ref(db, `presentkort/${serialNumber}`);
+        const snapshot = await get(cardRef);
+        
+        if (snapshot.exists()) {
+            alert(`Presentkort ${serialNumber} är redan aktiverat!\n\nAktuellt saldo: ${snapshot.val().value} kr\nSäljare: ${snapshot.val().seller}`);
+            return;
+        }
+        
+        // Card is available, show activation dialog
+        hideAllDialogs();
         activateCardDiv.style.display = "block";
+        cardValueInput.focus();
+        
     } catch (error) {
-        console.error("Error fetching serial numbers:", error);
-        alert("Kunde inte hämta nästa lediga serienummer.");
+        console.error("Error:", error);
+        alert("Ett fel uppstod: " + error.message);
+    } finally {
+        getNextSerialNumberButton.disabled = false;
+        getNextSerialNumberButton.textContent = "Sälj Presentkort";
     }
 });
 
@@ -171,9 +328,10 @@ getNextSerialNumberButton.addEventListener("click", async () => {
 listCardsButton.addEventListener("click", () => {
     // Toggle the visibility of the filter dialog
     if (filterDialog.style.display === "none" || filterDialog.style.display === "") {
-        filterDialog.style.display = "block"; // Show the dialog
+        hideAllDialogs();
+        filterDialog.style.display = "block";
     } else {
-        filterDialog.style.display = "none"; // Hide the dialog
+        filterDialog.style.display = "none";
     }
 });
 
@@ -201,6 +359,9 @@ applyFiltersButton.addEventListener("click", () => {
 // Show print dialog and fetch next print number
 printCardsButton.addEventListener("click", async () => {
     try {
+        printCardsButton.disabled = true;
+        printCardsButton.textContent = "Hämtar...";
+
         const printNumberRef = ref(db, "presentkort_config/nextPrintNumber");
         const snapshot = await get(printNumberRef);
         
@@ -213,13 +374,14 @@ printCardsButton.addEventListener("click", async () => {
         }
         
         nextPrintNumberSpan.textContent = nextNumber.toString().padStart(5, "0");
+        hideAllDialogs();
         printDialog.style.display = "block";
-        filterDialog.style.display = "none";
-        cardInfoDiv.style.display = "none";
-        activateCardDiv.style.display = "none";
     } catch (error) {
         console.error("Error fetching print number:", error);
-        alert("Kunde inte hämta nästa löpnummer.");
+        alert("Kunde inte hämta nästa löpnummer: " + error.message);
+    } finally {
+        printCardsButton.disabled = false;
+        printCardsButton.textContent = "Skriv ut Presentkort";
     }
 });
 
@@ -339,3 +501,8 @@ async function generateGiftCardPDF(startNumber, quantity) {
         throw new Error("Kunde inte ladda presentkortsmallen. Kontrollera att presentkort.pdf finns i mappen.");
     }
 }
+
+// Close history dialog
+document.getElementById("closeHistory").addEventListener("click", () => {
+    document.getElementById("historyDialog").style.display = "none";
+});

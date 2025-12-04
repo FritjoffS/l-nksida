@@ -6,56 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta author="Name" content="Fredrik Söderberg">
     <title>Presentkortshantering</title>
+    <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/navbar.css">
     <link rel="stylesheet" href="presentkort.css">
-    <link rel="stylesheet" href="../styles/global.css">
-
-    <!-- Add Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    
     
     <!-- Add pdf-lib for PDF generation -->
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 
-    <script>
-        // Initialize Firebase with your project's config
-        var firebaseConfig = {
-            apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
-            authDomain: "l-nksida.firebaseapp.com",
-            databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "l-nksida",
-            storageBucket: "l-nksida.firebasestorage.app",
-            messagingSenderId: "258147870107",
-            appId: "1:258147870107:web:ce637517bc30b7578cad3e"
-        };
-        firebase.initializeApp(firebaseConfig);
-
-        // Function to check if a user is logged in or not
-        function checkAuthState() {
-            firebase.auth().onAuthStateChanged(function (user) {
-                if (!user) {
-                    // User is not signed in, redirect to the login page
-                    window.location.href = "../index/login.html";
-                }
-            });
-        }
-
-        // Function to log out the user
-        function logout() {
-            firebase.auth().signOut().then(function () {
-                // Sign-out successful, redirect to login page
-                window.location.href = "../index/login.html";
-            }).catch(function (error) {
-                // Handle errors here
-                console.error("Logout error:", error);
-            });
-        }
-    </script>
-
 </head>
 
-
-<body onload="checkAuthState()">
+<body>
 
     <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
@@ -66,7 +27,7 @@
         <div id="inputCard">
             <label for="serialNumber">Presentkortets Serienummer:</label>
             <input type="text" id="serialNumber" placeholder="Ange serienummer">
-            <div style="display: flex; gap: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <button id="checkCard">Lös in / Kontrollera Presentkort</button>
                 <button id="getNextSerialNumber">Sälj Presentkort</button>
                 <button id="listCards">Lista Presentkort</button>
@@ -122,12 +83,14 @@
             <p id="cardValue"></p>
             <label for="redeemAmount">Belopp att lösa in:</label>
             <input type="number" id="redeemAmount" placeholder="Ange belopp">
-            <button id="redeemCard">Lös in</button>
-            <button id="viewHistory">Visa Historik</button> <!-- New button -->
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button id="redeemCard">Lös in</button>
+                <button id="viewHistory">Visa Historik</button>
+            </div>
         </div>
 
         <div id="activateCard" style="display: none;">
-            <h2>Sälj Nytt Presentkort</h2>
+            <h2>Sälj Presentkort</h2>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <div>
                     <label for="cardValueInput">Önskat värde på presentkort:</label>
@@ -138,7 +101,15 @@
                     <input type="text" id="sellerName" placeholder="Ange ditt namn">
                 </div>
             </div>
-            <button id="activateCardButton">Ladda Presentkort</button>
+            <button id="activateCardButton">Aktivera Presentkort</button>
+        </div>
+
+        <div id="historyDialog" style="display: none; margin-top: 20px; border: 2px solid #333; padding: 20px; border-radius: 10px; max-height: 500px; overflow-y: auto;">
+            <h2>Presentkorts Historik</h2>
+            <div id="historyContent">
+                <p>Hämtar historik...</p>
+            </div>
+            <button id="closeHistory" style="background: #6c757d; margin-top: 15px;">Stäng</button>
         </div>
     </div>
 
