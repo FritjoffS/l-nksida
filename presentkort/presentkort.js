@@ -204,7 +204,7 @@ printCardsButton.addEventListener("click", async () => {
         const printNumberRef = ref(db, "presentkort_config/nextPrintNumber");
         const snapshot = await get(printNumberRef);
         
-        let nextNumber = 1000; // Start from 01000
+        let nextNumber = 2000; // Start from 02000
         if (snapshot.exists()) {
             nextNumber = snapshot.val();
         } else {
@@ -242,7 +242,7 @@ generatePDFButton.addEventListener("click", async () => {
         // Get current print number
         const printNumberRef = ref(db, "presentkort_config/nextPrintNumber");
         const snapshot = await get(printNumberRef);
-        let startNumber = snapshot.exists() ? snapshot.val() : 1000;
+        let startNumber = snapshot.exists() ? snapshot.val() : 2000;
         
         // Generate PDF
         await generateGiftCardPDF(startNumber, quantity);
