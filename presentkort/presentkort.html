@@ -13,6 +13,9 @@
     
     <!-- Add pdf-lib for PDF generation -->
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    
+    <!-- Add SheetJS for Excel import -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
 </head>
 
@@ -32,6 +35,26 @@
                 <button id="getNextSerialNumber">Sälj Presentkort</button>
                 <button id="listCards">Lista Presentkort</button>
                 <button id="printCards" style="background: #007bff;">Skriv ut Presentkort</button>
+                <button id="importCards" style="background: #17a2b8;">Importera Historik</button>
+            </div>
+        </div>
+
+        <div id="importDialog" style="display: none; margin-top: 20px; border: 2px solid #17a2b8; padding: 20px; border-radius: 10px; background: #f8f9fa;">
+            <h2>Importera Presentkortshistorik</h2>
+            <p style="margin-bottom: 15px; color: #666;">
+                Välj en Excel-fil (.xlsx) med kolumnerna:<br>
+                <strong>Serienummer, Ursprungligt värde, Försäljningsdatum, Inlöst datum</strong>
+            </p>
+            <input type="file" id="excelFile" accept=".xlsx, .xls" style="margin-bottom: 15px;">
+            <div id="importProgress" style="display: none; margin: 15px 0;">
+                <p><strong>Importerar:</strong> <span id="importStatus">0/0</span></p>
+                <div style="background: #e9ecef; border-radius: 5px; height: 20px; overflow: hidden;">
+                    <div id="importProgressBar" style="background: #17a2b8; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="startImport" style="background: #28a745;">Starta Import</button>
+                <button id="cancelImport" style="background: #6c757d;">Avbryt</button>
             </div>
         </div>
 
