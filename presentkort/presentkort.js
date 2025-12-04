@@ -257,9 +257,9 @@ viewHistoryButton.addEventListener("click", async () => {
             historyHTML += `<div style="max-height: 300px; overflow-y: auto;">`;
             historyArray.forEach(entry => {
                 const date = new Date(entry.timestamp).toLocaleString('sv-SE');
-                const type = entry.type === 'activation' ? '🎉 Aktivering' : 
-                            entry.type === 'redeem' ? '💵 Inlösen' : 
-                            entry.type === 'reload' ? '🔄 Påladdning' : '📝 Transaktion';
+                const type = entry.type === 'activation' ? 'Aktivering' : 
+                            entry.type === 'redeem' ? 'Inlösen' : 
+                            entry.type === 'reload' ? 'Påladdning' : 'Transaktion';
                 const amount = entry.amount > 0 ? `+${entry.amount}` : entry.amount;
                 const user = entry.seller || entry.user || 'System';
                 
