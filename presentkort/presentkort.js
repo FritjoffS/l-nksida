@@ -59,6 +59,16 @@ const nextPrintNumberSpan = document.getElementById("nextPrintNumber");
 const generatePDFButton = document.getElementById("generatePDF");
 const cancelPrintButton = document.getElementById("cancelPrint");
 
+// New elements for import
+const importCardsButton = document.getElementById("importCards");
+const importDialog = document.getElementById("importDialog");
+const excelFileInput = document.getElementById("excelFile");
+const startImportButton = document.getElementById("startImport");
+const cancelImportButton = document.getElementById("cancelImport");
+const importProgressDiv = document.getElementById("importProgress");
+const importStatusSpan = document.getElementById("importStatus");
+const importProgressBar = document.getElementById("importProgressBar");
+
 // Helper function to hide all dialogs
 function hideAllDialogs() {
     cardInfoDiv.style.display = "none";
@@ -514,9 +524,183 @@ async function generateGiftCardPDF(startNumber, quantity) {
     }
 }
 
-// Close history dialog
+// Close history dialog - go back to card info
 document.getElementById("closeHistory").addEventListener("click", () => {
     document.getElementById("historyDialog").style.display = "none";
+    document.getElementById("cardInfo").style.display = "block";
+});
+
+// Import cards functionality
+importCardsButton.addEventListener("click", () => {
+    hideAllDialogs();
+    importDialog.style.display = "block";
+    excelFileInput.value = "";
+    importProgressDiv.style.display = "none";
+});
+
+cancelImportButton.addEventListener("click", () => {
+    importDialog.style.display = "none";
+});
+
+startImportButton.addEventListener("click", async () => {
+    const file = excelFileInput.files[0];
+    if (!file) {
+        return alert("Välj en Excel-fil först!");
+    }
+
+    try {
+        startImportButton.disabled = true;
+        cancelImportButton.disabled = true;
+        importProgressDiv.style.display = "block";
+
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        
+        // Try to read with headers first
+        let jsonData = XLSX.utils.sheet_to_json(worksheet);
+        
+        // If no data or first row looks like it might be data (all numbers), read without headers
+        if (jsonData.length === 0 || !jsonData[0].hasOwnProperty('Serienummer')) {
+            // Read as array without headers
+            jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            
+            // Skip first row if it looks like headers (contains text)
+            const firstRow = jsonData[0];
+            if (firstRow && typeof firstRow[0] === 'string' && isNaN(firstRow[0])) {
+                jsonData.shift();
+            }
+        }
+
+        if (jsonData.length === 0) {
+            throw new Error("Excel-filen är tom!");
+        }
+
+        let successCount = 0;
+        let errorCount = 0;
+        const total = jsonData.length;
+
+        for (let i = 0; i < jsonData.length; i++) {
+            const row = jsonData[i];
+            
+            // Update progress
+            importStatusSpan.textContent = `${i + 1}/${total}`;
+            importProgressBar.style.width = `${((i + 1) / total) * 100}%`;
+
+            try {
+                let serialNumber, originalValue, saleDate, redeemedDate;
+                
+                // Check if row is an array (no headers) or object (with headers)
+                if (Array.isArray(row)) {
+                    // Array format: [serienummer, värde, försäljningsdatum, inlöst datum]
+                    serialNumber = (row[0] || '').toString().trim();
+                    originalValue = parseFloat(row[1] || 0);
+                    saleDate = row[2];
+                    redeemedDate = row[3];
+                } else {
+                    // Object format with headers
+                    serialNumber = (row['Serienummer'] || row['serienummer'] || row['SerieNummer'] || '').toString().trim();
+                    originalValue = parseFloat(row['Ursprungligt värde'] || row['ursprungligt värde'] || row['Värde'] || row['värde'] || 0);
+                    saleDate = row['Försäljningsdatum'] || row['försäljningsdatum'] || row['Datum'] || row['datum'];
+                    redeemedDate = row['Inlöst datum'] || row['inlöst datum'] || row['Inlöst'] || row['inlöst'];
+                }
+
+                if (!serialNumber || !originalValue || !saleDate) {
+                    console.warn(`Rad ${i + 1}: Saknar nödvändiga värden (SN: ${serialNumber}, Värde: ${originalValue}, Datum: ${saleDate})`);
+                    errorCount++;
+                    continue;
+                }
+
+                // Convert Excel date to JavaScript Date if needed
+                let saleDateObj;
+                if (typeof saleDate === 'number') {
+                    // Excel date (days since 1900-01-01)
+                    saleDateObj = new Date((saleDate - 25569) * 86400 * 1000);
+                } else {
+                    saleDateObj = new Date(saleDate);
+                }
+
+                if (isNaN(saleDateObj.getTime())) {
+                    console.warn(`Rad ${i + 1}: Ogiltigt försäljningsdatum, hoppar över`);
+                    errorCount++;
+                    continue;
+                }
+
+                // Calculate expiration date (2 years from sale)
+                const expirationDate = new Date(saleDateObj);
+                expirationDate.setFullYear(expirationDate.getFullYear() + 2);
+
+                // Check if card is redeemed
+                const isRedeemed = redeemedDate && redeemedDate !== '' && redeemedDate !== null;
+                const currentValue = isRedeemed ? 0 : originalValue;
+
+                // Create card data
+                const cardData = {
+                    value: currentValue,
+                    seller: "Importerad",
+                    date: saleDateObj.toISOString(),
+                    expirationDate: expirationDate.toISOString()
+                };
+
+                const cardRef = ref(db, `presentkort/${serialNumber}`);
+                await set(cardRef, cardData);
+
+                // Add activation history
+                const historyRef = ref(db, `presentkort/${serialNumber}/history`);
+                const activationEntry = {
+                    type: "activation",
+                    amount: originalValue,
+                    timestamp: saleDateObj.toISOString(),
+                    seller: "Importerad"
+                };
+                await push(historyRef, activationEntry);
+
+                // If redeemed, add redemption history
+                if (isRedeemed) {
+                    let redeemedDateObj;
+                    if (typeof redeemedDate === 'number') {
+                        redeemedDateObj = new Date((redeemedDate - 25569) * 86400 * 1000);
+                    } else {
+                        redeemedDateObj = new Date(redeemedDate);
+                    }
+
+                    if (!isNaN(redeemedDateObj.getTime())) {
+                        const redemptionEntry = {
+                            type: "redeem",
+                            amount: -originalValue,
+                            timestamp: redeemedDateObj.toISOString(),
+                            seller: "Importerad"
+                        };
+                        await push(historyRef, redemptionEntry);
+                    }
+                }
+
+                successCount++;
+
+            } catch (rowError) {
+                console.error(`Fel på rad ${i + 1}:`, rowError);
+                errorCount++;
+            }
+
+            // Small delay to avoid overwhelming Firebase
+            if (i % 10 === 0) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+        }
+
+        importProgressDiv.style.display = "none";
+        alert(`Import klar!\\n\\nLyckade: ${successCount}\\nFel: ${errorCount}\\nTotalt: ${total}`);
+        importDialog.style.display = "none";
+
+    } catch (error) {
+        console.error("Import error:", error);
+        alert("Ett fel uppstod vid import: " + error.message);
+    } finally {
+        startImportButton.disabled = false;
+        cancelImportButton.disabled = false;
+        importProgressDiv.style.display = "none";
+    }
 });
 
 // Check if we should open filter dialog on page load
