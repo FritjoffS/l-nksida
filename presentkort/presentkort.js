@@ -362,7 +362,7 @@ printCardsButton.addEventListener("click", async () => {
         printCardsButton.disabled = true;
         printCardsButton.textContent = "Hämtar...";
 
-        const printNumberRef = ref(db, "presentkort_config/nextPrintNumber");
+        const printNumberRef = ref(db, "presentkort/config/nextPrintNumber");
         const snapshot = await get(printNumberRef);
         
         let nextNumber = 2000; // Start from 02000
@@ -402,7 +402,7 @@ generatePDFButton.addEventListener("click", async () => {
         generatePDFButton.textContent = "Genererar PDF...";
         
         // Get current print number
-        const printNumberRef = ref(db, "presentkort_config/nextPrintNumber");
+        const printNumberRef = ref(db, "presentkort/config/nextPrintNumber");
         const snapshot = await get(printNumberRef);
         let startNumber = snapshot.exists() ? snapshot.val() : 2000;
         
