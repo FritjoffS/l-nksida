@@ -17,7 +17,16 @@
     <div id="listaPresentkortContainer">
         <button id="closeList" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; font-size: 32px; cursor: pointer; color: #333; line-height: 1; padding: 0; width: 40px; height: 40px;" title="Stäng">&times;</button>
         <h1>Lista Presentkort</h1>
-        <table id="cardTable" border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+        <table id="cardTable" border="1" style="width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed;">
+            <colgroup>
+                <col style="width: 12%;">
+                <col style="width: 10%;">
+                <col style="width: 14%;">
+                <col style="width: 16%;">
+                <col style="width: 12%;">
+                <col style="width: 16%;">
+                <col style="width: 16%;">
+            </colgroup>
             <thead>
                 <tr>
                     <th>Serie nummer</th>
@@ -31,13 +40,36 @@
             </thead>
         </table>
         <div id="tableBodyWrapper" style="max-height: 420px; overflow-y: auto; overflow-x: hidden;">
-            <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+            <table border="1" style="width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 12%;">
+                    <col style="width: 10%;">
+                    <col style="width: 14%;">
+                    <col style="width: 16%;">
+                    <col style="width: 12%;">
+                    <col style="width: 16%;">
+                    <col style="width: 16%;">
+                </colgroup>
                 <tbody id="cardTableBody">
                     <tr>
                         <td colspan="7" style="text-align: center;">Hämtar presentkort...</td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+        <div id="summaryBar" style="position: absolute; bottom: 0; left: 0; right: 0; background: #6c757d; color: white; padding: 15px 20px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; display: flex; justify-content: space-around; font-size: 14px;">
+            <div>
+                <strong>Totalt:</strong> <span id="totalCount">0</span> st
+            </div>
+            <div>
+                <strong>Aktiva:</strong> <span id="activeCount">0</span> st (<span id="activeValue">0</span> kr)
+            </div>
+            <div>
+                <strong>Utgångna:</strong> <span id="expiredCount">0</span> st (<span id="expiredValue">0</span> kr)
+            </div>
+            <div>
+                <strong>Inlösta:</strong> <span id="redeemedCount">0</span> st (<span id="redeemedValue">0</span> kr)
+            </div>
         </div>
     </div>
     
