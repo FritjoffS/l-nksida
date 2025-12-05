@@ -46,6 +46,9 @@ const fetchFilteredCards = async () => {
             const cards = snapshot.val();
             cardTableBody.innerHTML = ""; // Clear placeholder row
 
+            // Create array of cards with their data for sorting
+            const cardArray = [];
+            
             Object.entries(cards).forEach(([serialNumber, cardData]) => {
                 // Skip config node
                 if (serialNumber === 'config') {
@@ -79,6 +82,24 @@ const fetchFilteredCards = async () => {
                     isWithinDateRange &&
                     ((showActive && isActive) || (showExpired && isExpired) || (showActive && showExpired))
                 ) {
+                    cardArray.push({
+                        serialNumber,
+                        cardData,
+                        activationDate,
+                        expirationDate
+                    });
+                }
+            });
+            
+            // Sort by serial number numerically
+            cardArray.sort((a, b) => {
+                const numA = parseInt(a.serialNumber.replace(/^0+/, '') || '0');
+                const numB = parseInt(b.serialNumber.replace(/^0+/, '') || '0');
+                return numA - numB;
+            });
+            
+            // Now render the sorted cards
+            cardArray.forEach(({ serialNumber, cardData, activationDate, expirationDate }) => {
                     // Get original value from history or use current value as fallback
                     let originalValue = cardData.value;
                     let redeemedDate = '-';
@@ -98,10 +119,13 @@ const fetchFilteredCards = async () => {
                         }
                     }
                     
+                    // Remove leading zeros from serial number for display
+                    const displaySerialNumber = serialNumber.replace(/^0+/, '') || '0';
+                    
                     const row = document.createElement("tr");
                     row.style.cursor = "pointer";
                     row.innerHTML = `
-                        <td>${serialNumber}</td>
+                        <td>${displaySerialNumber}</td>
                         <td>${cardData.value}</td>
                         <td>${originalValue}</td>
                         <td>${activationDate.toLocaleDateString('sv-SE')}</td>
@@ -114,7 +138,6 @@ const fetchFilteredCards = async () => {
                     row.addEventListener("click", () => showCardDetails(serialNumber, cardData));
                     
                     cardTableBody.appendChild(row);
-                }
             });
 
             // If no cards match the filters
@@ -143,7 +166,8 @@ onAuthStateChanged(auth, (user) => {
 
 // Function to show card details in modal
 function showCardDetails(serialNumber, cardData) {
-    let historyHTML = `<h3>Presentkort: ${serialNumber}</h3>`;
+    const displaySerialNumber = serialNumber.replace(/^0+/, '') || '0';
+    let historyHTML = `<h3>Presentkort: ${displaySerialNumber}</h3>`;
     historyHTML += `<p><strong>Aktuellt saldo:</strong> ${cardData.value} kr</p>`;
     historyHTML += `<p><strong>Aktiverat:</strong> ${new Date(cardData.date).toLocaleString('sv-SE')}</p>`;
     historyHTML += `<p><strong>Utgår:</strong> ${new Date(cardData.expirationDate).toLocaleDateString('sv-SE')}</p>`;
@@ -206,7 +230,8 @@ document.getElementById("editCard").addEventListener("click", () => {
     document.getElementById("editCardModal").style.display = "block";
     
     // Populate edit form
-    document.getElementById("editSerialNumber").textContent = serialNumber;
+    const displaySerialNumber = serialNumber.replace(/^0+/, '') || '0';
+    document.getElementById("editSerialNumber").textContent = displaySerialNumber;
     document.getElementById("editCurrentValue").value = cardData.value;
     document.getElementById("editExpirationDate").value = new Date(cardData.expirationDate).toISOString().split('T')[0];
     document.getElementById("editSeller").value = cardData.seller || '';
@@ -413,6 +438,40 @@ document.getElementById("saveCardEdits").addEventListener("click", async () => {
 document.getElementById("cancelCardEdits").addEventListener("click", () => {
     document.getElementById("editCardModal").style.display = "none";
     document.getElementById("cardDetailsModal").style.display = "block";
+});
+
+// Delete card
+document.getElementById("deleteCard").addEventListener("click", async () => {
+    const { serialNumber } = window.currentEditCard;
+    const displaySerialNumber = serialNumber.replace(/^0+/, '') || '0';
+    
+    const confirmDelete = confirm(`Är du säker på att du vill ta bort presentkort ${displaySerialNumber}?\n\nDetta går INTE att ångra!`);
+    
+    if (!confirmDelete) return;
+    
+    try {
+        document.getElementById("deleteCard").disabled = true;
+        document.getElementById("deleteCard").textContent = "Tar bort...";
+        
+        const cardRef = ref(db, `presentkort/${serialNumber}`);
+        await remove(cardRef);
+        
+        alert(`Presentkort ${displaySerialNumber} har tagits bort!`);
+        
+        // Close modals and refresh
+        document.getElementById("editCardModal").style.display = "none";
+        document.getElementById("modalOverlay").style.display = "none";
+        document.body.style.overflow = "auto";
+        
+        // Refresh the list
+        location.reload();
+        
+    } catch (error) {
+        console.error("Error deleting card:", error);
+        alert("Ett fel uppstod vid borttagning: " + error.message);
+        document.getElementById("deleteCard").disabled = false;
+        document.getElementById("deleteCard").textContent = "Ta bort presentkort";
+    }
 });
 
 // Close modal when clicking close button
