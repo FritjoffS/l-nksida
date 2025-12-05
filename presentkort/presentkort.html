@@ -9,11 +9,11 @@
     <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/navbar.css">
     <link rel="stylesheet" href="presentkort.css">
-    
-    
+
+
     <!-- Add pdf-lib for PDF generation -->
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-    
+
     <!-- Add SheetJS for Excel import -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
@@ -34,12 +34,15 @@
                 <button id="checkCard">Lös in / Kontrollera Presentkort</button>
                 <button id="getNextSerialNumber">Sälj Presentkort</button>
                 <button id="listCards">Lista Presentkort</button>
-                <button id="printCards" style="background: #007bff;">Skriv ut Presentkort</button>
-                <button id="importCards" style="background: #17a2b8;">Importera Historik</button>
+                <!-- <button id="printCards" style="background: #007bff;">Skriv ut Presentkort</button> -->
+                <!-- <button id="importCards" style="background: #17a2b8;">Importera Historik</button> -->
+                <button id="printCards" style="background: #007bff;" disabled>Skriv ut Presentkort</button>
+                <button id="importCards" style="background: #17a2b8; display: none;">Importera Historik</button>
             </div>
         </div>
 
-        <div id="importDialog" style="display: none; margin-top: 20px; border: 2px solid #17a2b8; padding: 20px; border-radius: 10px; background: #f8f9fa;">
+        <div id="importDialog"
+            style="display: none; margin-top: 20px; border: 2px solid #17a2b8; padding: 20px; border-radius: 10px; background: #f8f9fa;">
             <h2>Importera Presentkortshistorik</h2>
             <p style="margin-bottom: 15px; color: #666;">
                 Välj en Excel-fil (.xlsx) med kolumnerna:<br>
@@ -49,7 +52,8 @@
             <div id="importProgress" style="display: none; margin: 15px 0;">
                 <p><strong>Importerar:</strong> <span id="importStatus">0/0</span></p>
                 <div style="background: #e9ecef; border-radius: 5px; height: 20px; overflow: hidden;">
-                    <div id="importProgressBar" style="background: #17a2b8; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                    <div id="importProgressBar"
+                        style="background: #17a2b8; height: 100%; width: 0%; transition: width 0.3s;"></div>
                 </div>
             </div>
             <div style="display: flex; gap: 10px;">
@@ -58,7 +62,8 @@
             </div>
         </div>
 
-        <div id="printDialog" style="display: none; margin-top: 20px; border: 2px solid #007bff; padding: 20px; border-radius: 10px; background: #f8f9fa;">
+        <div id="printDialog"
+            style="display: none; margin-top: 20px; border: 2px solid #007bff; padding: 20px; border-radius: 10px; background: #f8f9fa;">
             <h2>Skriv ut Presentkort</h2>
             <div style="margin-bottom: 15px;">
                 <label for="printQuantity">Antal presentkort att skriva ut:</label>
@@ -139,7 +144,8 @@
             <button id="activateCardButton">Aktivera Presentkort</button>
         </div>
 
-        <div id="historyDialog" style="display: none; margin-top: 20px; border: 2px solid #333; padding: 20px; border-radius: 10px; max-height: 500px; overflow-y: auto;">
+        <div id="historyDialog"
+            style="display: none; margin-top: 20px; border: 2px solid #333; padding: 20px; border-radius: 10px; max-height: 500px; overflow-y: auto;">
             <h2>Presentkorts Historik</h2>
             <div id="historyContent">
                 <p>Hämtar historik...</p>
