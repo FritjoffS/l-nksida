@@ -40,6 +40,28 @@ button {
     /* Enable vertical scrolling */
 }
 
+#closeList {
+    position: fixed;
+    top: calc(50% - 285px + 10px);
+    right: calc(50% - min(47.5%, 600px) + 10px);
+    background: rgba(249, 249, 249, 0.95);
+    border: none;
+    font-size: 32px;
+    cursor: pointer;
+    color: #333;
+    line-height: 1;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    transition: color 0.2s;
+    z-index: 10;
+}
+
+#closeList:hover {
+    color: #dc3545;
+    background-color: rgba(249, 249, 249, 0.95);
+}
+
 h1,
 h2 {
     text-align: center;
