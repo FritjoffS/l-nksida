@@ -36,9 +36,51 @@ button {
     border-radius: 10px;
     background-color: #f9f9f9;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    /* Enable vertical scrolling */
+    overflow: hidden;
+    /* Changed from overflow-y: auto */
 }
+
+#tableBodyWrapper {
+    max-height: 420px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#tableBodyWrapper table {
+    border-top: none;
+}
+
+#tableBodyWrapper th,
+#tableBodyWrapper td {
+    width: auto;
+}
+
+#cardTable thead th,
+#tableBodyWrapper tbody td {
+    padding: 8px;
+}
+
+/* Match column widths */
+#cardTable thead th:nth-child(1),
+#tableBodyWrapper tbody td:nth-child(1) { width: 12%; }
+
+#cardTable thead th:nth-child(2),
+#tableBodyWrapper tbody td:nth-child(2) { width: 10%; }
+
+#cardTable thead th:nth-child(3),
+#tableBodyWrapper tbody td:nth-child(3) { width: 14%; }
+
+#cardTable thead th:nth-child(4),
+#tableBodyWrapper tbody td:nth-child(4) { width: 16%; }
+
+#cardTable thead th:nth-child(5),
+#tableBodyWrapper tbody td:nth-child(5) { width: 12%; }
+
+#cardTable thead th:nth-child(6),
+#tableBodyWrapper tbody td:nth-child(6) { width: 16%; }
+
+#cardTable thead th:nth-child(7),
+#tableBodyWrapper tbody td:nth-child(7) { width: 16%; }
 
 #closeList {
     position: fixed;
