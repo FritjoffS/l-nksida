@@ -81,11 +81,20 @@ const fetchFilteredCards = async () => {
                 ) {
                     // Get original value from history or use current value as fallback
                     let originalValue = cardData.value;
+                    let redeemedDate = '-';
                     if (cardData.history) {
                         const historyArray = Object.values(cardData.history);
                         const activationEntry = historyArray.find(entry => entry.type === 'activation');
                         if (activationEntry && activationEntry.amount) {
                             originalValue = activationEntry.amount;
+                        }
+                        
+                        // Find last redeem date
+                        const redeemEntries = historyArray.filter(entry => entry.type === 'redeem');
+                        if (redeemEntries.length > 0) {
+                            // Sort by timestamp descending and get the latest
+                            const latestRedeem = redeemEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+                            redeemedDate = new Date(latestRedeem.timestamp).toLocaleDateString('sv-SE');
                         }
                     }
                     
@@ -95,9 +104,10 @@ const fetchFilteredCards = async () => {
                         <td>${serialNumber}</td>
                         <td>${cardData.value}</td>
                         <td>${originalValue}</td>
-                        <td>${activationDate.toLocaleDateString()}</td>
-                        <td>${expirationDate.toLocaleDateString()}</td>
+                        <td>${activationDate.toLocaleDateString('sv-SE')}</td>
                         <td>${cardData.seller}</td>
+                        <td>${expirationDate.toLocaleDateString('sv-SE')}</td>
+                        <td>${redeemedDate}</td>
                     `;
                     
                     // Add click event to show details
@@ -109,14 +119,14 @@ const fetchFilteredCards = async () => {
 
             // If no cards match the filters
             if (cardTableBody.children.length === 0) {
-                cardTableBody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>Inga presentkort matchar filtren.</td></tr>";
+                cardTableBody.innerHTML = "<tr><td colspan='7' style='text-align: center;'>Inga presentkort matchar filtren.</td></tr>";
             }
         } else {
-            cardTableBody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>Inga presentkort hittades.</td></tr>";
+            cardTableBody.innerHTML = "<tr><td colspan='7' style='text-align: center;'>Inga presentkort hittades.</td></tr>";
         }
     } catch (error) {
         console.error("Error fetching cards:", error);
-        cardTableBody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>Kunde inte hämta presentkort. Kontrollera att du är inloggad.</td></tr>";
+        cardTableBody.innerHTML = "<tr><td colspan='7' style='text-align: center;'>Kunde inte hämta presentkort. Kontrollera att du är inloggad.</td></tr>";
     }
 };
 
