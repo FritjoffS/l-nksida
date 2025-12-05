@@ -170,6 +170,13 @@ function showCardDetails(serialNumber, cardData) {
     }
     
     document.getElementById("cardDetailsContent").innerHTML = historyHTML;
+    
+    // Scroll to top of page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = "hidden";
+    
     document.getElementById("cardDetailsModal").style.display = "block";
     document.getElementById("modalOverlay").style.display = "block";
     
@@ -402,6 +409,7 @@ document.getElementById("cancelCardEdits").addEventListener("click", () => {
 document.getElementById("closeCardDetails").addEventListener("click", () => {
     document.getElementById("cardDetailsModal").style.display = "none";
     document.getElementById("modalOverlay").style.display = "none";
+    document.body.style.overflow = "auto";
 });
 
 // Close modal when clicking overlay
@@ -410,5 +418,6 @@ document.getElementById("modalOverlay").addEventListener("click", () => {
     document.getElementById("modalOverlay").style.display = "none";
     document.getElementById("editCardModal").style.display = "none";
     document.getElementById("editHistoryModal").style.display = "none";
+    document.body.style.overflow = "auto";
     currentEditingHistoryKey = null;
 });
