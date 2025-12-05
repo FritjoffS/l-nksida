@@ -187,6 +187,7 @@ const fetchFilteredCards = async () => {
 
 // Function to update summary bar
 function updateSummary(cardArray) {
+    const now = new Date();
     const totalCount = cardArray.length;
     let activeCount = 0;
     let activeValue = 0;
@@ -194,8 +195,6 @@ function updateSummary(cardArray) {
     let expiredValue = 0;
     let redeemedCount = 0;
     let redeemedValue = 0;
-    
-    const now = new Date();
     
     cardArray.forEach(({ cardData, expirationDate }) => {
         const value = cardData.value || 0;
@@ -217,12 +216,16 @@ function updateSummary(cardArray) {
             redeemedCount++;
         }
         
-        if (expirationDate > now) {
-            activeCount++;
-            activeValue += value;
-        } else {
+        // Check if active or expired based on expiration date
+        const isExpired = expirationDate <= now;
+        
+        if (isExpired) {
             expiredCount++;
             expiredValue += value;
+        } else if (!hasBeenRedeemed) {
+            // Active: not expired AND not redeemed
+            activeCount++;
+            activeValue += value;
         }
     });
     
@@ -571,4 +574,65 @@ document.getElementById("modalOverlay").addEventListener("click", () => {
     document.getElementById("editHistoryModal").style.display = "none";
     document.body.style.overflow = "auto";
     currentEditingHistoryKey = null;
+});
+
+// Export to Excel functionality
+document.getElementById("exportExcel").addEventListener("click", () => {
+    // Get all rows from the table
+    const rows = document.querySelectorAll("#cardTableBody tr");
+    
+    if (rows.length === 0 || (rows.length === 1 && rows[0].cells.length === 1)) {
+        return alert("Ingen data att exportera!");
+    }
+    
+    // Prepare data array
+    const data = [];
+    
+    // Add header row
+    data.push([
+        "Serie nummer",
+        "Saldo (kr)",
+        "Ursprungligt värde",
+        "Försäljnings datum",
+        "Säljare",
+        "Utgångs datum",
+        "Inlöst datum"
+    ]);
+    
+    // Add data rows
+    rows.forEach(row => {
+        if (row.cells.length === 7) { // Only process valid data rows
+            const rowData = [];
+            for (let i = 0; i < row.cells.length; i++) {
+                rowData.push(row.cells[i].textContent.trim());
+            }
+            data.push(rowData);
+        }
+    });
+    
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    
+    // Set column widths
+    ws['!cols'] = [
+        { wch: 15 }, // Serie nummer
+        { wch: 12 }, // Saldo
+        { wch: 18 }, // Ursprungligt värde
+        { wch: 20 }, // Försäljnings datum
+        { wch: 15 }, // Säljare
+        { wch: 18 }, // Utgångs datum
+        { wch: 18 }  // Inlöst datum
+    ];
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Presentkort");
+    
+    // Generate filename with current date
+    const today = new Date();
+    const dateStr = today.toISOString().split('T')[0];
+    const filename = `presentkort_${dateStr}.xlsx`;
+    
+    // Save file
+    XLSX.writeFile(wb, filename);
 });
