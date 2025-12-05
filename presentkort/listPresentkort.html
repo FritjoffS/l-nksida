@@ -29,12 +29,16 @@
                     <th>Inlöst datum</th>
                 </tr>
             </thead>
-            <tbody id="cardTableBody">
-                <tr>
-                    <td colspan="7" style="text-align: center;">Hämtar presentkort...</td>
-                </tr>
-            </tbody>
         </table>
+        <div id="tableBodyWrapper" style="max-height: 420px; overflow-y: auto; overflow-x: hidden;">
+            <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+                <tbody id="cardTableBody">
+                    <tr>
+                        <td colspan="7" style="text-align: center;">Hämtar presentkort...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     
     <!-- Card Details Modal -->
