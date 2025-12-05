@@ -189,7 +189,8 @@ activateCardButton.addEventListener("click", async () => {
         // Check if card already exists
         const existingCard = await get(cardRef);
         if (existingCard.exists()) {
-            const confirmOverwrite = confirm("Presentkort " + serialNumber + " finns redan! Vill du skriva över det?");
+            const displaySerialNumber = serialNumber.replace(/^0+/, '') || '0';
+            const confirmOverwrite = confirm("Presentkort " + displaySerialNumber + " finns redan! Vill du skriva över det?");
             if (!confirmOverwrite) {
                 return;
             }
@@ -218,7 +219,8 @@ activateCardButton.addEventListener("click", async () => {
         };
         await push(historyRef, activationHistoryEntry);
 
-        alert(`Presentkort ${serialNumber} har skapats med värde ${cardValue} kr!\nUtgångsdatum: ${expirationDate.toLocaleDateString('sv-SE')}`);
+        const displaySerialNumber = serialNumber.replace(/^0+/, '') || '0';
+        alert(`Presentkort ${displaySerialNumber} har skapats med värde ${cardValue} kr!\nUtgångsdatum: ${expirationDate.toLocaleDateString('sv-SE')}`);
         
         // Clear form fields
         serialNumberInput.value = "";
