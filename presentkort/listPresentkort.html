@@ -15,6 +15,7 @@
     <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
     <div id="listaPresentkortContainer">
+        <button id="closeList" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; font-size: 32px; cursor: pointer; color: #333; line-height: 1; padding: 0; width: 40px; height: 40px;" title="Stäng">&times;</button>
         <h1>Lista Presentkort</h1>
         <table id="cardTable" border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead>
@@ -34,7 +35,6 @@
                 </tr>
             </tbody>
         </table>
-        <button id="backToPresentkort">Tillbaka</button>
     </div>
     
     <!-- Card Details Modal -->
@@ -78,6 +78,7 @@
             </div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button id="saveCardEdits" style="background: #28a745; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;">Spara</button>
+                <button id="deleteCard" style="background: #dc3545; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;">Ta bort presentkort</button>
                 <button id="cancelCardEdits" style="background: #6c757d; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;">Avbryt</button>
             </div>
         </div>
@@ -118,7 +119,7 @@
     <script src="listPresentkort.js" type="module"></script>
     <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
     <script>
-        document.getElementById("backToPresentkort").addEventListener("click", () => {
+        document.getElementById("closeList").addEventListener("click", () => {
             window.location.href = "presentkort.html";
         });
     </script>
