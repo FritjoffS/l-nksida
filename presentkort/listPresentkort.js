@@ -33,6 +33,8 @@ const showActive = urlParams.get("showActive") === "true";
 const showExpired = urlParams.get("showExpired") === "true";
 const activatedFrom = urlParams.get("activatedFrom");
 const activatedTo = urlParams.get("activatedTo");
+const redeemedFrom = urlParams.get("redeemedFrom");
+const redeemedTo = urlParams.get("redeemedTo");
 
 // DOM elements
 const cardTableBody = document.getElementById("cardTableBody");
@@ -77,9 +79,36 @@ const fetchFilteredCards = async () => {
                     (!activatedFromDate || activationDate >= activatedFromDate) &&
                     (!activatedToDate || activationDate <= activatedToDate);
 
+                // Get latest redeem date from history for filtering
+                let latestRedeemDate = null;
+                if (cardData.history) {
+                    const historyArray = Object.values(cardData.history);
+                    const redeemEntries = historyArray.filter(entry => entry.type === 'redeem');
+                    if (redeemEntries.length > 0) {
+                        const latestRedeem = redeemEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+                        latestRedeemDate = new Date(latestRedeem.timestamp);
+                    }
+                }
+
+                // Adjust redeemedFrom and redeemedTo to include the entire day
+                const redeemedFromDate = redeemedFrom ? new Date(redeemedFrom) : null;
+                if (redeemedFromDate) redeemedFromDate.setHours(0, 0, 0, 0);
+
+                const redeemedToDate = redeemedTo ? new Date(redeemedTo) : null;
+                if (redeemedToDate) redeemedToDate.setHours(23, 59, 59, 999);
+
+                // Check if the card matches the redeemed date range
+                const isWithinRedeemedRange =
+                    (!redeemedFromDate || (latestRedeemDate && latestRedeemDate >= redeemedFromDate)) &&
+                    (!redeemedToDate || (latestRedeemDate && latestRedeemDate <= redeemedToDate));
+
+                // If redeemedFrom or redeemedTo is specified, only show cards with redemption history
+                const matchesRedeemFilter = (!redeemedFromDate && !redeemedToDate) || (latestRedeemDate && isWithinRedeemedRange);
+
                 // Apply filters
                 if (
                     isWithinDateRange &&
+                    matchesRedeemFilter &&
                     ((showActive && isActive) || (showExpired && isExpired) || (showActive && showExpired))
                 ) {
                     cardArray.push({
@@ -140,6 +169,9 @@ const fetchFilteredCards = async () => {
                     cardTableBody.appendChild(row);
             });
 
+            // Update summary bar
+            updateSummary(cardArray);
+
             // If no cards match the filters
             if (cardTableBody.children.length === 0) {
                 cardTableBody.innerHTML = "<tr><td colspan='7' style='text-align: center;'>Inga presentkort matchar filtren.</td></tr>";
@@ -152,6 +184,56 @@ const fetchFilteredCards = async () => {
         cardTableBody.innerHTML = "<tr><td colspan='7' style='text-align: center;'>Kunde inte hämta presentkort. Kontrollera att du är inloggad.</td></tr>";
     }
 };
+
+// Function to update summary bar
+function updateSummary(cardArray) {
+    const totalCount = cardArray.length;
+    let activeCount = 0;
+    let activeValue = 0;
+    let expiredCount = 0;
+    let expiredValue = 0;
+    let redeemedCount = 0;
+    let redeemedValue = 0;
+    
+    const now = new Date();
+    
+    cardArray.forEach(({ cardData, expirationDate }) => {
+        const value = cardData.value || 0;
+        
+        // Check if card has been redeemed (has redeem entries in history)
+        let hasBeenRedeemed = false;
+        if (cardData.history) {
+            const historyArray = Object.values(cardData.history);
+            const redeemEntries = historyArray.filter(entry => entry.type === 'redeem');
+            if (redeemEntries.length > 0) {
+                hasBeenRedeemed = true;
+                // Calculate how much has been redeemed (sum of all redeem amounts - they are negative)
+                const totalRedeemed = redeemEntries.reduce((sum, entry) => sum + Math.abs(entry.amount), 0);
+                redeemedValue += totalRedeemed;
+            }
+        }
+        
+        if (hasBeenRedeemed) {
+            redeemedCount++;
+        }
+        
+        if (expirationDate > now) {
+            activeCount++;
+            activeValue += value;
+        } else {
+            expiredCount++;
+            expiredValue += value;
+        }
+    });
+    
+    document.getElementById("totalCount").textContent = totalCount;
+    document.getElementById("activeCount").textContent = activeCount;
+    document.getElementById("activeValue").textContent = activeValue;
+    document.getElementById("expiredCount").textContent = expiredCount;
+    document.getElementById("expiredValue").textContent = expiredValue;
+    document.getElementById("redeemedCount").textContent = redeemedCount;
+    document.getElementById("redeemedValue").textContent = redeemedValue;
+}
 
 // Wait for authentication before fetching data
 onAuthStateChanged(auth, (user) => {
