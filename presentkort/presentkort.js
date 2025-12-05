@@ -358,6 +358,8 @@ applyFiltersButton.addEventListener("click", () => {
     const showExpired = document.getElementById("showExpiredCards").checked;
     const activatedFrom = document.getElementById("activatedFrom").value;
     const activatedTo = document.getElementById("activatedTo").value;
+    const redeemedFrom = document.getElementById("redeemedFrom").value;
+    const redeemedTo = document.getElementById("redeemedTo").value;
 
     // Save filter state to sessionStorage
     sessionStorage.setItem('filterDialogOpen', 'true');
@@ -365,6 +367,8 @@ applyFiltersButton.addEventListener("click", () => {
     sessionStorage.setItem('filterShowExpired', showExpired);
     sessionStorage.setItem('filterActivatedFrom', activatedFrom);
     sessionStorage.setItem('filterActivatedTo', activatedTo);
+    sessionStorage.setItem('filterRedeemedFrom', redeemedFrom);
+    sessionStorage.setItem('filterRedeemedTo', redeemedTo);
 
     // Build query parameters
     const queryParams = new URLSearchParams({
@@ -372,6 +376,8 @@ applyFiltersButton.addEventListener("click", () => {
         showExpired,
         activatedFrom,
         activatedTo,
+        redeemedFrom,
+        redeemedTo,
     });
 
     // Redirect to listPresentkort.html with filters applied
@@ -712,11 +718,15 @@ if (sessionStorage.getItem('filterDialogOpen') === 'true') {
     const showExpired = sessionStorage.getItem('filterShowExpired');
     const activatedFrom = sessionStorage.getItem('filterActivatedFrom');
     const activatedTo = sessionStorage.getItem('filterActivatedTo');
+    const redeemedFrom = sessionStorage.getItem('filterRedeemedFrom');
+    const redeemedTo = sessionStorage.getItem('filterRedeemedTo');
     
     if (showActive) document.getElementById('showActiveCards').checked = showActive === 'true';
     if (showExpired) document.getElementById('showExpiredCards').checked = showExpired === 'true';
     if (activatedFrom) document.getElementById('activatedFrom').value = activatedFrom;
     if (activatedTo) document.getElementById('activatedTo').value = activatedTo;
+    if (redeemedFrom) document.getElementById('redeemedFrom').value = redeemedFrom;
+    if (redeemedTo) document.getElementById('redeemedTo').value = redeemedTo;
     
     // Show filter dialog
     filterDialog.style.display = 'block';
