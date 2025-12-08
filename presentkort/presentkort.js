@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { logAction } from "./logger.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -155,6 +156,14 @@ redeemCardButton.addEventListener("click", async () => {
         };
         await push(historyRef, newHistoryEntry);
 
+        // Log the redemption
+        await logAction(db, 'redeem', serialNumber, {
+            amount: redeemAmount,
+            previousValue: cardData.value,
+            newValue: newValue,
+            userName: redeemSeller
+        });
+
         alert("Beloppet har lösts in!");
         const expirationDate = new Date(cardData.expirationDate);
         const formattedExpirationDate = `${expirationDate.getFullYear()}-${String(expirationDate.getMonth() + 1).padStart(2, '0')}-${String(expirationDate.getDate()).padStart(2, '0')}`;
@@ -224,6 +233,14 @@ activateCardButton.addEventListener("click", async () => {
             seller: sellerName
         };
         await push(historyRef, activationHistoryEntry);
+
+        // Log the card creation
+        await logAction(db, 'create', cleanedSerialNumber, {
+            value: cardValue,
+            seller: sellerName,
+            expirationDate: expirationDate.toISOString(),
+            userName: sellerName
+        });
 
         alert(`Presentkort ${cleanedSerialNumber} har skapats med värde ${cardValue} kr!\nUtgångsdatum: ${expirationDate.toLocaleDateString('sv-SE')}`);
         
@@ -355,6 +372,11 @@ listCardsButton.addEventListener("click", () => {
     } else {
         filterDialog.style.display = "none";
     }
+});
+
+// View logs button
+document.getElementById("viewLogs").addEventListener("click", () => {
+    window.location.href = "logs.html";
 });
 
 // Apply filters and redirect to listPresentkort.html with query parameters
