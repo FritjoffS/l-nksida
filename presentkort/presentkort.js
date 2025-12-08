@@ -181,16 +181,22 @@ activateCardButton.addEventListener("click", async () => {
             return alert("Ange giltiga värden!");
         }
 
+        // Remove leading zeros from serial number before saving
+        const cleanedSerialNumber = serialNumber.replace(/^0+/, '');
+        
+        if (!cleanedSerialNumber || cleanedSerialNumber === '0') {
+            return alert("Ogiltigt serienummer! Kan inte vara endast nollor.");
+        }
+
         activateCardButton.disabled = true;
         activateCardButton.textContent = "Aktiverar...";
 
-        const cardRef = ref(db, `presentkort/${serialNumber}`);
+        const cardRef = ref(db, `presentkort/${cleanedSerialNumber}`);
         
         // Check if card already exists
         const existingCard = await get(cardRef);
         if (existingCard.exists()) {
-            const displaySerialNumber = serialNumber.replace(/^0+/, '') || '0';
-            const confirmOverwrite = confirm("Presentkort " + displaySerialNumber + " finns redan! Vill du skriva över det?");
+            const confirmOverwrite = confirm("Presentkort " + cleanedSerialNumber + " finns redan! Vill du skriva över det?");
             if (!confirmOverwrite) {
                 return;
             }
@@ -210,7 +216,7 @@ activateCardButton.addEventListener("click", async () => {
         await set(cardRef, newCardData);
 
         // Save activation history with consistent structure
-        const historyRef = ref(db, `presentkort/${serialNumber}/history`);
+        const historyRef = ref(db, `presentkort/${cleanedSerialNumber}/history`);
         const activationHistoryEntry = {
             type: "activation",
             amount: cardValue,
@@ -219,8 +225,7 @@ activateCardButton.addEventListener("click", async () => {
         };
         await push(historyRef, activationHistoryEntry);
 
-        const displaySerialNumber = serialNumber.replace(/^0+/, '') || '0';
-        alert(`Presentkort ${displaySerialNumber} har skapats med värde ${cardValue} kr!\nUtgångsdatum: ${expirationDate.toLocaleDateString('sv-SE')}`);
+        alert(`Presentkort ${cleanedSerialNumber} har skapats med värde ${cardValue} kr!\nUtgångsdatum: ${expirationDate.toLocaleDateString('sv-SE')}`);
         
         // Clear form fields
         serialNumberInput.value = "";
