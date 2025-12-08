@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Fredrik Söderberg">
+    <title>Presentkort - Logghistorik</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/navbar.css">
+    <link rel="stylesheet" href="presentkort.css">
+    
+    <!-- Add SheetJS for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+    <div id="navbar"></div>
+
+    <div id="listaPresentkortContainer">
+        <button id="closeList" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; font-size: 32px; cursor: pointer; color: #333; line-height: 1; padding: 0; width: 40px; height: 40px;" title="Stäng">&times;</button>
+        <button id="exportExcel" style="position: absolute; top: 10px; right: 60px; background: #28a745; border: none; font-size: 14px; cursor: pointer; color: white; padding: 8px 15px; border-radius: 5px;" title="Exportera till Excel">Exportera Excel</button>
+        
+        <h1>Logghistorik</h1>
+        
+        <!-- Filter section -->
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em;">Från datum:</label>
+                    <input type="date" id="filterFromDate" style="width: 100%; padding: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em;">Till datum:</label>
+                    <input type="date" id="filterToDate" style="width: 100%; padding: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em;">Händelsetyp:</label>
+                    <select id="filterAction" style="width: 100%; padding: 5px;">
+                        <option value="">Alla</option>
+                        <option value="create">Skapade</option>
+                        <option value="redeem">Inlösningar</option>
+                        <option value="edit">Redigeringar</option>
+                        <option value="delete">Borttagningar</option>
+                        <option value="import">Importer</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em;">Användare:</label>
+                    <input type="text" id="filterUser" placeholder="Filtrera på användare" style="width: 100%; padding: 5px;">
+                </div>
+            </div>
+            <button id="applyLogFilters" style="background: #007bff; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;">Filtrera</button>
+            <button id="clearLogFilters" style="background: #6c757d; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">Rensa filter</button>
+        </div>
+        
+        <table id="logTable" border="1" style="width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed;">
+            <colgroup>
+                <col style="width: 15%;">
+                <col style="width: 10%;">
+                <col style="width: 10%;">
+                <col style="width: 12%;">
+                <col style="width: 53%;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Tidsstämpel</th>
+                    <th>Händelse</th>
+                    <th>Kort nr</th>
+                    <th>Användare</th>
+                    <th>Detaljer</th>
+                </tr>
+            </thead>
+        </table>
+        <div id="tableBodyWrapper" style="max-height: 360px; overflow-y: auto; overflow-x: hidden;">
+            <table border="1" style="width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 15%;">
+                    <col style="width: 10%;">
+                    <col style="width: 10%;">
+                    <col style="width: 12%;">
+                    <col style="width: 53%;">
+                </colgroup>
+                <tbody id="logTableBody">
+                    <tr>
+                        <td colspan="5" style="text-align: center;">Hämtar loggar...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="summaryBar" style="position: absolute; bottom: 0; left: 0; right: 0; background: #6c757d; color: white; padding: 15px 20px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; display: flex; justify-content: space-around; font-size: 14px;">
+            <div>
+                <strong>Totalt antal händelser:</strong> <span id="totalLogs">0</span> st
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Details Modal -->
+    <div id="logDetailsModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 700px; max-height: 80vh; overflow-y: auto; background: white; border: 2px solid #333; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); z-index: 1000;">
+        <h2>Loggdetaljer</h2>
+        <div id="logDetailsContent">
+            <p>Laddar...</p>
+        </div>
+        <button id="closeLogDetails" style="background: #6c757d; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; margin-top: 15px;">Stäng</button>
+    </div>
+
+    <!-- Overlay for modal -->
+    <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+
+    <script src="logs.js" type="module"></script>
+    <script src="../scripts/loadNavbar.js"></script>
+    <script>
+        document.getElementById("closeList").addEventListener("click", () => {
+            window.location.href = "presentkort.html";
+        });
+    </script>
+</body>
+
+</html>
