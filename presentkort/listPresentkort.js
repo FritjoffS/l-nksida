@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, get, set, push, remove, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { logAction } from "./logger.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -525,11 +526,43 @@ document.getElementById("saveCardEdits").addEventListener("click", async () => {
             const oldCardRef = ref(db, `presentkort/${oldSerialNumber}`);
             await remove(oldCardRef);
             
+            // Log the serial number change
+            await logAction(db, 'edit', cleanedNewSerialNumber, {
+                previousSerialNumber: oldSerialNumber,
+                value: calculatedValue,
+                seller: newSeller
+            }, {
+                serialNumber: { old: oldSerialNumber, new: cleanedNewSerialNumber }
+            });
+            
             alert(`Presentkort uppdaterat! Serienummer ändrat från ${oldSerialNumber} till ${cleanedNewSerialNumber}`);
         } else {
             // Same serial number, just update
             const cardRef = ref(db, `presentkort/${oldSerialNumber}`);
+            
+            // Track changes
+            const changes = {};
+            const oldData = window.currentEditCard.cardData;
+            if (oldData.value !== calculatedValue) {
+                changes.value = { old: oldData.value, new: calculatedValue };
+            }
+            if (oldData.seller !== newSeller) {
+                changes.seller = { old: oldData.seller, new: newSeller };
+            }
+            if (oldData.expirationDate !== new Date(newExpirationDate).toISOString()) {
+                changes.expirationDate = { old: new Date(oldData.expirationDate).toLocaleDateString('sv-SE'), new: newExpirationDate };
+            }
+            
             await set(cardRef, updatedCard);
+            
+            // Log the edit if there were changes
+            if (Object.keys(changes).length > 0) {
+                await logAction(db, 'edit', oldSerialNumber, {
+                    value: calculatedValue,
+                    seller: newSeller
+                }, changes);
+            }
+            
             alert("Presentkort uppdaterat!");
         }
         
@@ -567,7 +600,16 @@ document.getElementById("deleteCard").addEventListener("click", async () => {
         document.getElementById("deleteCard").disabled = true;
         document.getElementById("deleteCard").textContent = "Tar bort...";
         
+        const cardData = window.currentEditCard.cardData;
         const cardRef = ref(db, `presentkort/${serialNumber}`);
+        
+        // Log the deletion before removing
+        await logAction(db, 'delete', serialNumber, {
+            value: cardData.value,
+            seller: cardData.seller,
+            originalValue: cardData.value
+        });
+        
         await remove(cardRef);
         
         alert(`Presentkort ${displaySerialNumber} har tagits bort!`);
