@@ -316,7 +316,7 @@ document.getElementById("editCard").addEventListener("click", () => {
     
     // Populate edit form
     const displaySerialNumber = serialNumber.replace(/^0+/, '') || '0';
-    document.getElementById("editSerialNumber").textContent = displaySerialNumber;
+    document.getElementById("editSerialNumber").value = displaySerialNumber;
     document.getElementById("editCurrentValue").value = cardData.value;
     document.getElementById("editExpirationDate").value = new Date(cardData.expirationDate).toISOString().split('T')[0];
     document.getElementById("editSeller").value = cardData.seller || '';
@@ -465,20 +465,26 @@ document.getElementById("cancelHistoryEntry").addEventListener("click", () => {
 
 // Save card edits
 document.getElementById("saveCardEdits").addEventListener("click", async () => {
-    const { serialNumber } = window.currentEditCard;
+    const { serialNumber: oldSerialNumber } = window.currentEditCard;
+    const newSerialNumber = document.getElementById("editSerialNumber").value.trim();
     const calculatedValue = parseFloat(document.getElementById("editCurrentValue").value);
     const newExpirationDate = document.getElementById("editExpirationDate").value;
     const newSeller = document.getElementById("editSeller").value.trim();
     
-    if (isNaN(calculatedValue) || !newExpirationDate || !newSeller) {
+    if (!newSerialNumber || isNaN(calculatedValue) || !newExpirationDate || !newSeller) {
         return alert("Fyll i alla fält korrekt!");
+    }
+    
+    // Remove leading zeros from new serial number
+    const cleanedNewSerialNumber = newSerialNumber.replace(/^0+/, '') || '0';
+    
+    if (cleanedNewSerialNumber === '0') {
+        return alert("Ogiltigt serienummer!");
     }
     
     try {
         document.getElementById("saveCardEdits").disabled = true;
         document.getElementById("saveCardEdits").textContent = "Sparar...";
-        
-        const cardRef = ref(db, `presentkort/${serialNumber}`);
         
         // Find activation date from history
         let activationDate = window.currentEditCard.cardData.date; // Default to original
@@ -499,10 +505,33 @@ document.getElementById("saveCardEdits").addEventListener("click", async () => {
             history: currentHistoryData
         };
         
-        // Set entire card at once - this will overwrite all data
-        await set(cardRef, updatedCard);
-        
-        alert("Presentkort uppdaterat!");
+        // Check if serial number has changed
+        if (cleanedNewSerialNumber !== oldSerialNumber) {
+            // Check if new serial number already exists
+            const newCardRef = ref(db, `presentkort/${cleanedNewSerialNumber}`);
+            const newCardSnapshot = await get(newCardRef);
+            
+            if (newCardSnapshot.exists()) {
+                const confirmOverwrite = confirm(`Presentkort ${cleanedNewSerialNumber} finns redan! Vill du skriva över det?`);
+                if (!confirmOverwrite) {
+                    return;
+                }
+            }
+            
+            // Create card with new serial number
+            await set(newCardRef, updatedCard);
+            
+            // Delete old card
+            const oldCardRef = ref(db, `presentkort/${oldSerialNumber}`);
+            await remove(oldCardRef);
+            
+            alert(`Presentkort uppdaterat! Serienummer ändrat från ${oldSerialNumber} till ${cleanedNewSerialNumber}`);
+        } else {
+            // Same serial number, just update
+            const cardRef = ref(db, `presentkort/${oldSerialNumber}`);
+            await set(cardRef, updatedCard);
+            alert("Presentkort uppdaterat!");
+        }
         
         // Close modals and refresh
         document.getElementById("editCardModal").style.display = "none";
