@@ -124,14 +124,45 @@ body {
         top: 0;
         left: 0;
         width: 100%;
-        margin: 0; /* Decrease margins for the print container */
+        margin: 0;
+        padding: 0;
     }
 
     .formcontainer * {
         visibility: visible;
     }
 
+    .header {
+        margin: 10px auto 0px;
+    }
+
+    .formulär section {
+        padding: 0px;
+        margin: 0 auto;
+    }
+
+    .formulär input[name="produkt"] {
+        padding: 8px 15px;
+        font-size: 1.1rem;
+    }
+
+    .formulär input[name="produktNummer"] {
+        padding: 8px 8px;
+        font-size: 0.95rem;
+    }
+
+    .formulär .barcode {
+        height: 35px;
+        margin-top: 0px;
+        margin-left: 3px;
+    }
+
     .buttons, br, .sidenav, #sidenav, #savedTitlesDropdown {
         display: none;
+    }
+
+    @page {
+        size: A4;
+        margin: 10mm 15mm;
     }
 }
