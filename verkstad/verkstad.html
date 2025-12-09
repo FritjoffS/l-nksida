@@ -21,15 +21,10 @@
   <link rel="stylesheet" href="../styles/search.css">
   <link rel="stylesheet" href="../styles/navbar.css">
   <link rel="stylesheet" href="../styles/generic-buttons.css">
-  <!-- Add Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
-  <script src="../scripts/firebase-init.js"></script>
 
 </head>
 
-<body onload="checkAuthState()">
+<body>
 
   <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
@@ -47,7 +42,7 @@
 
   </div>
 
-  <script src="../scripts/verkstad.js"></script>
+  <script type="module" src="verkstad.js"></script>
   <script src="../scripts/loadNavbar.js"></script>
 
   <!-- PWA Service Worker Registration -->
