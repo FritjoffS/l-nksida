@@ -624,20 +624,22 @@ startImportButton.addEventListener("click", async () => {
             importProgressBar.style.width = `${((i + 1) / total) * 100}%`;
 
             try {
-                let serialNumber, originalValue, saleDate, redeemedDate;
+                let serialNumber, originalValue, saleDate, seller, redeemedDate;
                 
                 // Check if row is an array (no headers) or object (with headers)
                 if (Array.isArray(row)) {
-                    // Array format: [serienummer, värde, försäljningsdatum, inlöst datum]
+                    // Array format: [serienummer, värde, försäljningsdatum, säljare, inlöst datum]
                     serialNumber = (row[0] || '').toString().trim();
                     originalValue = parseFloat(row[1] || 0);
                     saleDate = row[2];
-                    redeemedDate = row[3];
+                    seller = (row[3] || 'Importerad').toString().trim();
+                    redeemedDate = row[4];
                 } else {
                     // Object format with headers
                     serialNumber = (row['Serienummer'] || row['serienummer'] || row['SerieNummer'] || '').toString().trim();
                     originalValue = parseFloat(row['Ursprungligt värde'] || row['ursprungligt värde'] || row['Värde'] || row['värde'] || 0);
                     saleDate = row['Försäljningsdatum'] || row['försäljningsdatum'] || row['Datum'] || row['datum'];
+                    seller = (row['Säljare'] || row['säljare'] || row['Saljare'] || row['saljare'] || 'Importerad').toString().trim();
                     redeemedDate = row['Inlöst datum'] || row['inlöst datum'] || row['Inlöst'] || row['inlöst'];
                 }
 
@@ -673,7 +675,7 @@ startImportButton.addEventListener("click", async () => {
                 // Create card data
                 const cardData = {
                     value: currentValue,
-                    seller: "Importerad",
+                    seller: seller || "Importerad",
                     date: saleDateObj.toISOString(),
                     expirationDate: expirationDate.toISOString()
                 };
@@ -687,7 +689,7 @@ startImportButton.addEventListener("click", async () => {
                     type: "activation",
                     amount: originalValue,
                     timestamp: saleDateObj.toISOString(),
-                    seller: "Importerad"
+                    seller: seller || "Importerad"
                 };
                 await push(historyRef, activationEntry);
 

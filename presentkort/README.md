@@ -7,6 +7,6 @@
 
 # Importera historik
 Excel kolumner:
-löpnummer   Ursprungligt värde  Försäljningsdatum   Inlöst Datum
+löpnummer   Ursprungligt värde  Försäljningsdatum   Säljare   Inlöst Datum
 
 # Import av samtliga presentkort 2024-2025 - ok
