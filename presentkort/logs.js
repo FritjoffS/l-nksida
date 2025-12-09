@@ -64,7 +64,6 @@ const fetchLogs = async () => {
             renderLogs(allLogs);
         } else {
             logTableBody.innerHTML = "<tr><td colspan='5' style='text-align: center;'>Inga loggar hittades.</td></tr>";
-            document.getElementById("totalLogs").textContent = "0";
         }
     } catch (error) {
         console.error("Error fetching logs:", error);
@@ -78,7 +77,6 @@ function renderLogs(logs) {
     
     if (logs.length === 0) {
         logTableBody.innerHTML = "<tr><td colspan='5' style='text-align: center;'>Inga loggar matchar filtren.</td></tr>";
-        document.getElementById("totalLogs").textContent = "0";
         return;
     }
     
@@ -120,8 +118,6 @@ function renderLogs(logs) {
         row.addEventListener("click", () => showLogDetails(log));
         logTableBody.appendChild(row);
     });
-    
-    document.getElementById("totalLogs").textContent = logs.length;
 }
 
 // Filter logs
