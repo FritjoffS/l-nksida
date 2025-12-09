@@ -422,7 +422,7 @@ printCardsButton.addEventListener("click", async () => {
         const printNumberRef = ref(db, "presentkort/config/nextPrintNumber");
         const snapshot = await get(printNumberRef);
         
-        let nextNumber = 2000; // Start from 02000
+        let nextNumber = 2000; // Start from 2000
         if (snapshot.exists()) {
             nextNumber = snapshot.val();
         } else {
@@ -430,7 +430,7 @@ printCardsButton.addEventListener("click", async () => {
             await set(printNumberRef, nextNumber);
         }
         
-        nextPrintNumberSpan.textContent = nextNumber.toString().padStart(5, "0");
+        nextPrintNumberSpan.textContent = nextNumber.toString().padStart(4, "0");
         hideAllDialogs();
         printDialog.style.display = "block";
     } catch (error) {
@@ -494,7 +494,7 @@ async function generateGiftCardPDF(startNumber, quantity) {
         const outputPdf = await PDFDocument.create();
         
         for (let i = 0; i < quantity; i++) {
-            const cardNumber = (startNumber + i).toString().padStart(5, "0");
+            const cardNumber = (startNumber + i).toString().padStart(4, "0");
             
             // Load template for each card
             const templatePdf = await PDFDocument.load(existingPdfBytes);
