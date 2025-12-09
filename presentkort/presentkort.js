@@ -23,6 +23,12 @@ const auth = getAuth(app);
 onAuthStateChanged(auth, (user) => {
     if (!user) {
         window.location.href = "../index/login.html";
+    } else {
+        // Show import button only for fredrik@jarnhandel.com
+        const importButton = document.getElementById("importCards");
+        if (importButton && user.email === "fredrik@jarnhandel.com") {
+            importButton.style.display = "block";
+        }
     }
 });
 
