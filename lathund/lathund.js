@@ -45,11 +45,27 @@ const clearButton = document.querySelector("#clearButton");
 const exportButton = document.querySelector("#exportButton");
 const importButton = document.querySelector("#importButton");
 
-function InsertData() {
+async function InsertData() {
   // Check if the title input is not empty
   if (titleInput.value.trim() === "") {
     alert("Överskrift måste fyllas i");
     return;
+  }
+
+  // Check if title already exists
+  const dbref = ref(db);
+  const snapshot = await get(child(dbref, "lathund/products"));
+  
+  if (snapshot.exists()) {
+    const data = snapshot.val();
+    const existingTitle = Object.values(data).find(item => 
+      item.title.toLowerCase() === titleInput.value.trim().toLowerCase()
+    );
+    
+    if (existingTitle) {
+      alert("En sida med namnet '" + titleInput.value + "' finns redan. Välj ett annat namn.");
+      return;
+    }
   }
 
   const dataObject = {
@@ -116,12 +132,29 @@ function FindData() {
 }
 
 // Function to update data based on the selected title
-function UpdateData() {
+async function UpdateData() {
   const selectedIdentifier = document.getElementById('savedTitlesDropdown').value;
 
   if (selectedIdentifier === "") {
     alert("Välj en sida att uppdatera");
     return;
+  }
+
+  // Check if new title already exists (excluding current entry)
+  const dbref = ref(db);
+  const snapshot = await get(child(dbref, "lathund/products"));
+  
+  if (snapshot.exists()) {
+    const data = snapshot.val();
+    const existingEntry = Object.entries(data).find(([key, item]) => 
+      key !== selectedIdentifier && 
+      item.title.toLowerCase() === titleInput.value.trim().toLowerCase()
+    );
+    
+    if (existingEntry) {
+      alert("En sida med namnet '" + titleInput.value + "' finns redan. Välj ett annat namn.");
+      return;
+    }
   }
 
   const dataObject = {
