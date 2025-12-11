@@ -23,6 +23,137 @@ const togglePasswordButton = document.getElementById('togglePassword');
 const forgotPasswordLink = document.getElementById('forgotPassword');
 const loadingSpinner = document.getElementById('loadingSpinner');
 
+// Rate Limiting Configuration
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minuter
+const ATTEMPT_RESET_TIME = 15 * 60 * 1000; // 15 minuter
+const STORAGE_KEY = 'loginAttempts';
+const LOCKOUT_KEY = 'lockoutUntil';
+
+// Rate Limiting State
+class RateLimiter {
+  constructor() {
+    this.loadState();
+  }
+
+  loadState() {
+    const attemptsData = localStorage.getItem(STORAGE_KEY);
+    const lockoutData = localStorage.getItem(LOCKOUT_KEY);
+    
+    this.attempts = attemptsData ? JSON.parse(attemptsData) : [];
+    this.lockoutUntil = lockoutData ? parseInt(lockoutData) : null;
+    
+    // Rensa gamla försök (äldre än 15 min)
+    this.cleanOldAttempts();
+  }
+
+  saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.attempts));
+    if (this.lockoutUntil) {
+      localStorage.setItem(LOCKOUT_KEY, this.lockoutUntil.toString());
+    }
+  }
+
+  cleanOldAttempts() {
+    const cutoffTime = Date.now() - ATTEMPT_RESET_TIME;
+    this.attempts = this.attempts.filter(timestamp => timestamp > cutoffTime);
+  }
+
+  isLockedOut() {
+    if (!this.lockoutUntil) return false;
+    
+    if (Date.now() < this.lockoutUntil) {
+      return true;
+    }
+    
+    // Lockout har gått ut, rensa
+    this.unlock();
+    return false;
+  }
+
+  getRemainingLockoutTime() {
+    if (!this.lockoutUntil) return 0;
+    const remaining = this.lockoutUntil - Date.now();
+    return remaining > 0 ? remaining : 0;
+  }
+
+  addAttempt() {
+    this.cleanOldAttempts();
+    this.attempts.push(Date.now());
+    
+    if (this.attempts.length >= MAX_LOGIN_ATTEMPTS) {
+      this.lockoutUntil = Date.now() + LOCKOUT_DURATION;
+    }
+    
+    this.saveState();
+  }
+
+  reset() {
+    this.attempts = [];
+    this.lockoutUntil = null;
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LOCKOUT_KEY);
+  }
+
+  unlock() {
+    this.lockoutUntil = null;
+    localStorage.removeItem(LOCKOUT_KEY);
+  }
+
+  getAttemptsRemaining() {
+    this.cleanOldAttempts();
+    return Math.max(0, MAX_LOGIN_ATTEMPTS - this.attempts.length);
+  }
+}
+
+const rateLimiter = new RateLimiter();
+
+// Check lockout status on page load and update UI
+function checkLockoutStatus() {
+  if (rateLimiter.isLockedOut()) {
+    const remainingMs = rateLimiter.getRemainingLockoutTime();
+    const remainingMinutes = Math.ceil(remainingMs / 60000);
+    const remainingSeconds = Math.ceil(remainingMs / 1000);
+    
+    loginButton.disabled = true;
+    
+    // Visa initial meddelande
+    if (remainingMinutes > 1) {
+      errorMessage.textContent = `För många misslyckade försök. Kontot är låst i ${remainingMinutes} minuter.`;
+    } else {
+      errorMessage.textContent = `För många misslyckade försök. Kontot är låst i ${remainingSeconds} sekunder.`;
+    }
+    errorMessage.style.display = 'block';
+    
+    // Starta nedräkning
+    const countdownInterval = setInterval(() => {
+      if (!rateLimiter.isLockedOut()) {
+        clearInterval(countdownInterval);
+        loginButton.disabled = false;
+        errorMessage.textContent = 'Du kan nu försöka logga in igen.';
+        errorMessage.style.backgroundColor = '#d4edda';
+        errorMessage.style.color = '#155724';
+        setTimeout(() => {
+          hideError();
+          errorMessage.style.backgroundColor = '';
+          errorMessage.style.color = '';
+        }, 3000);
+      } else {
+        const ms = rateLimiter.getRemainingLockoutTime();
+        const min = Math.ceil(ms / 60000);
+        const sec = Math.ceil(ms / 1000);
+        
+        // Uppdatera endast textContent för att undvika omladdning
+        if (min > 1) {
+          errorMessage.textContent = `För många misslyckade försök. Kontot är låst i ${min} minuter.`;
+        } else {
+          errorMessage.textContent = `För många misslyckade försök. Kontot är låst i ${sec} sekunder.`;
+        }
+      }
+    }, 1000);
+  }
+}
+
 // Input validation
 function validateEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -80,6 +211,20 @@ function checkAuthState() {
 async function login() {
   hideError();
   
+  // Check if user is locked out
+  if (rateLimiter.isLockedOut()) {
+    const remainingMs = rateLimiter.getRemainingLockoutTime();
+    const remainingMinutes = Math.ceil(remainingMs / 60000);
+    const remainingSeconds = Math.ceil(remainingMs / 1000);
+    
+    if (remainingMinutes > 1) {
+      showError(`För många misslyckade försök. Försök igen om ${remainingMinutes} minuter.`);
+    } else {
+      showError(`För många misslyckade försök. Försök igen om ${remainingSeconds} sekunder.`);
+    }
+    return;
+  }
+  
   const email = emailInput.value.trim();
   const password = passwordInput.value;
 
@@ -103,38 +248,62 @@ async function login() {
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    // Successful login, redirect handled by onAuthStateChanged
+    // Successful login - reset rate limiter
+    rateLimiter.reset();
+    // Redirect handled by onAuthStateChanged
     window.location.href = 'index.html';
   } catch (error) {
     setLoading(false);
     
+    // Add failed attempt to rate limiter
+    rateLimiter.addAttempt();
+    
+    // Check if now locked out
+    if (rateLimiter.isLockedOut()) {
+      showError(`För många misslyckade försök. Kontot är låst i ${Math.ceil(LOCKOUT_DURATION / 60000)} minuter.`);
+      loginButton.disabled = true;
+      checkLockoutStatus(); // Start countdown
+      return;
+    }
+    
+    // Show attempts remaining warning if getting close to limit
+    const remaining = rateLimiter.getAttemptsRemaining();
+    let errorMsg = '';
+    
     // User-friendly error messages
     switch (error.code) {
       case 'auth/invalid-email':
-        showError('Ogiltig e-postadress');
+        errorMsg = 'Ogiltig e-postadress';
         break;
       case 'auth/user-disabled':
-        showError('Detta konto har inaktiverats');
+        errorMsg = 'Detta konto har inaktiverats';
         break;
       case 'auth/user-not-found':
-        showError('Ingen användare hittades med denna e-postadress');
+        errorMsg = 'Ingen användare hittades med denna e-postadress';
         break;
       case 'auth/wrong-password':
-        showError('Felaktigt lösenord');
+        errorMsg = 'Felaktigt lösenord';
         break;
       case 'auth/invalid-credential':
-        showError('Felaktig e-post eller lösenord');
+        errorMsg = 'Felaktig e-post eller lösenord';
         break;
       case 'auth/too-many-requests':
-        showError('För många inloggningsförsök. Försök igen senare.');
+        errorMsg = 'För många inloggningsförsök. Försök igen senare.';
         break;
       case 'auth/network-request-failed':
-        showError('Nätverksfel. Kontrollera din internetanslutning.');
+        errorMsg = 'Nätverksfel. Kontrollera din internetanslutning.';
         break;
       default:
-        showError('Ett fel uppstod vid inloggning. Försök igen.');
+        errorMsg = 'Ett fel uppstod vid inloggning. Försök igen.';
         console.error('Login error:', error);
     }
+    
+    // Add warning about remaining attempts
+    if (remaining <= 2 && remaining > 0) {
+      errorMsg += ` (${remaining} försök kvar)`;
+    }
+    
+    showError(errorMsg);
   }
 }
 
@@ -158,7 +327,13 @@ async function handleForgotPassword() {
     showError('Återställningslänk skickad till din e-post!');
     errorMessage.style.backgroundColor = '#d4edda';
     errorMessage.style.color = '#155724';
-    errorMessage.style.borderColor = '#c3e6cb';
+    
+    // Reset color after 5 seconds
+    setTimeout(() => {
+      errorMessage.style.backgroundColor = '';
+      errorMessage.style.color = '';
+      hideError();
+    }, 5000);
   } catch (error) {
     switch (error.code) {
       case 'auth/user-not-found':
@@ -202,3 +377,4 @@ passwordInput.addEventListener('input', hideError);
 
 // Initialize
 checkAuthState();
+checkLockoutStatus();
