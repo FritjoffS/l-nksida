@@ -1,0 +1,172 @@
+/* Verkstad page specific styles */
+
+/* Loading overlay */
+#loadingOverlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+#loadingOverlay .spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #ff6600;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+#loadingOverlay p {
+  color: white;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Toast animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Empty state styling */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: white;
+  min-height: 300px;
+}
+
+.empty-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+  opacity: 0.6;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.empty-state h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  font-weight: normal;
+}
+
+.empty-state p {
+  font-size: 16px;
+  opacity: 0.8;
+  max-width: 400px;
+}
+
+/* Button improvements */
+.linkButton {
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.linkButton:focus {
+  outline: 3px solid #ff6600;
+  outline-offset: 3px;
+}
+
+.linkButton:focus-visible {
+  outline: 3px solid #ff6600;
+  outline-offset: 3px;
+}
+
+.linkButton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 102, 0, 0);
+  transition: background 0.3s ease;
+  pointer-events: none;
+}
+
+.linkButton:hover::after {
+  background: rgba(255, 102, 0, 0.2);
+}
+
+.linkButton:active {
+  transform: scale(0.95);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .empty-state {
+    padding: 40px 20px;
+  }
+  
+  .empty-icon {
+    font-size: 60px;
+  }
+  
+  .empty-state h2 {
+    font-size: 20px;
+  }
+  
+  .empty-state p {
+    font-size: 14px;
+  }
+}
