@@ -1,3 +1,8 @@
+button {
+    all: unset;
+    cursor: pointer;
+}
+
 body {
     font-family: Arial, sans-serif;
 }
