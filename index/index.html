@@ -7,15 +7,17 @@
   <meta name="author" content="Fredrik Söderberg" />
   <meta name="description" content="Inloggningssida" />
   <title>Home</title>
-  
+
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="../manifest.json" />
   <meta name="theme-color" content="#ff6600" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Järnhandel" />
   <link rel="apple-touch-icon" href="../logo.png" />
-  
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Järnhandel" />
+
   <!-- Windows/Desktop specifika ikoner -->
   <link rel="icon" type="image/png" sizes="32x32" href="../logo.png" />
   <link rel="icon" type="image/png" sizes="48x48" href="../logo.png" />
@@ -24,17 +26,22 @@
   <link rel="icon" type="image/png" sizes="192x192" href="../logo.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
   <link rel="shortcut icon" href="../logo.png" />
-  
+
   <!-- Windows specifika meta tags -->
   <meta name="msapplication-TileImage" content="../logo.png" />
   <meta name="msapplication-TileColor" content="#ff6600" />
-  
+
   <link rel="stylesheet" href="../styles/global.css" />
   <link rel="stylesheet" href="../styles/date_time.css" />
   <link rel="stylesheet" href="../styles/search.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
-  
+
   <style>
+    button {
+      all: unset;
+      cursor: pointer;
+    }
+
     /* Loading overlay */
     #loadingOverlay {
       display: none;
@@ -49,7 +56,7 @@
       align-items: center;
       flex-direction: column;
     }
-    
+
     #loadingOverlay .spinner {
       border: 4px solid rgba(255, 255, 255, 0.3);
       border-top: 4px solid #ff6600;
@@ -58,16 +65,142 @@
       height: 50px;
       animation: spin 1s linear infinite;
     }
-    
+
     #loadingOverlay p {
       color: white;
       margin-top: 20px;
       font-size: 16px;
     }
-    
+
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    /* Screen reader only content */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* PWA Install Banner */
+    #installBanner {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+      padding: 16px;
+      max-width: 400px;
+      width: 90%;
+      z-index: 9998;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .install-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #333;
+    }
+
+    .install-icon {
+      font-size: 32px;
+    }
+
+    .install-text {
+      flex: 1;
+    }
+
+    .install-text strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .install-text p {
+      margin: 0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .install-btn {
+      background: #ff6600;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .install-btn:hover {
+      background: #e65c00;
+    }
+
+    .dismiss-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #999;
+      cursor: pointer;
+      padding: 0 8px;
+      line-height: 1;
+    }
+
+    .dismiss-btn:hover {
+      color: #333;
     }
   </style>
 </head>
@@ -78,38 +211,84 @@
     <div class="spinner"></div>
     <p>Kontrollerar autentisering...</p>
   </div>
-  
-  <div id="navbar"></div> <!-- Placeholder for the navbar -->
-  <div class="flexCenter" id="clock"></div>
-  <div class="flexCenter" id="date"></div>
 
-  <div class="search-bar">
-    <form action="https://www.google.com/search" method="get" target="_blank" rel="noopener noreferrer">
-      <input type="text" name="q" placeholder="Search Google">
-      <button class="search-bar button" type="submit">Search</button>
-    </form>
+  <!-- PWA Install Banner -->
+  <div id="installBanner" style="display: none;">
+    <div class="install-content">
+      <span class="install-icon">📦</span>
+      <div class="install-text">
+        <strong>Installera appen</strong>
+        <p>Installera Sollebrunns Järnhandel för snabbare åtkomst</p>
+      </div>
+      <button id="installButton" class="install-btn">Installera</button>
+      <button id="dismissInstall" class="dismiss-btn" aria-label="Stäng installationsbanner">×</button>
+    </div>
   </div>
 
+  <div id="navbar" role="navigation" aria-label="Huvudnavigering"></div>
+
+  <main role="main">
+    <div class="flexCenter" id="clock" role="timer" aria-live="off" aria-label="Aktuell tid"></div>
+    <div class="flexCenter" id="date" aria-live="off" aria-label="Dagens datum"></div>
+
+    <div class="search-bar" role="search">
+      <form action="https://www.google.com/search" method="get" target="_blank" rel="noopener noreferrer">
+        <label for="searchInput" class="sr-only">Sök på Google</label>
+        <input type="text" id="searchInput" name="q" placeholder="Search Google" aria-label="Sökfält för Google">
+        <button class="search-bar button" type="submit" aria-label="Sök">Search</button>
+      </form>
+    </div>
+  </main>
+
   <!-- App Version Display -->
-  <div style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; z-index: 1000;">
-    v2.1.1
+  <div id="appVersion" role="contentinfo" aria-label="Applikationsversion"
+    style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; z-index: 1000;">
+    Laddar...
   </div>
 
   <script type="module" src="index.js"></script>
   <script src="../scripts/script.js"></script>
   <script src="../scripts/clock.js"></script>
   <script src="../scripts/loadNavbar.js"></script>
-  
+
   <!-- PWA Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
+      window.addEventListener('load', function () {
         navigator.serviceWorker.register('../sw.js')
-          .then(function(registration) {
-            console.log('PWA Service Worker registered successfully:', registration.scope);
-          }, function(err) {
-            console.log('PWA Service Worker registration failed: ', err);
+          .then(function (registration) {
+            console.log('[PWA] Service Worker registered:', registration.scope);
+
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              console.log('[PWA] New Service Worker found');
+
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New service worker available, show update notification
+                  console.log('[PWA] Update available');
+                  if (confirm('En ny version är tillgänglig! Vill du uppdatera nu?')) {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                  }
+                }
+              });
+            });
+          })
+          .catch(function (err) {
+            console.error('[PWA] Service Worker registration failed:', err);
           });
+
+        // Reload page when new service worker takes control
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log('[PWA] New Service Worker activated, reloading...');
+            window.location.reload();
+          }
+        });
       });
     }
   </script>
