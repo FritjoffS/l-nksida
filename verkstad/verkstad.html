@@ -4,16 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta author="Name" content="Fredrik Söderberg">
+  <meta name="author" content="Fredrik Söderberg">
   <title>Verkstad</title>
   
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="../manifest.json" />
   <meta name="theme-color" content="#ff6600" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Järnhandel" />
   <link rel="apple-touch-icon" href="../logo.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Järnhandel" />
   <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
   
@@ -21,26 +23,29 @@
   <link rel="stylesheet" href="../styles/search.css">
   <link rel="stylesheet" href="../styles/navbar.css">
   <link rel="stylesheet" href="../styles/generic-buttons.css">
-
+  <link rel="stylesheet" href="verkstad.css">
 </head>
 
 <body>
-
-  <div id="navbar"></div> <!-- Placeholder for the navbar -->
-
-  <div class="container">
-
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" role="alert" aria-live="polite">
+    <div class="spinner"></div>
+    <p>Laddar verkstadslänkar...</p>
   </div>
 
-  <div class="search-bar">
-    <form action="https://www.google.com/search" method="get" target="_blank">
-      <input type="text" name="q" placeholder="Search Google">
-      <button class="search-bar button" type="submit">Search</button>
-    </form>
+  <div id="navbar" role="navigation" aria-label="Huvudnavigering"></div>
 
-  </div>
+  <main role="main">
+    <div class="container" id="buttonContainer" role="list" aria-label="Verkstadslänkar"></div>
 
-  </div>
+    <div class="search-bar" role="search">
+      <form action="https://www.google.com/search" method="get" target="_blank" rel="noopener noreferrer">
+        <label for="searchInput" class="sr-only">Sök på Google</label>
+        <input type="text" id="searchInput" name="q" placeholder="Search Google" aria-label="Sökfält för Google">
+        <button class="search-bar button" type="submit" aria-label="Sök">Search</button>
+      </form>
+    </div>
+  </main>
 
   <script type="module" src="verkstad.js"></script>
   <script src="../scripts/loadNavbar.js"></script>
@@ -51,14 +56,40 @@
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('../sw.js')
           .then(function(registration) {
-            console.log('PWA Service Worker registered successfully:', registration.scope);
-          }, function(err) {
-            console.log('PWA Service Worker registration failed: ', err);
+            console.log('[PWA] Service Worker registered:', registration.scope);
+            
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              console.log('[PWA] New Service Worker found');
+              
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('[PWA] Update available');
+                  if (confirm('En ny version är tillgänglig! Vill du uppdatera nu?')) {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                  }
+                }
+              });
+            });
+          })
+          .catch(function(err) {
+            console.error('[PWA] Service Worker registration failed:', err);
           });
+          
+        // Reload page when new service worker takes control
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log('[PWA] New Service Worker activated, reloading...');
+            window.location.reload();
+          }
+        });
       });
     }
   </script>
-
 </body>
 
 </html>
