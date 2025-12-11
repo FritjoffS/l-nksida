@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Fredrik Söderberg">
+  <title>Offline - Sollebrunns Järnhandel</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: "Trebuchet MS", Helvetica, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+    
+    .offline-container {
+      text-align: center;
+      padding: 40px;
+      max-width: 500px;
+    }
+    
+    .offline-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+    
+    p {
+      font-size: 18px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    
+    .retry-button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 15px 40px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .retry-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .info {
+      margin-top: 30px;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container" role="main">
+    <div class="offline-icon" aria-hidden="true">📡</div>
+    <h1>Du är offline</h1>
+    <p>Det verkar som att du inte har någon internetanslutning just nu. Kontrollera din anslutning och försök igen.</p>
+    <button class="retry-button" onclick="window.location.reload()" aria-label="Försök igen genom att ladda om sidan">
+      Försök igen
+    </button>
+    <div class="info">
+      <p>Vissa funktioner kanske inte fungerar utan internetanslutning.</p>
+    </div>
+  </div>
+  
+  <script>
+    // Auto-retry when back online
+    window.addEventListener('online', function() {
+      console.log('Connection restored, reloading...');
+      window.location.reload();
+    });
+    
+    // Check connection periodically
+    setInterval(function() {
+      if (navigator.onLine) {
+        window.location.reload();
+      }
+    }, 5000);
+  </script>
+</body>
+</html>
