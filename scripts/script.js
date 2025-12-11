@@ -31,7 +31,7 @@ if (dateElement) {
     dateElement.innerText = `${veckodagar[dagIVeckan]} ${formateratDatum}`;
 }
 
-// Uppdatera datumet en gång i timmen
+// Uppdatera datumet en gång i timmen (3600000 ms = 1 timme)
 setInterval(() => {
     const updatedDate = new Date();
     const updatedDay = updatedDate.getDate();
@@ -42,7 +42,7 @@ setInterval(() => {
     if (dateElement) {
         dateElement.innerText = `${veckodagar[updatedDate.getDay()]} ${updatedFormattedDate}`;
     }
-}, 1000); // 1000 millisekunder = 1 sekund, 3600000 millisekunder = 1 timme
+}, 3600000); // 3600000 millisekunder = 1 timme
 
 
 
