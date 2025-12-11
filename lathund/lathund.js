@@ -45,12 +45,76 @@ const clearButton = document.querySelector("#clearButton");
 const exportButton = document.querySelector("#exportButton");
 const importButton = document.querySelector("#importButton");
 
+// Security: Input sanitization and validation
+const MAX_TITLE_LENGTH = 100;
+const MAX_PRODUCT_LENGTH = 200;
+const MAX_PRODUCT_NUMBER_LENGTH = 50;
+
+// Sanitize string by removing potentially dangerous characters
+function sanitizeInput(input) {
+  if (typeof input !== 'string') return '';
+  
+  // Remove any HTML tags and script content
+  let sanitized = input.replace(/<[^>]*>/g, '');
+  
+  // Remove potentially dangerous characters while keeping Swedish characters
+  sanitized = sanitized.replace(/[<>"'`]/g, '');
+  
+  // Trim whitespace
+  return sanitized.trim();
+}
+
+// Validate title input
+function validateTitle(title) {
+  const sanitized = sanitizeInput(title);
+  
+  if (sanitized.length === 0) {
+    return { valid: false, message: "Överskrift måste fyllas i", sanitized };
+  }
+  
+  if (sanitized.length > MAX_TITLE_LENGTH) {
+    return { valid: false, message: `Överskrift får max vara ${MAX_TITLE_LENGTH} tecken`, sanitized };
+  }
+  
+  return { valid: true, sanitized };
+}
+
+// Validate product name
+function validateProductName(name) {
+  const sanitized = sanitizeInput(name);
+  
+  if (sanitized.length > MAX_PRODUCT_LENGTH) {
+    return { valid: false, message: `Produktnamn får max vara ${MAX_PRODUCT_LENGTH} tecken`, sanitized };
+  }
+  
+  return { valid: true, sanitized };
+}
+
+// Validate product number
+function validateProductNumber(number) {
+  const sanitized = sanitizeInput(number);
+  
+  if (sanitized.length > MAX_PRODUCT_NUMBER_LENGTH) {
+    return { valid: false, message: `Produktnummer får max vara ${MAX_PRODUCT_NUMBER_LENGTH} tecken`, sanitized };
+  }
+  
+  // Product numbers should typically be alphanumeric with some special chars
+  if (sanitized && !/^[a-zA-Z0-9åäöÅÄÖ\-_.\s]*$/.test(sanitized)) {
+    return { valid: false, message: "Produktnummer innehåller ogiltiga tecken", sanitized: '' };
+  }
+  
+  return { valid: true, sanitized };
+}
+
 async function InsertData() {
-  // Check if the title input is not empty
-  if (titleInput.value.trim() === "") {
-    alert("Överskrift måste fyllas i");
+  // Validate and sanitize title
+  const titleValidation = validateTitle(titleInput.value);
+  if (!titleValidation.valid) {
+    alert(titleValidation.message);
     return;
   }
+  
+  const sanitizedTitle = titleValidation.sanitized;
 
   // Check if title already exists
   const dbref = ref(db);
@@ -59,36 +123,59 @@ async function InsertData() {
   if (snapshot.exists()) {
     const data = snapshot.val();
     const existingTitle = Object.values(data).find(item => 
-      item.title.toLowerCase() === titleInput.value.trim().toLowerCase()
+      item.title.toLowerCase() === sanitizedTitle.toLowerCase()
     );
     
     if (existingTitle) {
-      alert("En sida med namnet '" + titleInput.value + "' finns redan. Välj ett annat namn.");
+      alert("En sida med namnet '" + sanitizedTitle + "' finns redan. Välj ett annat namn.");
       return;
     }
   }
 
   const dataObject = {
-    title: titleInput.value,
+    title: sanitizedTitle,
   };
+
+  let hasValidProduct = false;
 
   for (let i = 1; i <= numberRows; i++) {
     const produktInput = document.querySelector("#produkt" + i);
     const produktNummerInput = document.querySelector("#produktNummer" + i);
     
-    dataObject["produkt" + i] = produktInput.value;
-    dataObject["produktNummer" + i] = produktNummerInput.value;
+    // Validate and sanitize product data
+    const produktValidation = validateProductName(produktInput.value);
+    const nummerValidation = validateProductNumber(produktNummerInput.value);
+    
+    if (!produktValidation.valid) {
+      alert(`Rad ${i}: ${produktValidation.message}`);
+      return;
+    }
+    
+    if (!nummerValidation.valid) {
+      alert(`Rad ${i}: ${nummerValidation.message}`);
+      return;
+    }
+    
+    dataObject["produkt" + i] = produktValidation.sanitized;
+    dataObject["produktNummer" + i] = nummerValidation.sanitized;
+    
+    // Check if at least one product has data
+    if (produktValidation.sanitized || nummerValidation.sanitized) {
+      hasValidProduct = true;
+    }
   }
 
-  if (Object.keys(dataObject).length > 1) {
+  if (hasValidProduct) {
     const newPostRef = push(ref(db, "lathund/products"));
     set(newPostRef, dataObject)
       .then(() => {
-        alert("Sidan sparad som: " + titleInput.value);
+        alert("Sidan sparad som: " + sanitizedTitle);
+        titleInput.value = sanitizedTitle; // Update input with sanitized value
         displaySavedTitles();
       })
       .catch((error) => {
-        alert(error);
+        console.error("Save error:", error);
+        alert("Ett fel uppstod vid sparande. Försök igen.");
       });
   } else {
     alert("Minst en produkt och dess produktnummer måste fyllas i");
@@ -110,14 +197,16 @@ function FindData() {
     .then((snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        titleInput.value = data.title;
+        
+        // Sanitize data when loading from database
+        titleInput.value = sanitizeInput(data.title || "");
 
         for (let i = 1; i <= numberRows; i++) {
           const produktInput = document.querySelector("#produkt" + i);
           const produktNummerInput = document.querySelector("#produktNummer" + i);
 
-          produktInput.value = data["produkt" + i] || "";
-          produktNummerInput.value = data["produktNummer" + i] || "";
+          produktInput.value = sanitizeInput(data["produkt" + i] || "");
+          produktNummerInput.value = sanitizeInput(data["produktNummer" + i] || "");
 
           // Trigger barcode generation manually
           handleInputChange({ target: produktNummerInput });
@@ -127,7 +216,8 @@ function FindData() {
       }
     })
     .catch((error) => {
-      alert(error);
+      console.error("Load error:", error);
+      alert("Ett fel uppstod vid laddning. Försök igen.");
     });
 }
 
@@ -140,6 +230,15 @@ async function UpdateData() {
     return;
   }
 
+  // Validate and sanitize title
+  const titleValidation = validateTitle(titleInput.value);
+  if (!titleValidation.valid) {
+    alert(titleValidation.message);
+    return;
+  }
+  
+  const sanitizedTitle = titleValidation.sanitized;
+
   // Check if new title already exists (excluding current entry)
   const dbref = ref(db);
   const snapshot = await get(child(dbref, "lathund/products"));
@@ -148,34 +247,50 @@ async function UpdateData() {
     const data = snapshot.val();
     const existingEntry = Object.entries(data).find(([key, item]) => 
       key !== selectedIdentifier && 
-      item.title.toLowerCase() === titleInput.value.trim().toLowerCase()
+      item.title.toLowerCase() === sanitizedTitle.toLowerCase()
     );
     
     if (existingEntry) {
-      alert("En sida med namnet '" + titleInput.value + "' finns redan. Välj ett annat namn.");
+      alert("En sida med namnet '" + sanitizedTitle + "' finns redan. Välj ett annat namn.");
       return;
     }
   }
 
   const dataObject = {
-    title: titleInput.value,
+    title: sanitizedTitle,
   };
 
   for (let i = 1; i <= numberRows; i++) {
     const produktInput = document.querySelector("#produkt" + i);
     const produktNummerInput = document.querySelector("#produktNummer" + i);
     
-    dataObject["produkt" + i] = produktInput.value;
-    dataObject["produktNummer" + i] = produktNummerInput.value;
+    // Validate and sanitize product data
+    const produktValidation = validateProductName(produktInput.value);
+    const nummerValidation = validateProductNumber(produktNummerInput.value);
+    
+    if (!produktValidation.valid) {
+      alert(`Rad ${i}: ${produktValidation.message}`);
+      return;
+    }
+    
+    if (!nummerValidation.valid) {
+      alert(`Rad ${i}: ${nummerValidation.message}`);
+      return;
+    }
+    
+    dataObject["produkt" + i] = produktValidation.sanitized;
+    dataObject["produktNummer" + i] = nummerValidation.sanitized;
   }
 
   update(ref(db, "lathund/products/" + selectedIdentifier), dataObject)
     .then(() => {
       alert("Sidan uppdaterad");
+      titleInput.value = sanitizedTitle; // Update input with sanitized value
       displaySavedTitles();
     })
     .catch((error) => {
-      alert(error);
+      console.error("Update error:", error);
+      alert("Ett fel uppstod vid uppdatering. Försök igen.");
     });
 }
 
@@ -202,7 +317,8 @@ function DeleteData() {
         displaySavedTitles();
       })
       .catch((error) => {
-        alert(error);
+        console.error("Delete error:", error);
+        alert("Ett fel uppstod vid borttagning. Försök igen.");
       });
   } else {
     alert("Sidan ej raderad");
@@ -248,11 +364,11 @@ function populateDropdownList(identifiers, titles) {
   // Clear existing options
   dropdown.innerHTML = '<option value="">Välj en sida</option>';
 
-  // Add titles to the dropdown
+  // Add titles to the dropdown (sanitized to prevent XSS)
   titles.forEach((title, index) => {
     const option = document.createElement('option');
     option.value = identifiers[index];
-    option.textContent = title;
+    option.textContent = sanitizeInput(title); // Sanitize even when displaying
     dropdown.appendChild(option);
   });
 }
