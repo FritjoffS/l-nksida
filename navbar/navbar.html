@@ -1,25 +1,34 @@
-<nav>
-  <ul class="navbar">
-    <li><a href="../index/index.html"><img src="../icons/home.png" alt="Home Icon"
-          style="width:16px;height:16px;filter: invert(1);"><br>Hem</a></li>
-    <li><a href="../verkstad/verkstad.html"><img src="../icons/tools.png" alt="Verkstad Icon"
-          style="width:16px;height:16px;filter: invert(1);"><br>Verkstad</a></li>
-    <li><a href="../kontor/kontor.html"><img src="../icons/office.png" alt="Verkstad Icon"
-          style="width:16px;height:16px;filter: invert(1);"><br>Kontor</a></li>
-    <li><a href="../guider/guider.html"><img src="../icons/guide.png" alt="Guider Icon"
-          style="width:16px;height:16px;filter: invert(1);"><br>Guider</a></li>
-    <li><a href="../aviseringar/aviseringar.html"><img src="../icons/email.png" alt="Verkstad Icon"
-          style="width:16px;height:16px;filter: invert(1);"><br>Aviseringar</a></li>
-    <li><a href="../arbetsbeskrivningar/arbetsbeskr.html"><img src="../icons/list.png" alt="Verkstad Icon"
-          style="width:16px;height:16px;filter: invert(1);"><br>Arbetsbeskrivningar</a></li>
-    <li><a href="../lathund/lathund.html"><img src="../icons/barcode.png" alt="Verkstad Icon"
-          style="width:16px;height:16px;filter: invert(1);"><br>Lathund</a></li>
-    <li><a href="../products/products.html"><img src="../icons/under-construction.png" alt="Verkstad Icon"
-          style="width:16px;height:16px;filter: invert(1);"><br>Produkter</a></li>
-    <li><a href="../debetlappar/debet.html"><img src="../icons/debet.png" alt="Verkstad Icon"
-          style="width:16px;height:16px;filter: invert(1);"><br>Debetlappar</a></li>
-    <li id="admin-link-placeholder"></li> <!-- Placeholder for admin link -->
-    <li><button class="logout-button" onclick="logout()">Logout</button></li> <!-- Added class for styling -->
+<nav role="navigation" aria-label="Huvudnavigering">
+  <ul class="navbar" role="menubar">
+    <li role="none"><a href="../index/index.html" role="menuitem" aria-label="Gå till startsidan">
+      <img src="../icons/home.png" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
+      <br>Hem</a></li>
+    <li role="none"><a href="../verkstad/verkstad.html" role="menuitem" aria-label="Gå till Verkstad">
+      <img src="../icons/tools.png" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
+      <br>Verkstad</a></li>
+    <li role="none"><a href="../kontor/kontor.html" role="menuitem" aria-label="Gå till Kontor">
+      <img src="../icons/office.png" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
+      <br>Kontor</a></li>
+    <li role="none"><a href="../guider/guider.html" role="menuitem" aria-label="Gå till Guider">
+      <img src="../icons/guide.png" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
+      <br>Guider</a></li>
+    <li role="none"><a href="../aviseringar/aviseringar.html" role="menuitem" aria-label="Gå till Aviseringar">
+      <img src="../icons/email.png" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
+      <br>Aviseringar</a></li>
+    <li role="none"><a href="../arbetsbeskrivningar/arbetsbeskr.html" role="menuitem" aria-label="Gå till Arbetsbeskrivningar">
+      <img src="../icons/list.png" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
+      <br>Arbetsbeskrivningar</a></li>
+    <li role="none"><a href="../lathund/lathund.html" role="menuitem" aria-label="Gå till Lathund">
+      <img src="../icons/barcode.png" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
+      <br>Lathund</a></li>
+    <li role="none"><a href="../products/products.html" role="menuitem" aria-label="Gå till Produkter">
+      <img src="../icons/under-construction.png" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
+      <br>Produkter</a></li>
+    <li role="none"><a href="../debetlappar/debet.html" role="menuitem" aria-label="Gå till Debetlappar">
+      <img src="../icons/debet.png" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
+      <br>Debetlappar</a></li>
+    <li id="admin-link-placeholder" role="none"></li>
+    <li role="none"><button class="logout-button" onclick="logout()" role="menuitem" aria-label="Logga ut från applikationen">Logga ut</button></li>
   </ul>
 </nav>
 
@@ -40,13 +49,17 @@
         if (response.ok) {
           console.log('Admin page found. Adding link to navbar.');
           const adminLink = document.createElement('li');
+          adminLink.setAttribute('role', 'none');
           adminLink.innerHTML = `
-            <a href="${adminPath}">
-              <img src="../icons/admin.png" alt="Admin Icon" style="width:16px;height:16px;filter: invert(1);">
+            <a href="${adminPath}" role="menuitem" aria-label="Gå till Admin">
+              <img src="../icons/admin.png" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
               <br>Admin
             </a>
           `;
-          document.getElementById('admin-link-placeholder').replaceWith(adminLink);
+          const placeholder = document.getElementById('admin-link-placeholder');
+          if (placeholder) {
+            placeholder.replaceWith(adminLink);
+          }
         } else {
           console.log('Admin page not found. Response status:', response.status);
         }
