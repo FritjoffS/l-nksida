@@ -4,77 +4,68 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta author="Fredrik Söderberg" />
-  <title>Login Page</title>
+  <meta name="author" content="Fredrik Söderberg" />
+  <meta name="description" content="Inloggningssida" />
+  <title>Logga in</title>
 
   <link rel="stylesheet" href="../styles/global.css" />
   <link rel="stylesheet" href="../styles/login.css" />
-  <!-- Add Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
-
-
-  <script>
-    // Initialize Firebase with your project's config
-    var firebaseConfig = {
-      apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
-      authDomain: "l-nksida.firebaseapp.com",
-      databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "l-nksida",
-      storageBucket: "l-nksida.firebasestorage.app",
-      messagingSenderId: "258147870107",
-      appId: "1:258147870107:web:ce637517bc30b7578cad3e"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
-
-  <script>
-    // Function to check if a user is logged in or not
-    function checkAuthState() {
-      firebase.auth().onAuthStateChanged(function (user) {
-        if (user) {
-          // User is signed in, proceed to the website
-          window.location.href = "index.html";
-        } else {
-          // No user is signed in, clear input fields
-          document.getElementById("email").value = "";
-          document.getElementById("password").value = "";
-        }
-      });
-    }
-
-    // Function to handle the login form submission
-    function login() {
-      var email = document.getElementById("email").value;
-      var password = document.getElementById("password").value;
-
-      firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(function () {
-          // Login successful, redirect to the homepage
-          window.location.href = "index.html";
-        })
-        .catch(function (error) {
-          // Handle errors here
-          var errorCode = error.code;
-          var errorMessage = error.message;
-          console.log("Login error:", errorCode, errorMessage);
-        });
-    }
-  </script>
-
 </head>
 
-<body onload="checkAuthState()">
-  <h1 style="display: none;">Login Page</h1>
-  <form autocomplete="off">
-    <!-- <label for="email">Email:</label> -->
-    <input type="email" id="email" required placeholder="Email" autocomplete="off"><br>
-    <!-- <label for="password">Password:</label> -->
-    <input type="password" id="password" required placeholder="Password" autocomplete="off"><br>
-    <button type="button" onclick="login()">Login</button>
-  </form>
-  <!-- Add a note for users redirected after logout -->
-  <!-- <p>If you were logged out, please log in again to continue.</p> -->
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="logo-container">
+        <h1>Välkommen</h1>
+        <p class="subtitle">Logga in för att fortsätta</p>
+      </div>
+
+      <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+      <form id="loginForm" autocomplete="on">
+        <div class="input-group">
+          <label for="email">E-post</label>
+          <input 
+            type="email" 
+            id="email" 
+            required 
+            placeholder="din.epost@exempel.se" 
+            autocomplete="username"
+            spellcheck="false"
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="password">Lösenord</label>
+          <div class="password-wrapper">
+            <input 
+              type="password" 
+              id="password" 
+              required 
+              placeholder="Ditt lösenord" 
+              autocomplete="current-password"
+            />
+            <button type="button" id="togglePassword" class="toggle-password" title="Visa/dölj lösenord">👁️</button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <a href="#" id="forgotPassword" class="forgot-password">Glömt lösenord?</a>
+        </div>
+
+        <button type="button" id="loginButton" class="login-button">
+          <span id="loadingSpinner" class="spinner" style="display: none;"></span>
+          Logga in
+        </button>
+      </form>
+
+      <div class="footer-text">
+        <p>Endast för behöriga användare</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="login.js"></script>
 </body>
 
 </html>
