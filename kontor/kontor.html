@@ -1,80 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="Fredrik Söderberg" />
   <title>Kontor</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#ff6600" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Järnhandel" />
+  <link rel="apple-touch-icon" href="../logo.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Järnhandel" />
+  <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
+  
   <link rel="stylesheet" href="../styles/global.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
   <link rel="stylesheet" href="../styles/kontor-buttons.css" />
+  <link rel="stylesheet" href="kontor.css" />
   
   <!-- Google Analytics -->
-  <script type="module" src="../scripts/analytics.js"></script>
-  
-   <!-- Add Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
-
-  <script>
-    // Initialize Firebase with your project's config
-    var firebaseConfig = {
-      apiKey: "AIzaSyDOFeJ1GvtXtffzCwQFg2M3CCVtpn875KQ",
-      authDomain: "l-nksida.firebaseapp.com",
-      databaseURL: "https://l-nksida-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "l-nksida",
-      storageBucket: "l-nksida.firebasestorage.app",
-      messagingSenderId: "258147870107",
-      appId: "1:258147870107:web:ce637517bc30b7578cad3e"
-    };
-    firebase.initializeApp(firebaseConfig);
-
-    // Function to check if a user is logged in or not
-    function checkAuthState() {
-      console.log("Checking auth state...");
-      firebase.auth().onAuthStateChanged(function (user) {
-        if (!user) {
-          console.log("User not authenticated, redirecting to login");
-          // User is not signed in, redirect to the login page
-          window.location.href = "../index/login.html";
-        } else {
-          console.log("User is authenticated:", user.email);
-          // User is signed in, kontor.js will handle loadButtons()
-        }
-      });
-    }
-
-    // Function to log out the user
-    function logout() {
-      firebase.auth().signOut().then(function () {
-        // Sign-out successful, redirect to login page
-        window.location.href = "../index/login.html";
-      }).catch(function (error) {
-        // Handle errors here
-        console.error("Logout error:", error);
-      });
-    }
-
-    // Load page on page load
-    window.onload = function () {
-      console.log("Page loaded, initializing...");
-      checkAuthState();
-    };
-  </script>
+  <script type="module" src="../scripts/analytics.js" async></script>
 </head>
 
-<body onload="checkAuthState()">
-
-  <div id="navbar"></div> <!-- Placeholder for the navbar -->
-
-  <div class="container">
-    <!-- Dynamic buttons will be loaded here -->
+<body>
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" role="alert" aria-live="polite">
+    <div class="spinner"></div>
+    <p>Laddar kontorslänkar...</p>
   </div>
+
+  <div id="navbar" role="navigation" aria-label="Huvudnavigering"></div>
+
+  <main role="main">
+    <div class="container" id="buttonContainer" role="list" aria-label="Kontorslänkar">
+      <!-- Dynamic buttons will be loaded here -->
+    </div>
+  </main>
   
-  <script src="../scripts/kontor.js"></script>
-  <script src="../scripts/script.js"></script>
-  <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
+  <script type="module" src="kontor.js"></script>
+  <script src="../scripts/loadNavbar.js"></script>
+  
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('../sw.js')
+          .then(function(registration) {
+            console.log('[PWA] Service Worker registered:', registration.scope);
+            
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              console.log('[PWA] New Service Worker found');
+              
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('[PWA] Update available');
+                  if (confirm('En ny version är tillgänglig! Vill du uppdatera nu?')) {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                  }
+                }
+              });
+            });
+          })
+          .catch(function(err) {
+            console.error('[PWA] Service Worker registration failed:', err);
+          });
+          
+        // Reload page when new service worker takes control
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log('[PWA] New Service Worker activated, reloading...');
+            window.location.reload();
+          }
+        });
+      });
+    }
+  </script>
 </body>
 
 </html>
