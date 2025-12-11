@@ -1,14 +1,19 @@
 {
   "name": "Sollebrunns Järnhandel",
   "short_name": "Järnhandel",
-  "description": "Länksida för Sollebrunns Järnhandel",
-  "version": "2.1.1",
-  "version_name": "2.1.1",
+  "description": "Länksida för Sollebrunns Järnhandel - Verkstad, Kontor, Guider och mer",
+  "version": "2.1.2",
+  "version_name": "2.1.2",
   "start_url": "/l-nksida/index/index.html",
+  "scope": "/l-nksida/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#333333",
   "theme_color": "#ff6600",
   "orientation": "any",
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "sv",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "logo.png",
@@ -57,6 +62,36 @@
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/logo_rund.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Verkstad",
+      "short_name": "Verkstad",
+      "description": "Öppna verkstadslänkar",
+      "url": "/l-nksida/verkstad/verkstad.html",
+      "icons": [{ "src": "icons/tools.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Kontor",
+      "short_name": "Kontor",
+      "description": "Öppna kontorslänkar",
+      "url": "/l-nksida/kontor/kontor.html",
+      "icons": [{ "src": "icons/office.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Lathund",
+      "short_name": "Lathund",
+      "description": "Öppna produktlathund",
+      "url": "/l-nksida/lathund/lathund.html",
+      "icons": [{ "src": "icons/barcode.png", "sizes": "96x96" }]
     }
   ]
 }
