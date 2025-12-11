@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta author="Fredrik Söderberg" />
+  <meta name="author" content="Fredrik Söderberg" />
+  <meta name="description" content="Inloggningssida" />
   <title>Home</title>
   
   <!-- PWA Meta Tags -->
@@ -32,45 +33,58 @@
   <link rel="stylesheet" href="../styles/date_time.css" />
   <link rel="stylesheet" href="../styles/search.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
-    <!-- Add Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
-    <script src="../scripts/firebase-init.js"></script>
-
-    <script>
-      // Function to check if a user is logged in or not
-      function checkAuthState() {
-        firebase.auth().onAuthStateChanged(function(user) {
-          if (!user) {
-            // User is not signed in, redirect to the login page
-            window.location.href = "login.html";
-          }
-        });
-      }
-
-      // Function to log out the user
-      function logout() {
-        firebase.auth().signOut().then(function() {
-          // Sign-out successful, redirect to login page
-          window.location.href = "login.html";
-        }).catch(function(error) {
-          // Handle errors here
-          console.error("Logout error:", error);
-        });
-      }
-    </script>
   
+  <style>
+    /* Loading overlay */
+    #loadingOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    #loadingOverlay .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #ff6600;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+    
+    #loadingOverlay p {
+      color: white;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 
-<body onload="checkAuthState()">
+<body>
+  <!-- Loading overlay -->
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Kontrollerar autentisering...</p>
+  </div>
+  
   <div id="navbar"></div> <!-- Placeholder for the navbar -->
   <div class="flexCenter" id="clock"></div>
-  <div class="flexCenter" id="date">
-    <span id="date"></span>
-  </div>
+  <div class="flexCenter" id="date"></div>
 
   <div class="search-bar">
-    <form action="https://www.google.com/search" method="get" target="_blank">
+    <form action="https://www.google.com/search" method="get" target="_blank" rel="noopener noreferrer">
       <input type="text" name="q" placeholder="Search Google">
       <button class="search-bar button" type="submit">Search</button>
     </form>
@@ -81,9 +95,10 @@
     v2.1.1
   </div>
 
+  <script type="module" src="index.js"></script>
   <script src="../scripts/script.js"></script>
   <script src="../scripts/clock.js"></script>
-  <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
+  <script src="../scripts/loadNavbar.js"></script>
   
   <!-- PWA Service Worker Registration -->
   <script>
