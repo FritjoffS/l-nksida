@@ -494,6 +494,15 @@ generatePDFButton.addEventListener("click", async () => {
         // Update the next print number
         await set(printNumberRef, startNumber + quantity);
 
+        // Track printing in Google Analytics
+        if (window.logAnalyticsEvent) {
+            window.logAnalyticsEvent('gift_cards_printed', {
+                quantity: quantity,
+                start_number: startNumber,
+                end_number: startNumber + quantity - 1
+            });
+        }
+
         alert(`${quantity} presentkort har genererats!`);
         printDialog.style.display = "none";
 
