@@ -128,7 +128,7 @@ redeemCardButton.addEventListener("click", async () => {
         if (!serialNumber || isNaN(redeemAmount) || redeemAmount <= 0) {
             return alert("Ange giltiga värden!");
         }
-        
+
         if (!redeemSeller) {
             return alert("Ange säljare!");
         }
@@ -170,6 +170,16 @@ redeemCardButton.addEventListener("click", async () => {
             userName: redeemSeller
         });
 
+        // Track redemption in Google Analytics
+        if (window.logAnalyticsEvent) {
+            window.logAnalyticsEvent('gift_card_redeemed', {
+                serial_number: serialNumber,
+                amount: redeemAmount,
+                remaining_balance: newValue,
+                seller: redeemSeller
+            });
+        }
+
         alert("Beloppet har lösts in!");
         const expirationDate = new Date(cardData.expirationDate);
         const formattedExpirationDate = `${expirationDate.getFullYear()}-${String(expirationDate.getMonth() + 1).padStart(2, '0')}-${String(expirationDate.getDate()).padStart(2, '0')}`;
@@ -198,7 +208,7 @@ activateCardButton.addEventListener("click", async () => {
 
         // Remove leading zeros from serial number before saving
         const cleanedSerialNumber = serialNumber.replace(/^0+/, '');
-        
+
         if (!cleanedSerialNumber || cleanedSerialNumber === '0') {
             return alert("Ogiltigt serienummer! Kan inte vara endast nollor.");
         }
@@ -207,7 +217,7 @@ activateCardButton.addEventListener("click", async () => {
         activateCardButton.textContent = "Aktiverar...";
 
         const cardRef = ref(db, `presentkort/${cleanedSerialNumber}`);
-        
+
         // Check if card already exists
         const existingCard = await get(cardRef);
         if (existingCard.exists()) {
@@ -248,8 +258,17 @@ activateCardButton.addEventListener("click", async () => {
             userName: sellerName
         });
 
+        // Track activation in Google Analytics
+        if (window.logAnalyticsEvent) {
+            window.logAnalyticsEvent('gift_card_activated', {
+                serial_number: cleanedSerialNumber,
+                value: cardValue,
+                seller: sellerName
+            });
+        }
+
         alert(`Presentkort ${cleanedSerialNumber} har skapats med värde ${cardValue} kr!\nUtgångsdatum: ${expirationDate.toLocaleDateString('sv-SE')}`);
-        
+
         // Clear form fields
         serialNumberInput.value = "";
         cardValueInput.value = "";
@@ -268,22 +287,22 @@ activateCardButton.addEventListener("click", async () => {
 viewHistoryButton.addEventListener("click", async () => {
     const serialNumber = serialNumberInput.value.trim();
     if (!serialNumber) return alert("Ange ett serienummer!");
-    
+
     try {
         viewHistoryButton.disabled = true;
         viewHistoryButton.textContent = "Hämtar...";
-        
+
         const cardRef = ref(db, `presentkort/${serialNumber}`);
         const snapshot = await get(cardRef);
-        
+
         if (!snapshot.exists()) {
             return alert("Presentkortet ej aktiverat!");
         }
-        
+
         const cardData = snapshot.val();
         const historyRef = ref(db, `presentkort/${serialNumber}/history`);
         const historySnapshot = await get(historyRef);
-        
+
         let historyHTML = `<h3>Presentkort: ${serialNumber}</h3>`;
         historyHTML += `<p><strong>Aktuellt saldo:</strong> ${cardData.value} kr</p>`;
         historyHTML += `<p><strong>Aktiverat:</strong> ${new Date(cardData.date).toLocaleString('sv-SE')}</p>`;
@@ -291,23 +310,23 @@ viewHistoryButton.addEventListener("click", async () => {
         historyHTML += `<p><strong>Säljare:</strong> ${cardData.seller || 'Okänd'}</p>`;
         historyHTML += `<hr style="margin: 15px 0;">`;
         historyHTML += `<h4>Transaktionshistorik:</h4>`;
-        
+
         if (historySnapshot.exists()) {
             const history = historySnapshot.val();
             const historyArray = Object.entries(history).map(([key, value]) => ({
                 ...value,
                 key
             })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
+
             historyHTML += `<div style="max-height: 300px; overflow-y: auto;">`;
             historyArray.forEach(entry => {
                 const date = new Date(entry.timestamp).toLocaleString('sv-SE');
-                const type = entry.type === 'activation' ? 'Aktivering' : 
-                            entry.type === 'redeem' ? 'Inlösen' : 
-                            entry.type === 'reload' ? 'Påladdning' : 'Transaktion';
+                const type = entry.type === 'activation' ? 'Aktivering' :
+                    entry.type === 'redeem' ? 'Inlösen' :
+                        entry.type === 'reload' ? 'Påladdning' : 'Transaktion';
                 const amount = entry.amount > 0 ? `+${entry.amount}` : entry.amount;
                 const user = entry.seller || entry.user || 'System';
-                
+
                 historyHTML += `
                     <div style="padding: 10px; margin: 5px 0; background: #f8f9fa; border-radius: 5px; border-left: 3px solid ${entry.amount > 0 ? '#28a745' : '#dc3545'};">
                         <div><strong>${type}</strong> - ${date}</div>
@@ -320,11 +339,11 @@ viewHistoryButton.addEventListener("click", async () => {
         } else {
             historyHTML += `<p>Ingen transaktionshistorik hittades.</p>`;
         }
-        
+
         document.getElementById("historyContent").innerHTML = historyHTML;
         hideAllDialogs();
         document.getElementById("historyDialog").style.display = "block";
-        
+
     } catch (error) {
         console.error("Error fetching history:", error);
         alert("Ett fel uppstod vid hämtning av historik: " + error.message);
@@ -338,28 +357,28 @@ viewHistoryButton.addEventListener("click", async () => {
 getNextSerialNumberButton.addEventListener("click", async () => {
     try {
         const serialNumber = serialNumberInput.value.trim();
-        
+
         if (!serialNumber) {
             return alert("Ange löpnumret från det tryckta presentkortet som du vill sälja.");
         }
-        
+
         getNextSerialNumberButton.disabled = true;
         getNextSerialNumberButton.textContent = "Kontrollerar...";
-        
+
         // Check if card already exists
         const cardRef = ref(db, `presentkort/${serialNumber}`);
         const snapshot = await get(cardRef);
-        
+
         if (snapshot.exists()) {
             alert(`Presentkort ${serialNumber} är redan aktiverat!\n\nAktuellt saldo: ${snapshot.val().value} kr\nSäljare: ${snapshot.val().seller}`);
             return;
         }
-        
+
         // Card is available, show activation dialog
         hideAllDialogs();
         activateCardDiv.style.display = "block";
         cardValueInput.focus();
-        
+
     } catch (error) {
         console.error("Error:", error);
         alert("Ett fel uppstod: " + error.message);
@@ -427,7 +446,7 @@ printCardsButton.addEventListener("click", async () => {
 
         const printNumberRef = ref(db, "presentkort/config/nextPrintNumber");
         const snapshot = await get(printNumberRef);
-        
+
         let nextNumber = 2000; // Start from 2000
         if (snapshot.exists()) {
             nextNumber = snapshot.val();
@@ -435,7 +454,7 @@ printCardsButton.addEventListener("click", async () => {
             // Initialize the counter if it doesn't exist
             await set(printNumberRef, nextNumber);
         }
-        
+
         nextPrintNumberSpan.textContent = nextNumber.toString().padStart(4, "0");
         hideAllDialogs();
         printDialog.style.display = "block";
@@ -460,24 +479,24 @@ generatePDFButton.addEventListener("click", async () => {
         if (isNaN(quantity) || quantity < 1 || quantity > 100) {
             return alert("Ange ett giltigt antal (1-100)!");
         }
-        
+
         generatePDFButton.disabled = true;
         generatePDFButton.textContent = "Genererar PDF...";
-        
+
         // Get current print number
         const printNumberRef = ref(db, "presentkort/config/nextPrintNumber");
         const snapshot = await get(printNumberRef);
         let startNumber = snapshot.exists() ? snapshot.val() : 2000;
-        
+
         // Generate PDF
         await generateGiftCardPDF(startNumber, quantity);
-        
+
         // Update the next print number
         await set(printNumberRef, startNumber + quantity);
-        
+
         alert(`${quantity} presentkort har genererats!`);
         printDialog.style.display = "none";
-        
+
     } catch (error) {
         console.error("Error generating PDF:", error);
         alert("Ett fel uppstod vid generering av PDF: " + error.message);
@@ -490,34 +509,34 @@ generatePDFButton.addEventListener("click", async () => {
 // Function to generate PDF with gift cards
 async function generateGiftCardPDF(startNumber, quantity) {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
-    
+
     try {
         // Load the template PDF
         const templateUrl = 'presentkort.pdf';
         const existingPdfBytes = await fetch(templateUrl).then(res => res.arrayBuffer());
-        
+
         // Create a new PDF document for output
         const outputPdf = await PDFDocument.create();
-        
+
         for (let i = 0; i < quantity; i++) {
             const cardNumber = (startNumber + i).toString().padStart(4, "0");
-            
+
             // Load template for each card
             const templatePdf = await PDFDocument.load(existingPdfBytes);
             const font = await outputPdf.embedFont(StandardFonts.HelveticaBold);
-            
+
             // Get pages from template (assuming first page is front, second is back)
             const pageCount = templatePdf.getPageCount();
-            
+
             // Copy front page
             const [frontPage] = await outputPdf.copyPages(templatePdf, [0]);
             outputPdf.addPage(frontPage);
-            
+
             const { width, height } = frontPage.getSize();
             const fontSize = 14;
             const text = cardNumber;
             const textWidth = font.widthOfTextAtSize(text, fontSize);
-            
+
             // Add number in top right corner of front page
             // Adjusted: 5mm left = ~14.17pt, 5mm down = ~14.17pt
             // Additional: 3mm left = +8.5pt, 2mm up = +5.66pt, 1mm down = -2.83pt
@@ -528,12 +547,12 @@ async function generateGiftCardPDF(startNumber, quantity) {
                 font: font,
                 color: rgb(0, 0, 0),
             });
-            
+
             // Copy back page if it exists
             if (pageCount > 1) {
                 const [backPage] = await outputPdf.copyPages(templatePdf, [1]);
                 outputPdf.addPage(backPage);
-                
+
                 // Add number in top right corner of back page
                 // Adjusted: 5mm left = ~14.17pt, 5mm down = ~14.17pt
                 // Additional: 3mm left = +8.5pt, 2mm up = +5.66pt, 1mm down = -2.83pt
@@ -546,10 +565,10 @@ async function generateGiftCardPDF(startNumber, quantity) {
                 });
             }
         }
-        
+
         // Serialize the PDF to bytes
         const pdfBytes = await outputPdf.save();
-        
+
         // Create a blob and download
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
@@ -558,7 +577,7 @@ async function generateGiftCardPDF(startNumber, quantity) {
         link.download = `presentkort_${startNumber.toString().padStart(5, "0")}-${(startNumber + quantity - 1).toString().padStart(5, "0")}.pdf`;
         link.click();
         URL.revokeObjectURL(url);
-        
+
     } catch (error) {
         console.error("Error loading template:", error);
         throw new Error("Kunde inte ladda presentkortsmallen. Kontrollera att presentkort.pdf finns i mappen.");
@@ -598,15 +617,15 @@ startImportButton.addEventListener("click", async () => {
         const workbook = XLSX.read(data);
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        
+
         // Try to read with headers first
         let jsonData = XLSX.utils.sheet_to_json(worksheet);
-        
+
         // If no data or first row looks like it might be data (all numbers), read without headers
         if (jsonData.length === 0 || !jsonData[0].hasOwnProperty('Serienummer')) {
             // Read as array without headers
             jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            
+
             // Skip first row if it looks like headers (contains text)
             const firstRow = jsonData[0];
             if (firstRow && typeof firstRow[0] === 'string' && isNaN(firstRow[0])) {
@@ -624,14 +643,14 @@ startImportButton.addEventListener("click", async () => {
 
         for (let i = 0; i < jsonData.length; i++) {
             const row = jsonData[i];
-            
+
             // Update progress
             importStatusSpan.textContent = `${i + 1}/${total}`;
             importProgressBar.style.width = `${((i + 1) / total) * 100}%`;
 
             try {
                 let serialNumber, originalValue, saleDate, seller, redeemedDate;
-                
+
                 // Check if row is an array (no headers) or object (with headers)
                 if (Array.isArray(row)) {
                     // Array format: [serienummer, värde, försäljningsdatum, säljare, inlöst datum]
@@ -755,18 +774,17 @@ if (sessionStorage.getItem('filterDialogOpen') === 'true') {
     const activatedTo = sessionStorage.getItem('filterActivatedTo');
     const redeemedFrom = sessionStorage.getItem('filterRedeemedFrom');
     const redeemedTo = sessionStorage.getItem('filterRedeemedTo');
-    
+
     if (showActive) document.getElementById('showActiveCards').checked = showActive === 'true';
     if (showExpired) document.getElementById('showExpiredCards').checked = showExpired === 'true';
     if (activatedFrom) document.getElementById('activatedFrom').value = activatedFrom;
     if (activatedTo) document.getElementById('activatedTo').value = activatedTo;
     if (redeemedFrom) document.getElementById('redeemedFrom').value = redeemedFrom;
     if (redeemedTo) document.getElementById('redeemedTo').value = redeemedTo;
-    
+
     // Show filter dialog
     filterDialog.style.display = 'block';
-    
+
     // Clear the flag so it doesn't reopen on next page load
     sessionStorage.removeItem('filterDialogOpen');
 }
-
