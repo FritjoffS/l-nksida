@@ -20,6 +20,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
+console.log('Login.js loaded, Firebase initialized');
+console.log('Database instance:', db ? 'OK' : 'MISSING');
+
 // DOM elements
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
@@ -144,7 +147,9 @@ function hashEmail(email) {
 
 async function logSecurityEvent(eventType, email, details = {}) {
   try {
+    console.log('Starting security log:', eventType);
     const ipAddress = await getIpAddress();
+    console.log('IP Address:', ipAddress);
     const userAgent = navigator.userAgent;
     
     const logEntry = {
@@ -156,10 +161,14 @@ async function logSecurityEvent(eventType, email, details = {}) {
       ...details
     };
     
+    console.log('Log entry to save:', logEntry);
     const logsRef = dbRef(db, 'security_logs/login_attempts');
-    await push(logsRef, logEntry);
+    console.log('Database reference created');
+    const result = await push(logsRef, logEntry);
+    console.log('Security log saved successfully:', result.key);
   } catch (error) {
     console.error('Failed to log security event:', error);
+    console.error('Error details:', error.message, error.code);
     // Don't block login on logging failure
   }
 }
@@ -265,10 +274,12 @@ function checkAuthState() {
 
 // Login function
 async function login() {
+  console.log('Login function called');
   hideError();
   
   // Check if user is locked out
   if (rateLimiter.isLockedOut()) {
+    console.log('User is locked out');
     const remainingMs = rateLimiter.getRemainingLockoutTime();
     const remainingMinutes = Math.ceil(remainingMs / 60000);
     const remainingSeconds = Math.ceil(remainingMs / 1000);
@@ -283,34 +294,54 @@ async function login() {
   
   const email = emailInput.value.trim();
   const password = passwordInput.value;
+  console.log('Email:', email, 'Password length:', password.length);
 
   // Validate inputs
   if (!email || !password) {
+    console.log('Validation failed: missing email or password');
+    logSecurityEvent('login_failed', email, {
+      errorCode: 'validation/missing-fields',
+      attemptsRemaining: rateLimiter.getAttemptsRemaining()
+    }).catch(err => console.error('Security log failed:', err));
     showError('Vänligen fyll i både e-post och lösenord');
     return;
   }
 
   if (!validateEmail(email)) {
+    console.log('Validation failed: invalid email format');
+    logSecurityEvent('login_failed', email, {
+      errorCode: 'validation/invalid-email',
+      attemptsRemaining: rateLimiter.getAttemptsRemaining()
+    }).catch(err => console.error('Security log failed:', err));
     showError('Vänligen ange en giltig e-postadress');
     return;
   }
 
   if (!validatePassword(password)) {
+    console.log('Validation failed: password too short');
+    logSecurityEvent('login_failed', email, {
+      errorCode: 'validation/password-too-short',
+      passwordLength: password.length,
+      attemptsRemaining: rateLimiter.getAttemptsRemaining()
+    }).catch(err => console.error('Security log failed:', err));
     showError('Lösenordet måste vara minst 6 tecken');
     return;
   }
 
+  console.log('All validations passed');
   setLoading(true);
+
+  console.log('Attempting login with email:', email);
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
     // Successful login - reset rate limiter
     rateLimiter.reset();
     
-    // Log security event
-    await logSecurityEvent('login_success', email, {
+    // Log security event (non-blocking)
+    logSecurityEvent('login_success', email, {
       method: 'email_password'
-    });
+    }).catch(err => console.error('Security log failed:', err));
     
     // Track successful login in Google Analytics
     if (window.logAnalyticsEvent) {
@@ -322,13 +353,14 @@ async function login() {
     // Redirect handled by onAuthStateChanged
     window.location.href = 'index.html';
   } catch (error) {
+    console.log('Login error caught:', error.code);
     setLoading(false);
     
-    // Log security event
-    await logSecurityEvent('login_failed', email, {
+    // Log security event (non-blocking)
+    logSecurityEvent('login_failed', email, {
       errorCode: error.code || 'unknown',
       attemptsRemaining: rateLimiter.getAttemptsRemaining()
-    });
+    }).catch(err => console.error('Security log failed:', err));
     
     // Track failed login attempt in Google Analytics
     if (window.logAnalyticsEvent) {
@@ -343,11 +375,11 @@ async function login() {
     
     // Check if now locked out
     if (rateLimiter.isLockedOut()) {
-      // Log security event for rate limit
-      await logSecurityEvent('rate_limited', email, {
+      // Log security event for rate limit (non-blocking)
+      logSecurityEvent('rate_limited', email, {
         lockoutDurationMinutes: Math.ceil(LOCKOUT_DURATION / 60000),
         totalAttempts: rateLimiter.attempts.length
-      });
+      }).catch(err => console.error('Security log failed:', err));
       
       // Track rate limit lockout in Google Analytics
       if (window.logAnalyticsEvent) {
