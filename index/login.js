@@ -6,6 +6,11 @@ import {
   onAuthStateChanged,
   sendPasswordResetEmail 
 } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js';
+import { 
+  getDatabase, 
+  ref as dbRef, 
+  push 
+} from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js';
 
 // Import Firebase config
 import { firebaseConfig } from '../scripts/firebase-config.js';
@@ -13,6 +18,7 @@ import { firebaseConfig } from '../scripts/firebase-config.js';
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getDatabase(app);
 
 // DOM elements
 const emailInput = document.getElementById('email');
@@ -107,6 +113,56 @@ class RateLimiter {
 }
 
 const rateLimiter = new RateLimiter();
+
+// Security Logging
+let cachedIpAddress = null;
+
+async function getIpAddress() {
+  if (cachedIpAddress) return cachedIpAddress;
+  
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    cachedIpAddress = data.ip;
+    return cachedIpAddress;
+  } catch (error) {
+    console.error('Failed to fetch IP address:', error);
+    return 'unknown';
+  }
+}
+
+function hashEmail(email) {
+  // Simple hash for privacy (not cryptographic)
+  let hash = 0;
+  for (let i = 0; i < email.length; i++) {
+    const char = email.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return hash.toString(36);
+}
+
+async function logSecurityEvent(eventType, email, details = {}) {
+  try {
+    const ipAddress = await getIpAddress();
+    const userAgent = navigator.userAgent;
+    
+    const logEntry = {
+      timestamp: Date.now(),
+      eventType: eventType, // 'login_success', 'login_failed', 'rate_limited'
+      ipAddress: ipAddress,
+      emailHash: email ? hashEmail(email) : null,
+      userAgent: userAgent,
+      ...details
+    };
+    
+    const logsRef = dbRef(db, 'security_logs/login_attempts');
+    await push(logsRef, logEntry);
+  } catch (error) {
+    console.error('Failed to log security event:', error);
+    // Don't block login on logging failure
+  }
+}
 
 // Check lockout status on page load and update UI
 function checkLockoutStatus() {
@@ -251,6 +307,11 @@ async function login() {
     // Successful login - reset rate limiter
     rateLimiter.reset();
     
+    // Log security event
+    await logSecurityEvent('login_success', email, {
+      method: 'email_password'
+    });
+    
     // Track successful login in Google Analytics
     if (window.logAnalyticsEvent) {
       window.logAnalyticsEvent('login_success', {
@@ -262,6 +323,12 @@ async function login() {
     window.location.href = 'index.html';
   } catch (error) {
     setLoading(false);
+    
+    // Log security event
+    await logSecurityEvent('login_failed', email, {
+      errorCode: error.code || 'unknown',
+      attemptsRemaining: rateLimiter.getAttemptsRemaining()
+    });
     
     // Track failed login attempt in Google Analytics
     if (window.logAnalyticsEvent) {
@@ -276,6 +343,12 @@ async function login() {
     
     // Check if now locked out
     if (rateLimiter.isLockedOut()) {
+      // Log security event for rate limit
+      await logSecurityEvent('rate_limited', email, {
+        lockoutDurationMinutes: Math.ceil(LOCKOUT_DURATION / 60000),
+        totalAttempts: rateLimiter.attempts.length
+      });
+      
       // Track rate limit lockout in Google Analytics
       if (window.logAnalyticsEvent) {
         window.logAnalyticsEvent('login_rate_limited', {
