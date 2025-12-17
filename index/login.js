@@ -250,16 +250,39 @@ async function login() {
     await signInWithEmailAndPassword(auth, email, password);
     // Successful login - reset rate limiter
     rateLimiter.reset();
+    
+    // Track successful login in Google Analytics
+    if (window.logAnalyticsEvent) {
+      window.logAnalyticsEvent('login_success', {
+        method: 'email'
+      });
+    }
+    
     // Redirect handled by onAuthStateChanged
     window.location.href = 'index.html';
   } catch (error) {
     setLoading(false);
+    
+    // Track failed login attempt in Google Analytics
+    if (window.logAnalyticsEvent) {
+      window.logAnalyticsEvent('login_failed', {
+        error_code: error.code || 'unknown',
+        attempts_remaining: rateLimiter.getAttemptsRemaining()
+      });
+    }
     
     // Add failed attempt to rate limiter
     rateLimiter.addAttempt();
     
     // Check if now locked out
     if (rateLimiter.isLockedOut()) {
+      // Track rate limit lockout in Google Analytics
+      if (window.logAnalyticsEvent) {
+        window.logAnalyticsEvent('login_rate_limited', {
+          lockout_duration_minutes: Math.ceil(LOCKOUT_DURATION / 60000)
+        });
+      }
+      
       showError(`För många misslyckade försök. Kontot är låst i ${Math.ceil(LOCKOUT_DURATION / 60000)} minuter.`);
       loginButton.disabled = true;
       checkLockoutStatus(); // Start countdown
