@@ -148,7 +148,7 @@ async function logSecurityEvent(eventType, email, details = {}) {
     const userAgent = navigator.userAgent;
     
     const logEntry = {
-      timestamp: Date.now(),
+      timestamp: new Date().toISOString(),
       eventType: eventType,
       ipAddress: ipAddress,
       emailHash: email ? hashEmail(email) : null,
