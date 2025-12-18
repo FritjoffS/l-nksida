@@ -23,19 +23,19 @@
         <h1>Logghistorik</h1>
         
         <!-- Filter section -->
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
+        <div style="background: #f8f9fa; padding: 10px 15px; border-radius: 5px; margin-bottom: 10px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-bottom: 8px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em;">Från datum:</label>
-                    <input type="date" id="filterFromDate" style="width: 100%; padding: 5px;">
+                    <label style="display: block; margin-bottom: 3px; font-size: 0.85em;">Från datum:</label>
+                    <input type="date" id="filterFromDate" style="width: 100%; padding: 4px;">
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em;">Till datum:</label>
-                    <input type="date" id="filterToDate" style="width: 100%; padding: 5px;">
+                    <label style="display: block; margin-bottom: 3px; font-size: 0.85em;">Till datum:</label>
+                    <input type="date" id="filterToDate" style="width: 100%; padding: 4px;">
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em;">Händelsetyp:</label>
-                    <select id="filterAction" style="width: 100%; padding: 5px;">
+                    <label style="display: block; margin-bottom: 3px; font-size: 0.85em;">Händelsetyp:</label>
+                    <select id="filterAction" style="width: 100%; padding: 4px;">
                         <option value="">Alla</option>
                         <option value="create">Skapade</option>
                         <option value="redeem">Inlösningar</option>
@@ -45,14 +45,14 @@
                     </select>
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; font-size: 0.9em;">Användare:</label>
-                    <input type="text" id="filterUser" placeholder="Filtrera på användare" style="width: 100%; padding: 5px;">
+                    <label style="display: block; margin-bottom: 3px; font-size: 0.85em;">Användare:</label>
+                    <input type="text" id="filterUser" placeholder="Filtrera på användare" style="width: 100%; padding: 4px;">
                 </div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button id="applyLogFilters" style="background: #007bff; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;" title="Tillämpa valda filter på logglistan">Filtrera</button>
-                <button id="clearLogFilters" style="background: #6c757d; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;" title="Ta bort alla filter och visa alla loggar">Rensa filter</button>
-                <button id="exportExcel" style="background: #28a745; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;" title="Exportera till Excel">Exportera Excel</button>
+                <div style="display: flex; align-items: flex-end; gap: 5px;">
+                    <button id="applyLogFilters" style="background: #007bff; color: white; padding: 5px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em;" title="Filtrera">Filtrera</button>
+                    <button id="clearLogFilters" style="background: #6c757d; color: white; padding: 5px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em;" title="Rensa">Rensa</button>
+                    <button id="exportExcel" style="background: #28a745; color: white; padding: 5px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em;" title="Exportera">Excel</button>
+                </div>
             </div>
         </div>
         
@@ -74,7 +74,7 @@
                 </tr>
             </thead>
         </table>
-        <div id="tableBodyWrapper" style="max-height: 360px; overflow-y: auto; overflow-x: hidden;">
+        <div id="tableBodyWrapper" style="max-height: calc(100vh - 320px); min-height: 300px; overflow-y: auto; overflow-x: hidden;">
             <table border="1" style="width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed;">
                 <colgroup>
                     <col style="width: 15%;">
