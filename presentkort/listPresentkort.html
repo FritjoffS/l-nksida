@@ -17,28 +17,20 @@
 <body>
     <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
-    <div id="listaPresentkortContainer">
+    <div id="listaPresentkortContainer" style="margin-top: 60px;">
         <button id="closeList" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; font-size: 32px; cursor: pointer; color: #333; line-height: 1; padding: 0; width: 40px; height: 40px;" title="Stäng">&times;</button>
         
         <h1>Lista Presentkort</h1>
         
         <!-- Summary section -->
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; padding: 10px 15px; background: #f8f9fa; border-radius: 5px;">
-            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                <div>
-                    <strong>Totalt:</strong> <span id="totalCount">0</span> st
-                </div>
-                <div>
-                    <strong>Aktiva:</strong> <span id="activeCount">0</span> st (<span id="activeValue">0</span> kr)
-                </div>
-                <div>
-                    <strong>Utgångna:</strong> <span id="expiredCount">0</span> st (<span id="expiredValue">0</span> kr)
-                </div>
-                <div>
-                    <strong>Inlösta:</strong> <span id="redeemedCount">0</span> st (<span id="redeemedValue">0</span> kr)
-                </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; padding: 8px 12px; background: #f8f9fa; border-radius: 5px; font-size: 0.9em;">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <div><strong>Totalt:</strong> <span id="totalCount">0</span> st</div>
+                <div><strong>Aktiva:</strong> <span id="activeCount">0</span> st (<span id="activeValue">0</span> kr)</div>
+                <div><strong>Utgångna:</strong> <span id="expiredCount">0</span> st (<span id="expiredValue">0</span> kr)</div>
+                <div><strong>Inlösta:</strong> <span id="redeemedCount">0</span> st (<span id="redeemedValue">0</span> kr)</div>
             </div>
-            <button id="exportExcel" style="background: #28a745; border: none; font-size: 14px; cursor: pointer; color: white; padding: 8px 15px; border-radius: 5px;" title="Exportera till Excel">Exportera Excel</button>
+            <button id="exportExcel" style="background: #28a745; border: none; font-size: 0.85em; cursor: pointer; color: white; padding: 5px 12px; border-radius: 4px;" title="Exportera till Excel">Excel</button>
         </div>
         
         <table id="cardTable" border="1" style="width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed;">
@@ -63,7 +55,7 @@
                 </tr>
             </thead>
         </table>
-        <div id="tableBodyWrapper" style="max-height: 420px; overflow-y: auto; overflow-x: hidden;">
+        <div id="tableBodyWrapper" style="max-height: calc(100vh - 280px); min-height: 300px; overflow-y: auto; overflow-x: hidden;">
             <table border="1" style="width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed;">
                 <colgroup>
                     <col style="width: 12%;">
