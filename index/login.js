@@ -20,9 +20,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-console.log('Login.js loaded, Firebase initialized');
-console.log('Database instance:', db ? 'OK' : 'MISSING');
-
 // DOM elements
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
@@ -147,29 +144,22 @@ function hashEmail(email) {
 
 async function logSecurityEvent(eventType, email, details = {}) {
   try {
-    console.log('Starting security log:', eventType);
     const ipAddress = await getIpAddress();
-    console.log('IP Address:', ipAddress);
     const userAgent = navigator.userAgent;
     
     const logEntry = {
       timestamp: Date.now(),
-      eventType: eventType, // 'login_success', 'login_failed', 'rate_limited'
+      eventType: eventType,
       ipAddress: ipAddress,
       emailHash: email ? hashEmail(email) : null,
       userAgent: userAgent,
       ...details
     };
     
-    console.log('Log entry to save:', logEntry);
     const logsRef = dbRef(db, 'security_logs/login_attempts');
-    console.log('Database reference created');
-    const result = await push(logsRef, logEntry);
-    console.log('Security log saved successfully:', result.key);
+    await push(logsRef, logEntry);
   } catch (error) {
     console.error('Failed to log security event:', error);
-    console.error('Error details:', error.message, error.code);
-    // Don't block login on logging failure
   }
 }
 
@@ -274,12 +264,10 @@ function checkAuthState() {
 
 // Login function
 async function login() {
-  console.log('Login function called');
   hideError();
   
   // Check if user is locked out
   if (rateLimiter.isLockedOut()) {
-    console.log('User is locked out');
     const remainingMs = rateLimiter.getRemainingLockoutTime();
     const remainingMinutes = Math.ceil(remainingMs / 60000);
     const remainingSeconds = Math.ceil(remainingMs / 1000);
@@ -294,11 +282,9 @@ async function login() {
   
   const email = emailInput.value.trim();
   const password = passwordInput.value;
-  console.log('Email:', email, 'Password length:', password.length);
 
   // Validate inputs
   if (!email || !password) {
-    console.log('Validation failed: missing email or password');
     logSecurityEvent('login_failed', email, {
       errorCode: 'validation/missing-fields',
       attemptsRemaining: rateLimiter.getAttemptsRemaining()
@@ -308,7 +294,6 @@ async function login() {
   }
 
   if (!validateEmail(email)) {
-    console.log('Validation failed: invalid email format');
     logSecurityEvent('login_failed', email, {
       errorCode: 'validation/invalid-email',
       attemptsRemaining: rateLimiter.getAttemptsRemaining()
@@ -318,7 +303,6 @@ async function login() {
   }
 
   if (!validatePassword(password)) {
-    console.log('Validation failed: password too short');
     logSecurityEvent('login_failed', email, {
       errorCode: 'validation/password-too-short',
       passwordLength: password.length,
@@ -328,10 +312,7 @@ async function login() {
     return;
   }
 
-  console.log('All validations passed');
   setLoading(true);
-
-  console.log('Attempting login with email:', email);
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
@@ -353,7 +334,6 @@ async function login() {
     // Redirect handled by onAuthStateChanged
     window.location.href = 'index.html';
   } catch (error) {
-    console.log('Login error caught:', error.code);
     setLoading(false);
     
     // Log security event (non-blocking)
@@ -398,7 +378,7 @@ async function login() {
     const remaining = rateLimiter.getAttemptsRemaining();
     let errorMsg = '';
     
-    // User-friendly error messages
+    // User-friendly error messages - DON'T reveal if email exists
     switch (error.code) {
       case 'auth/invalid-email':
         errorMsg = 'Ogiltig e-postadress';
@@ -407,12 +387,9 @@ async function login() {
         errorMsg = 'Detta konto har inaktiverats';
         break;
       case 'auth/user-not-found':
-        errorMsg = 'Ingen användare hittades med denna e-postadress';
-        break;
       case 'auth/wrong-password':
-        errorMsg = 'Felaktigt lösenord';
-        break;
       case 'auth/invalid-credential':
+        // Use same message for all credential errors to not reveal if email exists
         errorMsg = 'Felaktig e-post eller lösenord';
         break;
       case 'auth/too-many-requests':
@@ -423,7 +400,6 @@ async function login() {
         break;
       default:
         errorMsg = 'Ett fel uppstod vid inloggning. Försök igen.';
-        console.error('Login error:', error);
     }
     
     // Add warning about remaining attempts
