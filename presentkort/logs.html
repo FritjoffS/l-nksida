@@ -17,9 +17,8 @@
 <body>
     <div id="navbar"></div>
 
-    <div id="listaPresentkortContainer">
+    <div id="listaPresentkortContainer" style="margin-top: 60px;">
         <button id="closeList" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; font-size: 32px; cursor: pointer; color: #333; line-height: 1; padding: 0; width: 40px; height: 40px;" title="Stäng">&times;</button>
-        <button id="exportExcel" style="position: absolute; top: 10px; right: 60px; background: #28a745; border: none; font-size: 14px; cursor: pointer; color: white; padding: 8px 15px; border-radius: 5px;" title="Exportera till Excel">Exportera Excel</button>
         
         <h1>Logghistorik</h1>
         
@@ -50,8 +49,11 @@
                     <input type="text" id="filterUser" placeholder="Filtrera på användare" style="width: 100%; padding: 5px;">
                 </div>
             </div>
-            <button id="applyLogFilters" style="background: #007bff; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;" title="Tillämpa valda filter på logglistan">Filtrera</button>
-            <button id="clearLogFilters" style="background: #6c757d; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;" title="Ta bort alla filter och visa alla loggar">Rensa filter</button>
+            <div style="display: flex; gap: 10px;">
+                <button id="applyLogFilters" style="background: #007bff; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;" title="Tillämpa valda filter på logglistan">Filtrera</button>
+                <button id="clearLogFilters" style="background: #6c757d; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;" title="Ta bort alla filter och visa alla loggar">Rensa filter</button>
+                <button id="exportExcel" style="background: #28a745; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer;" title="Exportera till Excel">Exportera Excel</button>
+            </div>
         </div>
         
         <table id="logTable" border="1" style="width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed;">
@@ -59,8 +61,8 @@
                 <col style="width: 15%;">
                 <col style="width: 10%;">
                 <col style="width: 10%;">
-                <col style="width: 16%;">
-                <col style="width: 49%;">
+                <col style="width: 20%;">
+                <col style="width: 30%;">
             </colgroup>
             <thead>
                 <tr>
@@ -78,8 +80,8 @@
                     <col style="width: 15%;">
                     <col style="width: 10%;">
                     <col style="width: 10%;">
-                    <col style="width: 16%;">
-                    <col style="width: 49%;">
+                    <col style="width: 20%;">
+                    <col style="width: 30%;">
                 </colgroup>
                 <tbody id="logTableBody">
                     <tr>
