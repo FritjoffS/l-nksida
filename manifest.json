@@ -92,6 +92,13 @@
       "description": "Öppna produktlathund",
       "url": "/l-nksida/lathund/lathund.html",
       "icons": [{ "src": "icons/barcode.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Presentkort",
+      "short_name": "Presentkort",
+      "description": "Öppna Presentkort",
+      "url": "/l-nksida/presentkort/presentkort.html",
+      "icons": [{ "src": "icons/presentkort.png", "sizes": "96x96" }]
     }
   ]
 }
