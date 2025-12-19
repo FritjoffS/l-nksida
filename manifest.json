@@ -98,7 +98,7 @@
       "short_name": "Presentkort",
       "description": "Öppna Presentkort",
       "url": "/l-nksida/presentkort/presentkort.html",
-      "icons": [{ "src": "icons/presentkort.png", "sizes": "96x96" }]
+      "icons": [{ "src": "icons/presentkort_1.png", "sizes": "96x96" }]
     }
   ]
 }
