@@ -169,6 +169,22 @@
             <button id="closeHistory" style="background: #6c757d; margin-top: 15px;"
                 title="Stäng historikvyn">Stäng</button>
         </div>
+
+        <!-- Re-authentication dialog for print protection -->
+        <div id="reauthDialog"
+            style="display: none; margin-top: 20px; border: 2px solid #dc3545; padding: 20px; border-radius: 10px; background: #fff3f3;">
+            <h2>🔒 Bekräfta din identitet</h2>
+            <p style="margin-bottom: 15px; color: #666;">För att skydda mot obehörig utskrift av presentkort, vänligen ange ditt lösenord:</p>
+            <div style="margin-bottom: 15px;">
+                <label for="reauthPassword">Lösenord:</label>
+                <input type="password" id="reauthPassword" placeholder="Ange ditt lösenord" style="width: 100%; padding: 10px; margin-top: 5px;">
+            </div>
+            <p id="reauthError" style="color: #dc3545; display: none; margin-bottom: 10px;"></p>
+            <div style="display: flex; gap: 10px;">
+                <button id="confirmReauth" style="background: #28a745;" title="Bekräfta identitet">Bekräfta</button>
+                <button id="cancelReauth" style="background: #6c757d;" title="Avbryt">Avbryt</button>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
