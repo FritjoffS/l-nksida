@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { logAction } from "./logger.js";
 
 // Firebase configuration
@@ -75,6 +75,13 @@ const cancelImportButton = document.getElementById("cancelImport");
 const importProgressDiv = document.getElementById("importProgress");
 const importStatusSpan = document.getElementById("importStatus");
 const importProgressBar = document.getElementById("importProgressBar");
+
+// Re-authentication elements for print protection
+const reauthDialog = document.getElementById("reauthDialog");
+const reauthPasswordInput = document.getElementById("reauthPassword");
+const confirmReauthButton = document.getElementById("confirmReauth");
+const cancelReauthButton = document.getElementById("cancelReauth");
+const reauthErrorP = document.getElementById("reauthError");
 
 // Helper function to hide all dialogs
 function hideAllDialogs() {
@@ -438,9 +445,70 @@ applyFiltersButton.addEventListener("click", () => {
 
 // ===== PDF PRINTING FUNCTIONALITY =====
 
-// Show print dialog and fetch next print number
+// Re-authentication for print protection
+async function showReauthDialog() {
+    hideAllDialogs();
+    reauthPasswordInput.value = "";
+    reauthErrorP.style.display = "none";
+    reauthDialog.style.display = "block";
+    reauthPasswordInput.focus();
+}
+
+async function verifyReauth(password) {
+    const user = auth.currentUser;
+    if (!user || !user.email) {
+        throw new Error("Ingen användare inloggad");
+    }
+    
+    const credential = EmailAuthProvider.credential(user.email, password);
+    await reauthenticateWithCredential(user, credential);
+    return true;
+}
+
+// Show re-auth dialog when clicking print button
 printCardsButton.addEventListener("click", async () => {
+    showReauthDialog();
+});
+
+// Cancel re-auth dialog
+cancelReauthButton.addEventListener("click", () => {
+    reauthDialog.style.display = "none";
+});
+
+// Allow Enter key to submit re-auth
+reauthPasswordInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        confirmReauthButton.click();
+    }
+});
+
+// Confirm re-authentication and show print dialog
+confirmReauthButton.addEventListener("click", async () => {
+    const password = reauthPasswordInput.value;
+    
+    if (!password) {
+        reauthErrorP.textContent = "Vänligen ange ditt lösenord";
+        reauthErrorP.style.display = "block";
+        return;
+    }
+    
     try {
+        confirmReauthButton.disabled = true;
+        confirmReauthButton.textContent = "Verifierar...";
+        reauthErrorP.style.display = "none";
+        
+        await verifyReauth(password);
+        
+        // Log successful re-authentication for print access
+        await logAction("print_reauth_success", {
+            user: auth.currentUser.email,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Hide re-auth dialog and show print dialog
+        reauthDialog.style.display = "none";
+        
+        // Now show the print dialog
         printCardsButton.disabled = true;
         printCardsButton.textContent = "Hämtar...";
 
@@ -458,10 +526,28 @@ printCardsButton.addEventListener("click", async () => {
         nextPrintNumberSpan.textContent = nextNumber.toString().padStart(4, "0");
         hideAllDialogs();
         printDialog.style.display = "block";
+        
     } catch (error) {
-        console.error("Error fetching print number:", error);
-        alert("Kunde inte hämta nästa löpnummer: " + error.message);
+        console.error("Re-authentication failed:", error);
+        
+        // Log failed re-authentication attempt
+        await logAction("print_reauth_failed", {
+            user: auth.currentUser?.email || "unknown",
+            timestamp: new Date().toISOString(),
+            error: error.code || error.message
+        });
+        
+        if (error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+            reauthErrorP.textContent = "Fel lösenord. Försök igen.";
+        } else if (error.code === "auth/too-many-requests") {
+            reauthErrorP.textContent = "För många försök. Vänta en stund och försök igen.";
+        } else {
+            reauthErrorP.textContent = "Autentisering misslyckades: " + error.message;
+        }
+        reauthErrorP.style.display = "block";
     } finally {
+        confirmReauthButton.disabled = false;
+        confirmReauthButton.textContent = "Bekräfta";
         printCardsButton.disabled = false;
         printCardsButton.textContent = "Skriv ut Presentkort";
     }
