@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Fredrik Söderberg">
+  <title>Skyltverktyg</title>
+
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#ff6600" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Järnhandel" />
+  <link rel="apple-touch-icon" href="../logo.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Järnhandel" />
+  <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
+
+  <link rel="stylesheet" href="../styles/global.css">
+  <link rel="stylesheet" href="../styles/navbar.css">
+  <link rel="stylesheet" href="skyltverktyg.css">
+
+  <!-- pdf-lib for PDF manipulation -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+  <!-- Google Analytics -->
+  <script type="module" src="../scripts/analytics.js" async></script>
+</head>
+
+<body>
+  <div id="navbar"></div> <!-- Placeholder for the navbar -->
+
+  <div id="skyltverktygContainer">
+    <h1>Skyltverktyg</h1>
+
+    <div id="formContainer">
+      <h2>Skapa Skylt</h2>
+
+      <form id="skyltForm">
+        <div class="form-group">
+          <label for="productImage">Produktbild:</label>
+          <input type="file" id="productImage" accept="image/*">
+          <input type="url" id="imageUrl" placeholder="Eller ange bild-URL">
+        </div>
+
+        <div class="form-group">
+          <label for="price">Pris:</label>
+          <input type="text" id="price" placeholder="t.ex. 299 kr">
+        </div>
+
+        <div class="form-group">
+          <label for="description">Beskrivning:</label>
+          <textarea id="description" rows="4" placeholder="Produktbeskrivning"></textarea>
+        </div>
+
+        <button type="submit" id="generateButton">Generera Skylt</button>
+      </form>
+    </div>
+
+    <div id="previewContainer" style="display: none;">
+      <h2>Förhandsgranskning</h2>
+      <iframe id="previewIframe" style="width: 100%; height: 600px; border: 1px solid #ddd;"></iframe>
+      <button id="downloadButton">Ladda ner PDF</button>
+    </div>
+
+    <!-- Modal for preview -->
+    <dialog id="previewModal">
+      <span id="closeModalX" aria-label="Stäng modal">&times;</span>
+      <h2>Skylt Förhandsgranskning</h2>
+      <iframe id="modalPreviewIframe" style="width: 100%; height: 80vh; border: 1px solid #ddd;"></iframe>
+    </dialog>
+  </div>
+
+  <script src="skyltverktyg.js"></script>
+  <script src="../scripts/loadNavbar.js"></script>
+</body>
+</html>
