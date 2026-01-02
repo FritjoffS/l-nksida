@@ -89,7 +89,7 @@ function renderLogs(logs) {
         const timestamp = new Date(log.timestamp).toLocaleString('sv-SE');
         const action = actionTranslations[log.action] || log.action;
         const cardNumber = log.cardNumber || '-';
-        const user = log.userEmail || log.userName || 'System';
+        const user = log.userName || log.seller || '-';
         
         // Create summary of details
         let detailsSummary = '';
@@ -175,7 +175,7 @@ function showLogDetails(log) {
             <strong>Tidsstämpel:</strong> ${timestamp}<br>
             <strong>Händelse:</strong> ${action}<br>
             <strong>Presentkort:</strong> ${log.cardNumber || '-'}<br>
-            <strong>Användare:</strong> ${log.userEmail || log.userName || 'System'}
+            <strong>Användare:</strong> ${log.userName || log.seller || '-'}
         </div>
         <hr>
     `;
