@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
+<html lang="sv">
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta author="Name" content="Fredrik Söderberg" />
+    <meta name="author" content="Fredrik Söderberg" />
     <title>Presentkortshantering</title>
     <link rel="stylesheet" href="../styles/global.css" />
     <link rel="stylesheet" href="../styles/navbar.css" />
@@ -17,280 +18,206 @@
 
     <!-- Google Analytics -->
     <script type="module" src="../scripts/analytics.js" async></script>
-  </head>
+</head>
 
-  <body>
+<body>
     <div id="navbar"></div>
     <!-- Placeholder for the navbar -->
 
     <div id="presentkortContainer">
-      <h1>Presentkortshantering</h1>
+        <h1>Presentkortshantering</h1>
 
-      <div id="inputCard">
-        <label for="serialNumber">Presentkortets Serienummer:</label>
-        <!-- Hidden input to catch autofill -->
-        <!--input type="text" name="fake-email" style="display:none;" autocomplete="email" /-->
-        <input type="text" id="serialNumber" name="serial" placeholder="Ange serienummer" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" />
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
-          <button
-            id="checkCard"
-            title="Kontrollera saldo eller lös in ett presentkort"
-          >
-            Lös in / Kontrollera Presentkort
-          </button>
-          <button
-            id="getNextSerialNumber"
-            title="Aktivera och sälj ett nytt presentkort"
-          >
-            Sälj Presentkort
-          </button>
-          <button
-            id="listCards"
-            title="Visa alla presentkort med filtreringsmöjligheter"
-          >
-            Lista Presentkort
-          </button>
-          <button
-            id="viewLogs"
-            style="background: #6c757d"
-            title="Visa logg över alla händelser"
-          >
-            Visa Logghistorik
-          </button>
-          <button id="printCards" style="background: #007bff">
-            Skriv ut Presentkort
-          </button>
-          <button id="importCards" style="background: #17a2b8">
-            Importera
-          </button>
-          <!-- <button id="printCards" style="background: #007bff;" disabled title="Skriv ut tomma presentkort (inaktiverad)">Skriv ut Presentkort</button> -->
-          <!-- <button id="importCards" style="background: #17a2b8; display: none;" title="Importera presentkortshistorik från Excel">Importera Historik</button> -->
+        <div id="inputCard">
+            <label for="serialNumber">Presentkortets Serienummer:</label>
+            <!-- Hidden input to catch autofill -->
+            <!--input type="text" name="fake-email" style="display:none;" autocomplete="email" /-->
+            <input type="text" id="serialNumber" name="serial" placeholder="Ange serienummer" autocomplete="off"
+                readonly onfocus="this.removeAttribute('readonly');" />
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+                <button id="checkCard" title="Kontrollera saldo eller lös in ett presentkort">
+                    Lös in / Kontrollera Presentkort
+                </button>
+                <button id="getNextSerialNumber" title="Aktivera och sälj ett nytt presentkort">
+                    Sälj Presentkort
+                </button>
+                <button id="listCards" title="Visa alla presentkort med filtreringsmöjligheter">
+                    Lista Presentkort
+                </button>
+                <button id="viewLogs" style="background: #6c757d" title="Visa logg över alla händelser">
+                    Visa Logghistorik
+                </button>
+                <button id="printCards" style="background: #007bff">
+                    Skriv ut Presentkort
+                </button>
+                <button id="importCards" style="background: #17a2b8">
+                    Importera
+                </button>
+                <!-- <button id="printCards" style="background: #007bff;" disabled title="Skriv ut tomma presentkort (inaktiverad)">Skriv ut Presentkort</button> -->
+                <!-- <button id="importCards" style="background: #17a2b8; display: none;" title="Importera presentkortshistorik från Excel">Importera Historik</button> -->
+            </div>
         </div>
-      </div>
 
-      <div
-        id="importDialog"
-        style="
+        <div id="importDialog" style="
           display: none;
           margin-top: 20px;
           border: 2px solid #17a2b8;
           padding: 20px;
           border-radius: 10px;
           background: #f8f9fa;
-        "
-      >
-        <h2>Importera Presentkortshistorik</h2>
-        <p style="margin-bottom: 15px; color: #666">
-          Välj en Excel-fil (.xlsx) med kolumnerna:<br />
-          <strong
-            >Serienummer, Ursprungligt värde, Försäljningsdatum, Säljare, Inlöst
-            datum</strong
-          >
-        </p>
-        <input
-          type="file"
-          id="excelFile"
-          accept=".xlsx, .xls"
-          style="margin-bottom: 15px"
-        />
-        <div id="importProgress" style="display: none; margin: 15px 0">
-          <p><strong>Importerar:</strong> <span id="importStatus">0/0</span></p>
-          <div
-            style="
+        ">
+            <h2>Importera Presentkortshistorik</h2>
+            <p style="margin-bottom: 15px; color: #666">
+                Välj en Excel-fil (.xlsx) med kolumnerna:<br />
+                <strong>Serienummer, Ursprungligt värde, Försäljningsdatum, Säljare, Inlöst
+                    datum</strong>
+            </p>
+            <input type="file" id="excelFile" accept=".xlsx, .xls" style="margin-bottom: 15px" />
+            <div id="importProgress" style="display: none; margin: 15px 0">
+                <p><strong>Importerar:</strong> <span id="importStatus">0/0</span></p>
+                <div style="
               background: #e9ecef;
               border-radius: 5px;
               height: 20px;
               overflow: hidden;
-            "
-          >
-            <div
-              id="importProgressBar"
-              style="
+            ">
+                    <div id="importProgressBar" style="
                 background: #17a2b8;
                 height: 100%;
                 width: 0%;
                 transition: width 0.3s;
-              "
-            ></div>
-          </div>
+              "></div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px">
+                <button id="startImport" style="background: #28a745" title="Börja importera presentkort från vald fil">
+                    Starta Import
+                </button>
+                <button id="cancelImport" style="background: #6c757d" title="Avbryt importen och stäng dialogen">
+                    Avbryt
+                </button>
+            </div>
         </div>
-        <div style="display: flex; gap: 10px">
-          <button
-            id="startImport"
-            style="background: #28a745"
-            title="Börja importera presentkort från vald fil"
-          >
-            Starta Import
-          </button>
-          <button
-            id="cancelImport"
-            style="background: #6c757d"
-            title="Avbryt importen och stäng dialogen"
-          >
-            Avbryt
-          </button>
-        </div>
-      </div>
 
-      <div
-        id="printDialog"
-        style="
+        <div id="printDialog" style="
           display: none;
           margin-top: 20px;
           border: 2px solid #007bff;
           padding: 20px;
           border-radius: 10px;
           background: #f8f9fa;
-        "
-      >
-        <h2>Skriv ut Presentkort</h2>
-        <div style="margin-bottom: 15px">
-          <label for="printQuantity">Antal presentkort att skriva ut:</label>
-          <input
-            type="number"
-            id="printQuantity"
-            value="1"
-            min="1"
-            max="100"
-            style="width: 100px"
-          />
+        ">
+            <h2>Skriv ut Presentkort</h2>
+            <div style="margin-bottom: 15px">
+                <label for="printQuantity">Antal presentkort att skriva ut:</label>
+                <input type="number" id="printQuantity" value="1" min="1" max="100" style="width: 100px" />
+            </div>
+            <div style="margin-bottom: 15px">
+                <p>
+                    <strong>Nästa löpnummer:</strong>
+                    <span id="nextPrintNumber">01000</span>
+                </p>
+                <p style="font-size: 0.9em; color: #666">
+                    Presentkorten kommer att numreras från detta nummer
+                </p>
+            </div>
+            <div style="display: flex; gap: 10px">
+                <button id="generatePDF" style="background: #28a745" title="Generera PDF med tomma presentkort">
+                    Generera PDF
+                </button>
+                <button id="cancelPrint" style="background: #6c757d" title="Avbryt utskrift och stäng dialogen">
+                    Avbryt
+                </button>
+            </div>
         </div>
-        <div style="margin-bottom: 15px">
-          <p>
-            <strong>Nästa löpnummer:</strong>
-            <span id="nextPrintNumber">01000</span>
-          </p>
-          <p style="font-size: 0.9em; color: #666">
-            Presentkorten kommer att numreras från detta nummer
-          </p>
-        </div>
-        <div style="display: flex; gap: 10px">
-          <button
-            id="generatePDF"
-            style="background: #28a745"
-            title="Generera PDF med tomma presentkort"
-          >
-            Generera PDF
-          </button>
-          <button
-            id="cancelPrint"
-            style="background: #6c757d"
-            title="Avbryt utskrift och stäng dialogen"
-          >
-            Avbryt
-          </button>
-        </div>
-      </div>
 
-      <div
-        id="filterDialog"
-        style="
+        <div id="filterDialog" style="
           display: none;
           margin-top: 20px;
           border: 2px solid #333;
           padding: 20px;
           border-radius: 10px;
-        "
-      >
-        <h2>Filtrera Presentkort</h2>
+        ">
+            <h2>Filtrera Presentkort</h2>
 
-        <div class="filterElements">
-          <div
-            style="
+            <div class="filterElements">
+                <div style="
               display: flex;
               justify-content: space-between;
               align-items: center;
-            "
-          >
-            <span>Visa Aktiva Presentkort</span>
-            <input type="checkbox" id="showActiveCards" checked />
-          </div>
-          <div
-            style="
+            ">
+                    <span>Visa Aktiva Presentkort</span>
+                    <input type="checkbox" id="showActiveCards" checked />
+                </div>
+                <div style="
               display: flex;
               justify-content: space-between;
               align-items: center;
-            "
-          >
-            <span>Visa Utgångna Presentkort</span>
-            <input type="checkbox" id="showExpiredCards" />
-          </div>
-          <div class="dateRange">
-            <div>
-              <label>Försäljningsdatum Från:</label>
-              <input type="date" id="activatedFrom" />
+            ">
+                    <span>Visa Utgångna Presentkort</span>
+                    <input type="checkbox" id="showExpiredCards" />
+                </div>
+                <div class="dateRange">
+                    <div>
+                        <label>Försäljningsdatum Från:</label>
+                        <input type="date" id="activatedFrom" />
+                    </div>
+                    <div>
+                        <label>Försäljningsdatum Till:</label>
+                        <input type="date" id="activatedTo" />
+                    </div>
+                </div>
+                <div class="dateRange">
+                    <div>
+                        <label>Inlöst datum Från:</label>
+                        <input type="date" id="redeemedFrom" />
+                    </div>
+                    <div>
+                        <label>Inlöst datum Till:</label>
+                        <input type="date" id="redeemedTo" />
+                    </div>
+                </div>
             </div>
-            <div>
-              <label>Försäljningsdatum Till:</label>
-              <input type="date" id="activatedTo" />
-            </div>
-          </div>
-          <div class="dateRange">
-            <div>
-              <label>Inlöst datum Från:</label>
-              <input type="date" id="redeemedFrom" />
-            </div>
-            <div>
-              <label>Inlöst datum Till:</label>
-              <input type="date" id="redeemedTo" />
-            </div>
-          </div>
+
+            <button id="applyFilters" title="Tillämpa valda filter på presentkortslistan">
+                Tillämpa Filter
+            </button>
         </div>
 
-        <button
-          id="applyFilters"
-          title="Tillämpa valda filter på presentkortslistan"
-        >
-          Tillämpa Filter
-        </button>
-      </div>
-
-      <div id="cardInfo" style="display: none">
-        <h2>Presentkort Information</h2>
-        <p id="cardValue"></p>
-        <label for="redeemAmount">Belopp att lösa in:</label>
-        <input type="number" id="redeemAmount" placeholder="Ange belopp" />
-        <label for="redeemSeller">Säljare:</label>
-        <input type="text" id="redeemSeller" placeholder="Ange ditt namn" />
-        <div style="display: flex; gap: 10px; align-items: center">
-          <button
-            id="redeemCard"
-            title="Lös in angivet belopp från presentkortet"
-          >
-            Lös in
-          </button>
-          <button
-            id="viewHistory"
-            title="Visa transaktionshistorik för detta presentkort"
-          >
-            Visa Historik
-          </button>
+        <div id="cardInfo" style="display: none">
+            <h2>Presentkort Information</h2>
+            <p id="cardValue"></p>
+            <label for="redeemAmount">Belopp att lösa in:</label>
+            <input type="number" id="redeemAmount" placeholder="Ange belopp" />
+            <label for="redeemSeller">Säljare:</label>
+            <input type="text" id="redeemSeller" placeholder="Ange ditt namn" />
+            <div style="display: flex; gap: 10px; align-items: center">
+                <button id="redeemCard" title="Lös in angivet belopp från presentkortet">
+                    Lös in
+                </button>
+                <button id="viewHistory" title="Visa transaktionshistorik för detta presentkort">
+                    Visa Historik
+                </button>
+            </div>
         </div>
-      </div>
 
-      <div id="activateCard" style="display: none">
-        <h2>Sälj Presentkort</h2>
-        <div style="display: flex; gap: 10px; align-items: center">
-          <div>
-            <label for="cardValueInput">Önskat värde på presentkort:</label>
-            <input type="number" id="cardValueInput" placeholder="Ange värde" />
-          </div>
-          <div>
-            <label for="sellerName">Säljare:</label>
-            <input type="text" id="sellerName" placeholder="Ange ditt namn" />
-          </div>
+        <div id="activateCard" style="display: none">
+            <h2>Sälj Presentkort</h2>
+            <div style="display: flex; gap: 10px; align-items: center">
+                <div>
+                    <label for="cardValueInput">Önskat värde på presentkort:</label>
+                    <input type="number" id="cardValueInput" placeholder="Ange värde" />
+                </div>
+                <div>
+                    <label for="sellerName">Säljare:</label>
+                    <input type="text" id="sellerName" placeholder="Ange ditt namn" />
+                </div>
+            </div>
+            <button id="activateCardButton" title="Aktivera presentkortet med angivet värde">
+                Aktivera Presentkort
+            </button>
         </div>
-        <button
-          id="activateCardButton"
-          title="Aktivera presentkortet med angivet värde"
-        >
-          Aktivera Presentkort
-        </button>
-      </div>
 
-      <div
-        id="historyDialog"
-        style="
+        <div id="historyDialog" style="
           display: none;
           margin-top: 20px;
           border: 2px solid #333;
@@ -298,76 +225,52 @@
           border-radius: 10px;
           max-height: 500px;
           overflow-y: auto;
-        "
-      >
-        <h2>Presentkorts Historik</h2>
-        <div id="historyContent">
-          <p>Hämtar historik...</p>
+        ">
+            <h2>Presentkorts Historik</h2>
+            <div id="historyContent">
+                <p>Hämtar historik...</p>
+            </div>
+            <button id="closeHistory" style="background: #6c757d; margin-top: 15px" title="Stäng historikvyn">
+                Stäng
+            </button>
         </div>
-        <button
-          id="closeHistory"
-          style="background: #6c757d; margin-top: 15px"
-          title="Stäng historikvyn"
-        >
-          Stäng
-        </button>
-      </div>
 
-      <!-- Re-authentication dialog for print protection -->
-      <div
-        id="reauthDialog"
-        style="
+        <!-- Re-authentication dialog for print protection -->
+        <div id="reauthDialog" style="
           display: none;
           margin-top: 20px;
           border: 2px solid #dc3545;
           padding: 20px;
           border-radius: 10px;
           background: #fff3f3;
-        "
-      >
-        <h2>🔒 Bekräfta din identitet</h2>
-        <p style="margin-bottom: 15px; color: #666">
-          För att skydda mot obehörig utskrift av presentkort, vänligen ange
-          ditt lösenord:
-        </p>
-        <div style="margin-bottom: 15px">
-          <label for="reauthPassword">Lösenord:</label>
-          <input
-            type="password"
-            id="reauthPassword"
-            placeholder="Ange ditt lösenord"
-            style="width: 100%; padding: 10px; margin-top: 5px"
-          />
+        ">
+            <h2>🔒 Bekräfta din identitet</h2>
+            <p style="margin-bottom: 15px; color: #666">
+                För att skydda mot obehörig utskrift av presentkort, vänligen ange
+                ditt lösenord:
+            </p>
+            <div style="margin-bottom: 15px">
+                <label for="reauthPassword">Lösenord:</label>
+                <input type="password" id="reauthPassword" placeholder="Ange ditt lösenord"
+                    style="width: 100%; padding: 10px; margin-top: 5px" />
+            </div>
+            <p id="reauthError" style="color: #dc3545; display: none; margin-bottom: 10px"></p>
+            <div style="display: flex; gap: 10px">
+                <button id="confirmReauth" style="background: #28a745" title="Bekräfta identitet">
+                    Bekräfta
+                </button>
+                <button id="cancelReauth" style="background: #6c757d" title="Avbryt">
+                    Avbryt
+                </button>
+            </div>
         </div>
-        <p
-          id="reauthError"
-          style="color: #dc3545; display: none; margin-bottom: 10px"
-        ></p>
-        <div style="display: flex; gap: 10px">
-          <button
-            id="confirmReauth"
-            style="background: #28a745"
-            title="Bekräfta identitet"
-          >
-            Bekräfta
-          </button>
-          <button id="cancelReauth" style="background: #6c757d" title="Avbryt">
-            Avbryt
-          </button>
-        </div>
-      </div>
     </div>
 
-    <script
-      type="module"
-      src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"
-    ></script>
-    <script
-      type="module"
-      src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"
-    ></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
     <script type="module" src="presentkort.js"></script>
     <script src="../scripts/loadNavbar.js"></script>
     <!-- Add script to load navbar -->
-  </body>
+</body>
+
 </html>
