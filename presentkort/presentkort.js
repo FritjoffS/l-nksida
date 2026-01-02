@@ -1,3 +1,5 @@
+// Denna fil hanterar all funktionalitet för presentkortshantering, inklusive kontroll, inlösen, aktivering, utskrift och import av presentkort.
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";

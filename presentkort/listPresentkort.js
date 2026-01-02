@@ -1,3 +1,5 @@
+// Denna fil hanterar visning och redigering av presentkort, inklusive filtrering, sortering, visning av detaljer, redigering av historik och export till Excel.
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, get, set, push, remove, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";

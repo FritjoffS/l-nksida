@@ -1,3 +1,5 @@
+// Denna fil hanterar loggning av alla operationer relaterade till presentkort i Firebase Realtime Database.
+
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
