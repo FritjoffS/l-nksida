@@ -207,10 +207,11 @@ function showLogDetails(log) {
     document.body.style.overflow = "hidden";
 }
 
-// Export to Excel
-document.getElementById("exportExcel").addEventListener("click", () => {
+// Export to Excel function
+function exportToExcel() {
     if (allLogs.length === 0) {
-        return alert("Ingen data att exportera!");
+        console.log("Ingen data att exportera!");
+        return false;
     }
     
     const data = [
@@ -240,9 +241,80 @@ document.getElementById("exportExcel").addEventListener("click", () => {
     
     XLSX.utils.book_append_sheet(wb, ws, "Loggar");
     
-    const today = new Date().toISOString().split('T')[0];
-    XLSX.writeFile(wb, `presentkort_loggar_${today}.xlsx`);
+    const now = new Date();
+    const date = now.toISOString().split('T')[0];
+    const time = now.toTimeString().slice(0, 5).replace(':', '');
+    XLSX.writeFile(wb, `presentkort_loggar_${date}_${time}.xlsx`);
+    return true;
+}
+
+// Manual export button
+document.getElementById("exportExcel").addEventListener("click", () => {
+    if (!exportToExcel()) {
+        alert("Ingen data att exportera!");
+    }
 });
+
+// ============================================
+// SCHEMALAGD AUTOMATISK EXPORT MED INTERVALL
+// ============================================
+const EXPORT_INTERVAL_HOURS = 12;    // Antal timmar mellan varje export
+const EXPORT_INTERVAL_MINUTES = 0;  // Antal minuter mellan varje export (läggs till timmarna)
+
+let lastAutoExportTime = null; // Håller koll på senaste automatiska exporten
+
+function checkScheduledExport() {
+    const now = new Date();
+    
+    // Beräkna intervall i millisekunder
+    const intervalMs = (EXPORT_INTERVAL_HOURS * 60 + EXPORT_INTERVAL_MINUTES) * 60 * 1000;
+    
+    // Om vi aldrig har exporterat, eller om tillräckligt lång tid har gått
+    if (lastAutoExportTime === null || (now.getTime() - lastAutoExportTime) >= intervalMs) {
+        
+        console.log(`[${now.toLocaleString('sv-SE')}] Kör schemalagd Excel-export...`);
+        
+        if (exportToExcel()) {
+            lastAutoExportTime = now.getTime();
+            console.log("Schemalagd export slutförd!");
+            
+            // Valfritt: Visa en notifikation för användaren
+            if (Notification.permission === "granted") {
+                new Notification("Presentkort - Automatisk export", {
+                    body: "Loggexport har sparats.",
+                    icon: "../icons/icon-192x192.png"
+                });
+            }
+        }
+    }
+}
+
+// Starta schemalagd kontroll (körs varje minut)
+function startScheduledExport() {
+    // Beräkna intervall för loggmeddelande
+    const totalMinutes = EXPORT_INTERVAL_HOURS * 60 + EXPORT_INTERVAL_MINUTES;
+    let intervalText = '';
+    if (EXPORT_INTERVAL_HOURS > 0) {
+        intervalText += `${EXPORT_INTERVAL_HOURS} timme${EXPORT_INTERVAL_HOURS > 1 ? 'r' : ''}`;
+    }
+    if (EXPORT_INTERVAL_MINUTES > 0) {
+        if (intervalText) intervalText += ' och ';
+        intervalText += `${EXPORT_INTERVAL_MINUTES} minut${EXPORT_INTERVAL_MINUTES > 1 ? 'er' : ''}`;
+    }
+    
+    console.log(`Schemalagd export aktiverad: Körs var ${intervalText} (om sidan är öppen)`);
+    
+    // Kontrollera varje minut (60000 ms)
+    setInterval(checkScheduledExport, 60000);
+    
+    // Be om notifikationstillstånd
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+}
+
+// Starta schemat när sidan laddas
+startScheduledExport();
 
 // Event listeners
 applyLogFiltersBtn.addEventListener("click", applyFilters);
