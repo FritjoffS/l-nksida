@@ -417,6 +417,7 @@ document.getElementById("viewLogs").addEventListener("click", () => {
 applyFiltersButton.addEventListener("click", () => {
     const showActive = document.getElementById("showActiveCards").checked;
     const showExpired = document.getElementById("showExpiredCards").checked;
+    const showOnlyWithBalance = document.getElementById("showOnlyWithBalance").checked;
     const activatedFrom = document.getElementById("activatedFrom").value;
     const activatedTo = document.getElementById("activatedTo").value;
     const redeemedFrom = document.getElementById("redeemedFrom").value;
@@ -426,6 +427,7 @@ applyFiltersButton.addEventListener("click", () => {
     sessionStorage.setItem('filterDialogOpen', 'true');
     sessionStorage.setItem('filterShowActive', showActive);
     sessionStorage.setItem('filterShowExpired', showExpired);
+    sessionStorage.setItem('filterShowOnlyWithBalance', showOnlyWithBalance);
     sessionStorage.setItem('filterActivatedFrom', activatedFrom);
     sessionStorage.setItem('filterActivatedTo', activatedTo);
     sessionStorage.setItem('filterRedeemedFrom', redeemedFrom);
@@ -435,6 +437,7 @@ applyFiltersButton.addEventListener("click", () => {
     const queryParams = new URLSearchParams({
         showActive,
         showExpired,
+        showOnlyWithBalance,
         activatedFrom,
         activatedTo,
         redeemedFrom,
@@ -867,6 +870,7 @@ if (sessionStorage.getItem('filterDialogOpen') === 'true') {
     // Restore filter values from sessionStorage
     const showActive = sessionStorage.getItem('filterShowActive');
     const showExpired = sessionStorage.getItem('filterShowExpired');
+    const showOnlyWithBalance = sessionStorage.getItem('filterShowOnlyWithBalance');
     const activatedFrom = sessionStorage.getItem('filterActivatedFrom');
     const activatedTo = sessionStorage.getItem('filterActivatedTo');
     const redeemedFrom = sessionStorage.getItem('filterRedeemedFrom');
@@ -874,6 +878,7 @@ if (sessionStorage.getItem('filterDialogOpen') === 'true') {
 
     if (showActive) document.getElementById('showActiveCards').checked = showActive === 'true';
     if (showExpired) document.getElementById('showExpiredCards').checked = showExpired === 'true';
+    if (showOnlyWithBalance) document.getElementById('showOnlyWithBalance').checked = showOnlyWithBalance === 'true';
     if (activatedFrom) document.getElementById('activatedFrom').value = activatedFrom;
     if (activatedTo) document.getElementById('activatedTo').value = activatedTo;
     if (redeemedFrom) document.getElementById('redeemedFrom').value = redeemedFrom;
