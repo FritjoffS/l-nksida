@@ -225,8 +225,8 @@ function updateSummary(cardArray) {
         if (isExpired) {
             expiredCount++;
             expiredValue += value;
-        } else if (!hasBeenRedeemed) {
-            // Active: not expired AND not redeemed
+        } else {
+            // Active: not expired (regardless of redemption status)
             activeCount++;
             activeValue += value;
         }
