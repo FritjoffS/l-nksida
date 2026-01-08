@@ -34,6 +34,7 @@ window.logout = () => {
 const urlParams = new URLSearchParams(window.location.search);
 const showActive = urlParams.get("showActive") === "true";
 const showExpired = urlParams.get("showExpired") === "true";
+const showOnlyWithBalance = urlParams.get("showOnlyWithBalance") === "true";
 const activatedFrom = urlParams.get("activatedFrom");
 const activatedTo = urlParams.get("activatedTo");
 const redeemedFrom = urlParams.get("redeemedFrom");
@@ -108,10 +109,14 @@ const fetchFilteredCards = async () => {
                 // If redeemedFrom or redeemedTo is specified, only show cards with redemption history
                 const matchesRedeemFilter = (!redeemedFromDate && !redeemedToDate) || (latestRedeemDate && isWithinRedeemedRange);
 
+                // Check if card has balance (if filter is enabled)
+                const hasBalance = !showOnlyWithBalance || (cardData.value > 0);
+
                 // Apply filters
                 if (
                     isWithinDateRange &&
                     matchesRedeemFilter &&
+                    hasBalance &&
                     ((showActive && isActive) || (showExpired && isExpired) || (showActive && showExpired))
                 ) {
                     cardArray.push({
