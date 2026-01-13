@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Fredrik Söderberg">
+    <title>Schemahantering</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/navbar.css">
+    <link rel="stylesheet" href="schema.css">
+</head>
+
+<body>
+    <div id="navbar"></div>
+
+    <div id="schemaContainer">
+        <div class="header-section">
+            <h1>Schemahantering</h1>
+            <div class="user-info">
+                <span id="currentUser">Läser in...</span>
+                <button id="switchUserBtn" class="header-btn secondary">🔄 Byt användare</button>
+                <button id="adminButton" class="header-btn" style="display: none;">⚙️ Admin</button>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="overview">📊 Översikt</button>
+            <button class="tab-btn" data-tab="timesheet">⏰ Tidrapportering</button>
+            <button class="tab-btn" data-tab="schedule">📅 Schema</button>
+            <button class="tab-btn" data-tab="reports">📈 Rapporter</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content-container">
+            <!-- ÖVERSIKT TAB -->
+            <div class="tab-content active" id="overview-tab">
+                <div class="overview-grid">
+                    <div class="stats-card">
+                        <h3>📍 Närvaro idag</h3>
+                        <div class="stat-value" id="presentToday">-</div>
+                        <div class="stat-label">personal på plats</div>
+                    </div>
+                    <div class="stats-card">
+                        <h3>⏱️ Mina timmar denna vecka</h3>
+                        <div class="stat-value" id="myHoursThisWeek">0.0</div>
+                        <div class="stat-label">timmar arbetade</div>
+                    </div>
+                    <div class="stats-card">
+                        <h3>📅 Nästa arbetspass</h3>
+                        <div class="stat-value" id="nextShift">-</div>
+                        <div class="stat-label">schemalagt pass</div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h3>Snabbåtgärder</h3>
+                    <div class="action-buttons">
+                        <button class="action-btn primary" id="quickClockIn">
+                            🟢 Stämpla in
+                        </button>
+                        <button class="action-btn secondary" id="quickClockOut">
+                            🔴 Stämpla ut
+                        </button>
+                        <button class="action-btn" id="viewMySchedule">
+                            📋 Mitt schema
+                        </button>
+                    </div>
+                </div>
+
+                <div class="active-staff">
+                    <h3>Personal på plats</h3>
+                    <div id="activeStaffList" class="staff-list">
+                        <p class="loading">Läser in...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIDRAPPORTERING TAB -->
+            <div class="tab-content" id="timesheet-tab">
+                <div class="timesheet-section">
+                    <div class="clock-controls">
+                        <div class="current-time-display">
+                            <div id="currentTime" class="time-large">--:--:--</div>
+                            <div id="currentDate" class="date-display">Läser in...</div>
+                        </div>
+                        
+                        <div class="clock-status" id="clockStatus">
+                            <span class="status-indicator"></span>
+                            <span class="status-text">Ej inloggad</span>
+                        </div>
+
+                        <div class="clock-buttons">
+                            <button class="clock-btn clock-in" id="clockInBtn">
+                                <span class="btn-icon">🟢</span>
+                                <span class="btn-text">Stämpla in</span>
+                            </button>
+                            <button class="clock-btn clock-out" id="clockOutBtn" disabled>
+                                <span class="btn-icon">🔴</span>
+                                <span class="btn-text">Stämpla ut</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="timesheet-log">
+                        <h3>Mina senaste registreringar</h3>
+                        <div class="filter-controls">
+                            <select id="timesheetPeriod">
+                                <option value="today">Idag</option>
+                                <option value="week" selected>Denna vecka</option>
+                                <option value="month">Denna månad</option>
+                                <option value="custom">Anpassad period</option>
+                            </select>
+                            <div id="customDateRange" style="display: none;">
+                                <input type="date" id="customStartDate">
+                                <span>till</span>
+                                <input type="date" id="customEndDate">
+                                <button id="applyCustomRange" class="small-btn">Visa</button>
+                            </div>
+                        </div>
+                        <div id="timesheetEntries" class="entries-list">
+                            <p class="loading">Läser in registreringar...</p>
+                        </div>
+                        <div class="timesheet-summary">
+                            <strong>Total tid:</strong> <span id="totalHours">0.0</span> timmar
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCHEMA TAB -->
+            <div class="tab-content" id="schedule-tab">
+                <div class="schedule-section">
+                    <div class="schedule-controls">
+                        <button id="prevWeek" class="nav-btn">◀ Föregående</button>
+                        <h3 id="scheduleWeekDisplay">Vecka --</h3>
+                        <button id="nextWeek" class="nav-btn">Följande ▶</button>
+                        <button id="todayWeek" class="small-btn">Idag</button>
+                    </div>
+
+                    <div class="schedule-grid" id="scheduleGrid">
+                        <p class="loading">Läser in schema...</p>
+                    </div>
+
+                    <div class="schedule-legend">
+                        <h4>Förklaring</h4>
+                        <div class="legend-items">
+                            <span class="legend-item"><span class="legend-color shift-morning"></span> Morgon</span>
+                            <span class="legend-item"><span class="legend-color shift-day"></span> Dag</span>
+                            <span class="legend-item"><span class="legend-color shift-evening"></span> Kväll</span>
+                            <span class="legend-item"><span class="legend-color shift-off"></span> Ledig</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RAPPORTER TAB -->
+            <div class="tab-content" id="reports-tab">
+                <div class="reports-section">
+                    <h3>Tidsrapporter</h3>
+                    
+                    <div class="report-controls">
+                        <div class="control-group">
+                            <label>Rapporttyp:</label>
+                            <select id="reportType">
+                                <option value="personal">Min tid</option>
+                                <option value="summary">Sammanfattning (Admin)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Period:</label>
+                            <select id="reportPeriod">
+                                <option value="thisWeek">Denna vecka</option>
+                                <option value="lastWeek">Förra veckan</option>
+                                <option value="thisMonth">Denna månad</option>
+                                <option value="lastMonth">Förra månaden</option>
+                                <option value="custom">Anpassad</option>
+                            </select>
+                        </div>
+                        <div class="control-group" id="reportCustomDates" style="display: none;">
+                            <label>Från:</label>
+                            <input type="date" id="reportStartDate">
+                            <label>Till:</label>
+                            <input type="date" id="reportEndDate">
+                        </div>
+                        <button id="generateReport" class="primary-btn">Skapa rapport</button>
+                        <button id="exportReport" class="secondary-btn">📥 Exportera</button>
+                    </div>
+
+                    <div id="reportContent" class="report-content">
+                        <p class="info-text">Välj rapportinställningar och klicka på "Skapa rapport"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clock In/Out Modal -->
+    <div id="clockModal" class="modal">
+        <div class="modal-content">
+            <h3 id="clockModalTitle">Stämpla in</h3>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tid:</label>
+                    <input type="time" id="clockTime" required>
+                </div>
+                <div class="form-group">
+                    <label>Kommentar (valfritt):</label>
+                    <textarea id="clockComment" rows="3" placeholder="T.ex. orsak till sen ankomst..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmClock" class="primary-btn">Bekräfta</button>
+                <button id="cancelClock" class="secondary-btn">Avbryt</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalOverlay" class="modal-overlay"></div>
+
+    <!-- PIN Login Modal -->
+    <div id="pinLoginModal" class="modal" style="display: block;">
+        <div class="modal-content">
+            <h3>Välj din profil</h3>
+            <div class="modal-body">
+                <p class="info-text">Ange din 4-siffriga personalkod för att fortsätta</p>
+                <div class="form-group">
+                    <label>Personalkod:</label>
+                    <input type="password" id="pinInput" maxlength="4" pattern="[0-9]{4}" placeholder="1234" autocomplete="off" autofocus>
+                </div>
+                <div id="pinError" class="error-message" style="display: none;">Felaktig personalkod</div>
+            </div>
+            <div class="modal-footer">
+                <button id="pinLoginBtn" class="primary-btn">Logga in</button>
+                <button id="pinLogoutBtn" class="secondary-btn">Tillbaka till l-nksida</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="schema.js" type="module"></script>
+    <script src="../scripts/loadNavbar.js"></script>
+</body>
+
+</html>
