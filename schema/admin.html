@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Fredrik Söderberg">
+    <title>Schema - Administration</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/navbar.css">
+    <link rel="stylesheet" href="schema.css">
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .admin-tab-btn {
+            width: auto;
+            height: auto;
+            padding: 12px 24px;
+            background: #f5f5f5;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin: 0;
+        }
+
+        .admin-tab-btn.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .admin-section {
+            display: none;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .user-card {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+
+        .user-card.admin {
+            border-left-color: #dc3545;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .user-actions button {
+            width: auto;
+            height: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .schedule-editor {
+            margin-top: 20px;
+        }
+
+        .schedule-editor-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .day-editor {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .day-editor h5 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .day-editor select,
+        .day-editor input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="navbar"></div>
+
+    <div id="schemaContainer">
+        <div class="admin-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="margin: 0;">Schemahantering - Administration</h1>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Hantera personal, schema och inställningar</p>
+                </div>
+                <button onclick="window.location.href='schema.html'" class="header-btn">
+                    ← Tillbaka till schema
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Tab Navigation -->
+        <div class="admin-tabs">
+            <button class="admin-tab-btn active" data-tab="users">👥 Personal</button>
+            <button class="admin-tab-btn" data-tab="schedule-manager">📅 Schemaläggning</button>
+            <button class="admin-tab-btn" data-tab="time-approval">✅ Godkänn tider</button>
+            <button class="admin-tab-btn" data-tab="settings">⚙️ Inställningar</button>
+        </div>
+
+        <!-- PERSONAL TAB -->
+        <div class="admin-section active" id="users-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Personalhantering</h2>
+                <button id="addUserBtn" class="primary-btn">+ Lägg till personal</button>
+            </div>
+
+            <div id="usersList" class="user-grid">
+                <p class="loading">Läser in personal...</p>
+            </div>
+        </div>
+
+        <!-- SCHEMALÄGGNING TAB -->
+        <div class="admin-section" id="schedule-manager-section">
+            <h2>Schemaläggning</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Välj personal:</label>
+                    <select id="scheduleUserSelect">
+                        <option value="">Välj en person...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Välj vecka:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="schedPrevWeek" class="nav-btn">◀</button>
+                        <input type="week" id="scheduleWeekPicker">
+                        <button id="schedNextWeek" class="nav-btn">▶</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="scheduleEditor" class="schedule-editor" style="display: none;">
+                <h3>Schemalägg vecka <span id="editWeekNumber"></span></h3>
+                <div id="scheduleEditorGrid" class="schedule-editor-grid">
+                    <!-- Generated by JavaScript -->
+                </div>
+                <div class="btn-group">
+                    <button id="saveSchedule" class="primary-btn">💾 Spara schema</button>
+                    <button id="copySchedule" class="secondary-btn">📋 Kopiera från föregående vecka</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GODKÄNN TIDER TAB -->
+        <div class="admin-section" id="time-approval-section">
+            <h2>Godkänn tidrapporter</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Period:</label>
+                    <select id="approvalPeriod">
+                        <option value="thisWeek">Denna vecka</option>
+                        <option value="lastWeek">Förra veckan</option>
+                        <option value="thisMonth">Denna månad</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button id="loadApprovals" class="primary-btn">Ladda tidrapporter</button>
+                </div>
+            </div>
+
+            <div id="approvalsList">
+                <p class="info-text">Välj period och klicka på "Ladda tidrapporter"</p>
+            </div>
+        </div>
+
+        <!-- INSTÄLLNINGAR TAB -->
+        <div class="admin-section" id="settings-section">
+            <h2>Systeminställningar</h2>
+            
+            <div class="form-group">
+                <label>Standard arbetstid (dag):</label>
+                <div class="form-row">
+                    <input type="time" id="defaultStartTime" value="08:00">
+                    <input type="time" id="defaultEndTime" value="17:00">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Rast (minuter):</label>
+                <input type="number" id="defaultBreak" value="30" min="0">
+            </div>
+
+            <div class="form-group">
+                <label>Tillåt redigering av tider efter (dagar):</label>
+                <input type="number" id="editDays" value="7" min="0">
+            </div>
+
+            <button id="saveSettings" class="primary-btn">Spara inställningar</button>
+        </div>
+    </div>
+
+    <!-- Add/Edit User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <h3 id="userModalTitle">Lägg till personal</h3>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Namn:</label>
+                    <input type="text" id="userName" required>
+                </div>
+                <div class="form-group">
+                    <label>E-post:</label>
+                    <input type="email" id="userEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Roll:</label>
+                    <select id="userRole">
+                        <option value="staff">Personal</option>
+                        <option value="admin">Administratör</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Personalkod (4 siffror):</label>
+                    <input type="password" id="userPin" maxlength="4" pattern="[0-9]{4}" placeholder="1234" required>
+                    <small style="color: #666; font-size: 12px;">Används för inloggning i schema-appen</small>
+                </div>
+                <div class="form-group">
+                    <label>Anställningsnummer:</label>
+                    <input type="text" id="userEmployeeId">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveUser" class="primary-btn">Spara</button>
+                <button id="cancelUser" class="secondary-btn">Avbryt</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalOverlay" class="modal-overlay"></div>
+
+    <script src="admin.js" type="module"></script>
+    <script src="../scripts/loadNavbar.js"></script>
+</body>
+
+</html>
