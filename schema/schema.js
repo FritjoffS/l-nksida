@@ -890,9 +890,14 @@ async function generateSummaryReport(startDate, endDate) {
 
 function getWeekStart(date) {
     const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(d.setDate(diff));
+    // Konvertera söndag (0) till 7 för beräkning
+    const dayOfWeek = day === 0 ? 7 : day;
+    // Beräkna differensen till måndag (dag 1)
+    const diff = dayOfWeek - 1;
+    d.setDate(d.getDate() - diff);
+    return d;
 }
 
 function getWeekNumber(date) {
