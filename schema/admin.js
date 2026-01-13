@@ -630,11 +630,14 @@ function getWeekNumber(date) {
 function getDateOfISOWeek(week, year) {
     const simple = new Date(year, 0, 1 + (week - 1) * 7);
     const dow = simple.getDay();
-    const ISOweekStart = simple;
-    if (dow <= 4)
-        ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
-    else
-        ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+    const dayOfWeek = dow === 0 ? 7 : dow; // Konvertera söndag (0) till 7
+    const ISOweekStart = new Date(simple);
+    
+    if (dayOfWeek <= 4) {
+        ISOweekStart.setDate(simple.getDate() - dayOfWeek + 1);
+    } else {
+        ISOweekStart.setDate(simple.getDate() + 8 - dayOfWeek);
+    }
     return ISOweekStart;
 }
 
@@ -665,9 +668,14 @@ function getApprovalDateRange(period) {
 
 function getWeekStart(date) {
     const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(d.setDate(diff));
+    // Konvertera söndag (0) till 7 för beräkning
+    const dayOfWeek = day === 0 ? 7 : day;
+    // Beräkna differensen till måndag (dag 1)
+    const diff = dayOfWeek - 1;
+    d.setDate(d.getDate() - diff);
+    return d;
 }
 
 function showSuccessMessage(message) {
