@@ -25,6 +25,7 @@ let currentUserData = null;
 let currentStaffId = null; // ID för inloggad personal
 let currentWeekOffset = 0;
 let clockedInStatus = null;
+let loginMethod = 'pin'; // Standard inloggningsmetod
 
 // Logout function
 window.logout = () => {
@@ -40,9 +41,11 @@ window.switchUser = () => {
     sessionStorage.removeItem('schemaStaffId');
     currentStaffId = null;
     currentUserData = null;
-    // Visa PIN-modal igen
+    // Rensa input-fält
     document.getElementById('pinInput').value = '';
+    document.getElementById('staffDropdown').selectedIndex = 0;
     document.getElementById('pinError').style.display = 'none';
+    // Visa PIN-modal igen
     showPinModal();
 };
 
@@ -78,19 +81,38 @@ onAuthStateChanged(auth, async (user) => {
 // PIN LOGIN FUNCTIONS
 // ==========================================
 
-function showPinModal() {
+async function showPinModal() {
+    // Ladda loginMethod från settings
+    await loadLoginMethod();
+    
     document.getElementById('pinLoginModal').style.display = 'block';
     document.getElementById('schemaContainer').style.filter = 'blur(5px)';
     document.getElementById('schemaContainer').style.pointerEvents = 'none';
+    
+    // Visa rätt inloggningsmetod
+    if (loginMethod === 'dropdown') {
+        document.getElementById('pinMethodDiv').style.display = 'none';
+        document.getElementById('dropdownMethodDiv').style.display = 'block';
+        await loadStaffDropdown();
+    } else {
+        document.getElementById('pinMethodDiv').style.display = 'block';
+        document.getElementById('dropdownMethodDiv').style.display = 'none';
+    }
     
     // Event listeners
     document.getElementById('pinLoginBtn').addEventListener('click', handlePinLogin);
     document.getElementById('pinLogoutBtn').addEventListener('click', () => {
         window.location.href = "../index/index.html";
     });
-    document.getElementById('pinInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handlePinLogin();
-    });
+    
+    if (loginMethod === 'pin') {
+        document.getElementById('pinInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handlePinLogin();
+        });
+    } else {
+        // För dropdown: dubbelklick för att logga in
+        document.getElementById('staffDropdown').addEventListener('dblclick', handlePinLogin);
+    }
 }
 
 function hidePinModal() {
@@ -99,39 +121,108 @@ function hidePinModal() {
     document.getElementById('schemaContainer').style.pointerEvents = 'auto';
 }
 
-async function handlePinLogin() {
-    const pin = document.getElementById('pinInput').value;
-    const errorDiv = document.getElementById('pinError');
-    
-    if (pin.length !== 4) {
-        errorDiv.textContent = 'Ange 4 siffror';
-        errorDiv.style.display = 'block';
-        return;
-    }
-    
+async function loadLoginMethod() {
     try {
-        // Hitta personal med denna PIN
+        const settingsRef = ref(db, 'schema/settings');
+        const snapshot = await get(settingsRef);
+        
+        if (snapshot.exists()) {
+            const settings = snapshot.val();
+            loginMethod = settings.loginMethod || 'pin';
+        }
+    } catch (error) {
+        console.error('Error loading login method:', error);
+        loginMethod = 'pin'; // Fallback till PIN
+    }
+}
+
+async function loadStaffDropdown() {
+    try {
         const usersRef = ref(db, 'schema/users');
         const snapshot = await get(usersRef);
         
-        if (!snapshot.exists()) {
-            errorDiv.textContent = 'Inga användare hittades';
-            errorDiv.style.display = 'block';
-            return;
+        const dropdown = document.getElementById('staffDropdown');
+        dropdown.innerHTML = '<option value="">-- Välj personal --</option>';
+        
+        if (snapshot.exists()) {
+            const users = snapshot.val();
+            const userArray = Object.entries(users).map(([id, data]) => ({
+                id,
+                name: data.name
+            }));
+            
+            // Sortera efter namn
+            userArray.sort((a, b) => a.name.localeCompare(b.name));
+            
+            userArray.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.name;
+                dropdown.appendChild(option);
+            });
         }
-        
-        const users = snapshot.val();
-        let foundStaffId = null;
-        
-        for (const [staffId, userData] of Object.entries(users)) {
-            // Konvertera båda till strängar för jämförelse
-            const userPin = String(userData.pin);
-            if (userPin === pin) {
-                foundStaffId = staffId;
-                break;
+    } catch (error) {
+        console.error('Error loading staff dropdown:', error);
+        document.getElementById('staffDropdown').innerHTML = '<option value="">Fel vid hämtning</option>';
+    }
+}
+
+async function handlePinLogin() {
+    const errorDiv = document.getElementById('pinError');
+    let foundStaffId = null;
+    
+    try {
+        if (loginMethod === 'dropdown') {
+            // Droplist-metod
+            const dropdown = document.getElementById('staffDropdown');
+            foundStaffId = dropdown.value;
+            
+            if (!foundStaffId || foundStaffId === '') {
+                errorDiv.textContent = 'Välj en personal från listan';
+                errorDiv.style.display = 'block';
+                return;
+            }
+        } else {
+            // PIN-metod
+            const pin = document.getElementById('pinInput').value;
+            
+            if (pin.length !== 4) {
+                errorDiv.textContent = 'Ange 4 siffror';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Hitta personal med denna PIN
+            const usersRef = ref(db, 'schema/users');
+            const snapshot = await get(usersRef);
+            
+            if (!snapshot.exists()) {
+                errorDiv.textContent = 'Inga användare hittades';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            const users = snapshot.val();
+            
+            for (const [staffId, userData] of Object.entries(users)) {
+                // Konvertera båda till strängar för jämförelse
+                const userPin = String(userData.pin);
+                if (userPin === pin) {
+                    foundStaffId = staffId;
+                    break;
+                }
+            }
+            
+            if (!foundStaffId) {
+                errorDiv.textContent = 'Felaktig personalkod';
+                errorDiv.style.display = 'block';
+                document.getElementById('pinInput').value = '';
+                document.getElementById('pinInput').focus();
+                return;
             }
         }
         
+        // Logga in användaren
         if (foundStaffId) {
             // Spara i session
             sessionStorage.setItem('schemaStaffId', foundStaffId);
@@ -143,11 +234,6 @@ async function handlePinLogin() {
             // Göm modal och starta app
             hidePinModal();
             initApp();
-        } else {
-            errorDiv.textContent = 'Felaktig personalkod';
-            errorDiv.style.display = 'block';
-            document.getElementById('pinInput').value = '';
-            document.getElementById('pinInput').focus();
         }
     } catch (error) {
         console.error('PIN login error:', error);
