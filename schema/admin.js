@@ -591,7 +591,8 @@ async function loadSettings() {
             systemSettings = {
                 defaultBreak: settings.defaultBreak || 30,
                 defaultStartTime: settings.defaultStartTime || '08:00',
-                defaultEndTime: settings.defaultEndTime || '17:00'
+                defaultEndTime: settings.defaultEndTime || '17:00',
+                loginMethod: settings.loginMethod || 'pin'
             };
             
             // Uppdatera UI
@@ -603,6 +604,9 @@ async function loadSettings() {
             }
             if (settings.defaultBreak !== undefined) {
                 document.getElementById('defaultBreak').value = settings.defaultBreak;
+            }
+            if (settings.loginMethod) {
+                document.getElementById('loginMethod').value = settings.loginMethod;
             }
             if (settings.editDays !== undefined) {
                 document.getElementById('editDays').value = settings.editDays;
@@ -618,6 +622,7 @@ async function saveSettings() {
         defaultStartTime: document.getElementById('defaultStartTime').value,
         defaultEndTime: document.getElementById('defaultEndTime').value,
         defaultBreak: parseInt(document.getElementById('defaultBreak').value),
+        loginMethod: document.getElementById('loginMethod').value,
         editDays: parseInt(document.getElementById('editDays').value),
         updatedAt: new Date().toISOString(),
         updatedBy: currentUser.uid
