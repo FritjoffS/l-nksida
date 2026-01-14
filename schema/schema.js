@@ -441,7 +441,8 @@ async function loadMyHoursThisWeek() {
                 const entryDate = new Date(date);
                 if (entryDate >= weekStart && entryDate <= weekEnd) {
                     const dayEntries = Object.values(entries[date]);
-                    totalHours += calculateDayHours(dayEntries);
+                    const dayHours = await calculateDayHours(dayEntries, date, currentStaffId);
+                    totalHours += dayHours;
                 }
             }
             
@@ -576,7 +577,7 @@ async function loadTimesheet() {
                     hasEntries = true;
                     
                     // Calculate day hours
-                    const dayHours = calculateDayHours(dayEntries);
+                    const dayHours = await calculateDayHours(dayEntries, date, currentStaffId);
                     totalHours += dayHours;
                     
                     // Display entries
@@ -695,10 +696,21 @@ async function loadSchedule() {
                         displayName = shift.type.charAt(0).toUpperCase() + shift.type.slice(1);
                     }
                     
+                    // Beräkna nettoarbetstid (exklusive rast)
+                    let timeInfo = '';
+                    if (shift.startTime && shift.type !== 'off') {
+                        const breakMin = shift.breakMinutes || 0;
+                        timeInfo = `<span class="shift-time">${shift.startTime} - ${shift.endTime}`;
+                        if (breakMin > 0) {
+                            timeInfo += ` (rast ${breakMin} min)`;
+                        }
+                        timeInfo += `</span>`;
+                    }
+                    
                     cell.innerHTML = `
                         <div class="${shiftClass}">
                             ${displayName}
-                            ${shift.startTime ? `<span class="shift-time">${shift.startTime} - ${shift.endTime}</span>` : ''}
+                            ${timeInfo}
                         </div>
                     `;
                 } else {
@@ -787,7 +799,7 @@ async function generatePersonalReport(startDate, endDate) {
             
             const clockIn = dayEntries.find(e => e.type === 'in');
             const clockOut = dayEntries.findLast(e => e.type === 'out');
-            const hours = calculateDayHours(dayEntries);
+            const hours = await calculateDayHours(dayEntries, date, currentStaffId);
             totalHours += hours;
             
             reportHTML += `
@@ -864,7 +876,7 @@ async function generateSummaryReport(startDate, endDate) {
                 const entryDate = new Date(date);
                 if (entryDate >= startDate && entryDate <= endDate) {
                     const dayEntries = Object.values(userEntries[date]);
-                    const hours = calculateDayHours(dayEntries);
+                    const hours = await calculateDayHours(dayEntries, date, userId);
                     if (hours > 0) {
                         userHours += hours;
                         workDays++;
@@ -980,7 +992,7 @@ function getReportDateRange(period) {
     }
 }
 
-function calculateDayHours(entries) {
+async function calculateDayHours(entries, date = null, userId = null) {
     let totalHours = 0;
     const sortedEntries = entries.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     
@@ -994,6 +1006,22 @@ function calculateDayHours(entries) {
             
             const diffMinutes = minutesOut - minutesIn;
             totalHours += diffMinutes / 60;
+        }
+    }
+    
+    // Dra av rasttid från schemat
+    if (date && userId) {
+        try {
+            const scheduleRef = ref(db, `schema/schedules/${userId}/${date}`);
+            const snapshot = await get(scheduleRef);
+            
+            if (snapshot.exists()) {
+                const schedule = snapshot.val();
+                const breakMinutes = schedule.breakMinutes || 0;
+                totalHours -= breakMinutes / 60;
+            }
+        } catch (error) {
+            console.error('Error fetching break time:', error);
         }
     }
     
