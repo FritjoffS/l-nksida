@@ -860,6 +860,24 @@
     font-weight: bold;
 }
 
+#pinLoginModal #staffDropdown {
+    width: 100%;
+    font-size: 16px;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+}
+
+#pinLoginModal #staffDropdown:focus {
+    border-color: #2196F3;
+}
+
+#pinLoginModal #staffDropdown option {
+    padding: 10px;
+}
+
 #pinLoginModal .error-message {
     background: #ffebee;
     color: #c62828;
