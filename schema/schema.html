@@ -222,10 +222,23 @@
         <div class="modal-content">
             <h3>Välj din profil</h3>
             <div class="modal-body">
-                <p class="info-text">Ange din 4-siffriga personalkod för att fortsätta</p>
-                <div class="form-group">
-                    <label>Personalkod:</label>
-                    <input type="password" id="pinInput" maxlength="4" pattern="[0-9]{4}" placeholder="1234" autocomplete="off" autofocus>
+                <!-- PIN Method -->
+                <div id="pinMethodDiv">
+                    <p class="info-text">Ange din 4-siffriga personalkod för att fortsätta</p>
+                    <div class="form-group">
+                        <label>Personalkod:</label>
+                        <input type="password" id="pinInput" maxlength="4" pattern="[0-9]{4}" placeholder="1234" autocomplete="off" autofocus>
+                    </div>
+                </div>
+                <!-- Dropdown Method -->
+                <div id="dropdownMethodDiv" style="display: none;">
+                    <p class="info-text">Välj ditt namn från listan</p>
+                    <div class="form-group">
+                        <label>Personal:</label>
+                        <select id="staffDropdown" size="8" style="width: 100%; font-size: 16px;">
+                            <option value="">Läser in...</option>
+                        </select>
+                    </div>
                 </div>
                 <div id="pinError" class="error-message" style="display: none;">Felaktig personalkod</div>
             </div>
