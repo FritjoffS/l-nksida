@@ -25,6 +25,11 @@ let currentUserData = null;
 let editingUserId = null;
 let selectedScheduleUser = null;
 let selectedWeek = null;
+let systemSettings = {
+    defaultBreak: 30,
+    defaultStartTime: '08:00',
+    defaultEndTime: '17:00'
+};
 
 // Logout function
 window.logout = () => {
@@ -309,8 +314,9 @@ async function loadScheduleEditor(userId, weekString) {
         
         let schedule = {
             type: 'day',
-            startTime: '08:00',
-            endTime: '17:00'
+            startTime: systemSettings.defaultStartTime,
+            endTime: systemSettings.defaultEndTime,
+            breakMinutes: systemSettings.defaultBreak
         };
         
         if (snapshot.exists()) {
@@ -337,6 +343,9 @@ function createDayEditor(index, dayName, date, schedule) {
                ${schedule.type === 'off' ? 'disabled' : ''}>
         <input type="time" id="end-${index}" value="${schedule.endTime || '17:00'}"
                ${schedule.type === 'off' ? 'disabled' : ''}>
+        <label style="font-size: 12px; margin-top: 5px;">Rast (min):</label>
+        <input type="number" id="break-${index}" value="${schedule.breakMinutes !== undefined ? schedule.breakMinutes : systemSettings.defaultBreak}" min="0" max="120" step="15"
+               ${schedule.type === 'off' ? 'disabled' : ''} style="width: 60px;">
     `;
     
     // Add event listener to disable times when "off" is selected
@@ -344,13 +353,16 @@ function createDayEditor(index, dayName, date, schedule) {
     select.addEventListener('change', (e) => {
         const startInput = div.querySelector(`#start-${index}`);
         const endInput = div.querySelector(`#end-${index}`);
+        const breakInput = div.querySelector(`#break-${index}`);
         
         if (e.target.value === 'off') {
             startInput.disabled = true;
             endInput.disabled = true;
+            breakInput.disabled = true;
         } else {
             startInput.disabled = false;
             endInput.disabled = false;
+            breakInput.disabled = false;
             // Default times for day shift
             startInput.value = '08:00';
             endInput.value = '17:00';
@@ -375,11 +387,13 @@ async function saveSchedule() {
             const date = document.getElementById(`type-${i}`).dataset.date;
             const startTime = document.getElementById(`start-${i}`).value;
             const endTime = document.getElementById(`end-${i}`).value;
+            const breakMinutes = parseInt(document.getElementById(`break-${i}`).value) || 0;
             
             const scheduleData = {
                 type,
                 startTime: type !== 'off' ? startTime : null,
                 endTime: type !== 'off' ? endTime : null,
+                breakMinutes: type !== 'off' ? breakMinutes : 0,
                 updatedAt: new Date().toISOString(),
                 updatedBy: currentUser.uid
             };
@@ -492,7 +506,7 @@ async function loadApprovals() {
                     
                     const clockIn = dayEntries.find(e => e.type === 'in');
                     const clockOut = dayEntries.findLast(e => e.type === 'out');
-                    const hours = calculateDayHours(dayEntries);
+                    const hours = await calculateDayHours(dayEntries, date, userId);
                     
                     html += `
                         <tr>
@@ -524,7 +538,7 @@ async function loadApprovals() {
     }
 }
 
-function calculateDayHours(entries) {
+async function calculateDayHours(entries, date = null, userId = null) {
     let totalHours = 0;
     const sortedEntries = entries.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
     
@@ -538,6 +552,22 @@ function calculateDayHours(entries) {
             
             const diffMinutes = minutesOut - minutesIn;
             totalHours += diffMinutes / 60;
+        }
+    }
+    
+    // Dra av rasttid från schemat
+    if (date && userId) {
+        try {
+            const scheduleRef = ref(db, `schema/schedules/${userId}/${date}`);
+            const snapshot = await get(scheduleRef);
+            
+            if (snapshot.exists()) {
+                const schedule = snapshot.val();
+                const breakMinutes = schedule.breakMinutes || 0;
+                totalHours -= breakMinutes / 60;
+            }
+        } catch (error) {
+            console.error('Error fetching break time:', error);
         }
     }
     
@@ -557,6 +587,14 @@ async function loadSettings() {
         if (snapshot.exists()) {
             const settings = snapshot.val();
             
+            // Spara i global variabel
+            systemSettings = {
+                defaultBreak: settings.defaultBreak || 30,
+                defaultStartTime: settings.defaultStartTime || '08:00',
+                defaultEndTime: settings.defaultEndTime || '17:00'
+            };
+            
+            // Uppdatera UI
             if (settings.defaultStartTime) {
                 document.getElementById('defaultStartTime').value = settings.defaultStartTime;
             }
