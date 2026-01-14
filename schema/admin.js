@@ -330,9 +330,7 @@ function createDayEditor(index, dayName, date, schedule) {
         <h5>${dayName}</h5>
         <small>${new Date(date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}</small>
         <select id="type-${index}" data-date="${date}">
-            <option value="morning" ${schedule.type === 'morning' ? 'selected' : ''}>Morgon</option>
-            <option value="day" ${schedule.type === 'day' ? 'selected' : ''}>Dag</option>
-            <option value="evening" ${schedule.type === 'evening' ? 'selected' : ''}>Kväll</option>
+            <option value="day" ${schedule.type === 'day' ? 'selected' : ''}>Arbete</option>
             <option value="off" ${schedule.type === 'off' ? 'selected' : ''}>Ledig</option>
         </select>
         <input type="time" id="start-${index}" value="${schedule.startTime || '08:00'}" 
@@ -353,22 +351,9 @@ function createDayEditor(index, dayName, date, schedule) {
         } else {
             startInput.disabled = false;
             endInput.disabled = false;
-            
-            // Set default times based on shift type
-            switch(e.target.value) {
-                case 'morning':
-                    startInput.value = '06:00';
-                    endInput.value = '14:00';
-                    break;
-                case 'day':
-                    startInput.value = '08:00';
-                    endInput.value = '17:00';
-                    break;
-                case 'evening':
-                    startInput.value = '14:00';
-                    endInput.value = '22:00';
-                    break;
-            }
+            // Default times for day shift
+            startInput.value = '08:00';
+            endInput.value = '17:00';
         }
     });
     
