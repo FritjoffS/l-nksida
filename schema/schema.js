@@ -684,9 +684,20 @@ async function loadSchedule() {
                 if (scheduleSnapshot.exists()) {
                     const shift = scheduleSnapshot.val();
                     const shiftClass = `shift-cell shift-${shift.type}`;
+                    
+                    // Visa läsbart namn
+                    let displayName = shift.type;
+                    if (shift.type === 'off') {
+                        displayName = 'Ledig';
+                    } else if (shift.type === 'day') {
+                        displayName = 'Arbete';
+                    } else {
+                        displayName = shift.type.charAt(0).toUpperCase() + shift.type.slice(1);
+                    }
+                    
                     cell.innerHTML = `
                         <div class="${shiftClass}">
-                            ${shift.type === 'off' ? 'Ledig' : shift.type.charAt(0).toUpperCase() + shift.type.slice(1)}
+                            ${displayName}
                             ${shift.startTime ? `<span class="shift-time">${shift.startTime} - ${shift.endTime}</span>` : ''}
                         </div>
                     `;
