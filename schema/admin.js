@@ -214,8 +214,8 @@ async function saveUser() {
     const employeeId = document.getElementById('userEmployeeId').value;
     const pin = document.getElementById('userPin').value;
     
-    if (!name || !email) {
-        showErrorMessage('Namn och e-post är obligatoriska');
+    if (!name) {
+        showErrorMessage('Namn är obligatoriskt');
         return;
     }
     
