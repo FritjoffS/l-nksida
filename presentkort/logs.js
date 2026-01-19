@@ -320,6 +320,11 @@ startScheduledExport();
 applyLogFiltersBtn.addEventListener("click", applyFilters);
 clearLogFiltersBtn.addEventListener("click", clearFilters);
 
+// Close button - go back to presentkort.html
+document.getElementById("closeList")?.addEventListener("click", () => {
+    window.location.href = "presentkort.html";
+});
+
 document.getElementById("closeLogDetails").addEventListener("click", () => {
     document.getElementById("logDetailsModal").style.display = "none";
     document.getElementById("modalOverlay").style.display = "none";

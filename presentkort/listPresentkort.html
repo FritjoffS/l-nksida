@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/navbar.css">
     <link rel="stylesheet" href="presentkort.css">
-    
+
     <!-- Add SheetJS for Excel export -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -18,22 +18,35 @@
     <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
     <div id="listaPresentkortContainer" style="margin-top: 60px;">
-        <button id="closeList" style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; font-size: 32px; cursor: pointer; color: #333; line-height: 1; padding: 0; width: 40px; height: 40px;" title="Stäng">&times;</button>
-        
+        <button id="closeList"
+            style="position: relative; top: 10px; right: -820px; background: rgba(255, 255, 255, 0.9); border: 2px solid #333; font-size: 32px; cursor: pointer; color: #333; line-height: 1; padding: 0; width: 45px; height: 45px; border-radius: 5px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"
+            title="Stäng och gå tillbaka">&times;</button>
+
+<!--         <button id="closeList"
+            style="position: fixed; top: 130px; right: 50px; background: white; border: none; font-size: 32px; cursor: pointer; color: #333; line-height: 1; padding: 0; width: 40px; height: 40px;"
+            title="Stäng">&times;</button> -->
+
         <h1>Lista Presentkort</h1>
-        
+
         <!-- Summary section -->
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; padding: 8px 12px; background: #f8f9fa; border-radius: 5px; font-size: 0.9em;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; padding: 8px 12px; background: #f8f9fa; border-radius: 5px; font-size: 0.9em;">
             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                 <div><strong>Totalt:</strong> <span id="totalCount">0</span> st</div>
-                <div><strong>Aktiva:</strong> <span id="activeCount">0</span> st (<span id="activeValue">0</span> kr)</div>
-                <div><strong>Utgångna:</strong> <span id="expiredCount">0</span> st (<span id="expiredValue">0</span> kr)</div>
-                <div><strong>Inlösta:</strong> <span id="redeemedCount">0</span> st (<span id="redeemedValue">0</span> kr)</div>
+                <div><strong>Aktiva:</strong> <span id="activeCount">0</span> st (<span id="activeValue">0</span> kr)
+                </div>
+                <div><strong>Utgångna:</strong> <span id="expiredCount">0</span> st (<span id="expiredValue">0</span>
+                    kr)</div>
+                <div><strong>Inlösta:</strong> <span id="redeemedCount">0</span> st (<span id="redeemedValue">0</span>
+                    kr)</div>
             </div>
-            <button id="exportExcel" style="background: #28a745; border: none; font-size: 0.85em; cursor: pointer; color: white; padding: 5px 12px; border-radius: 4px;" title="Exportera till Excel">Excel</button>
+            <button id="exportExcel"
+                style="background: #28a745; border: none; font-size: 0.85em; cursor: pointer; color: white; padding: 5px 12px; border-radius: 4px;"
+                title="Exportera till Excel">Excel</button>
         </div>
-        
-        <table id="cardTable" border="1" style="width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed;">
+
+        <table id="cardTable" border="1"
+            style="width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed;">
             <colgroup>
                 <col style="width: 12%;">
                 <col style="width: 10%;">
@@ -55,7 +68,8 @@
                 </tr>
             </thead>
         </table>
-        <div id="tableBodyWrapper" style="max-height: calc(100vh - 280px); min-height: 300px; overflow-y: auto; overflow-x: hidden;">
+        <div id="tableBodyWrapper"
+            style="max-height: calc(100vh - 280px); min-height: 300px; overflow-y: auto; overflow-x: hidden;">
             <table border="1" style="width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed;">
                 <colgroup>
                     <col style="width: 12%;">
@@ -74,86 +88,111 @@
             </table>
         </div>
     </div>
-    
+
     <!-- Card Details Modal -->
-        <div id="cardDetailsModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; max-height: 80vh; overflow-y: auto; background: white; border: 2px solid #333; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); z-index: 1000;">
-            <div id="cardDetailsContent">
-                <p>Hämtar detaljer...</p>
+    <div id="cardDetailsModal"
+        style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; max-height: 80vh; overflow-y: auto; background: white; border: 2px solid #333; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); z-index: 1000;">
+        <div id="cardDetailsContent">
+            <p>Hämtar detaljer...</p>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <button id="editCard"
+                style="background: #007bff; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;"
+                title="Öppna redigeringsläge för detta presentkort">Redigera</button>
+            <button id="closeCardDetails"
+                style="background: #6c757d; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;"
+                title="Stäng detaljvyn">Stäng</button>
+        </div>
+    </div>
+
+    <!-- Edit Card Modal -->
+    <div id="editCardModal"
+        style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 700px; max-height: 90vh; overflow-y: auto; background: white; border: 2px solid #007bff; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); z-index: 1001;">
+        <h2>Redigera Presentkort</h2>
+        <div id="editCardContent">
+            <div style="margin-bottom: 15px;">
+                <label for="editSerialNumber"><strong>Serienummer:</strong></label>
+                <input type="text" id="editSerialNumber" style="width: 100%; padding: 8px; margin-top: 5px;">
+                <small style="color: #666;">OBS: Om du ändrar serienummer kommer ett nytt presentkort att skapas och det
+                    gamla raderas.</small>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button id="editCard" style="background: #007bff; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;" title="Öppna redigeringsläge för detta presentkort">Redigera</button>
-                <button id="closeCardDetails" style="background: #6c757d; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;" title="Stäng detaljvyn">Stäng</button>
+            <div style="margin-bottom: 15px;">
+                <label for="editCurrentValue"><strong>Aktuellt saldo (kr):</strong></label>
+                <input type="number" id="editCurrentValue" readonly
+                    style="width: 100%; padding: 8px; margin-top: 5px; background: #f0f0f0; cursor: not-allowed;">
+                <small style="color: #666;">Beräknas automatiskt från transaktionshistoriken</small>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="editExpirationDate"><strong>Utgångsdatum:</strong></label>
+                <input type="date" id="editExpirationDate" style="width: 100%; padding: 8px; margin-top: 5px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="editSeller"><strong>Säljare:</strong></label>
+                <input type="text" id="editSeller" style="width: 100%; padding: 8px; margin-top: 5px;">
+            </div>
+
+            <hr style="margin: 20px 0;">
+            <h3>Transaktionshistorik</h3>
+            <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Klicka på en transaktion för att redigera</p>
+            <div id="editHistoryContent" style="max-height: 300px; overflow-y: auto;">
             </div>
         </div>
-        
-        <!-- Edit Card Modal -->
-        <div id="editCardModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 700px; max-height: 90vh; overflow-y: auto; background: white; border: 2px solid #007bff; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); z-index: 1001;">
-            <h2>Redigera Presentkort</h2>
-            <div id="editCardContent">
-                <div style="margin-bottom: 15px;">
-                    <label for="editSerialNumber"><strong>Serienummer:</strong></label>
-                    <input type="text" id="editSerialNumber" style="width: 100%; padding: 8px; margin-top: 5px;">
-                    <small style="color: #666;">OBS: Om du ändrar serienummer kommer ett nytt presentkort att skapas och det gamla raderas.</small>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label for="editCurrentValue"><strong>Aktuellt saldo (kr):</strong></label>
-                    <input type="number" id="editCurrentValue" readonly style="width: 100%; padding: 8px; margin-top: 5px; background: #f0f0f0; cursor: not-allowed;">
-                    <small style="color: #666;">Beräknas automatiskt från transaktionshistoriken</small>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label for="editExpirationDate"><strong>Utgångsdatum:</strong></label>
-                    <input type="date" id="editExpirationDate" style="width: 100%; padding: 8px; margin-top: 5px;">
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label for="editSeller"><strong>Säljare:</strong></label>
-                    <input type="text" id="editSeller" style="width: 100%; padding: 8px; margin-top: 5px;">
-                </div>
-                
-                <hr style="margin: 20px 0;">
-                <h3>Transaktionshistorik</h3>
-                <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Klicka på en transaktion för att redigera</p>
-                <div id="editHistoryContent" style="max-height: 300px; overflow-y: auto;">
-                </div>
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="saveCardEdits" style="background: #28a745; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;" title="Spara alla ändringar">Spara</button>
-                <button id="deleteCard" style="background: #dc3545; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;" title="Ta bort presentkortet permanent">Ta bort presentkort</button>
-                <button id="cancelCardEdits" style="background: #6c757d; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;" title="Avbryt redigering utan att spara">Avbryt</button>
-            </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button id="saveCardEdits"
+                style="background: #28a745; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;"
+                title="Spara alla ändringar">Spara</button>
+            <button id="deleteCard"
+                style="background: #dc3545; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;"
+                title="Ta bort presentkortet permanent">Ta bort presentkort</button>
+            <button id="cancelCardEdits"
+                style="background: #6c757d; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;"
+                title="Avbryt redigering utan att spara">Avbryt</button>
         </div>
-        
-        <!-- Edit History Entry Modal -->
-        <div id="editHistoryModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 450px; background: white; border: 2px solid #007bff; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); z-index: 1002;">
-            <h3 id="editHistoryTitle">Redigera händelse</h3>
-            <div style="margin-bottom: 15px;">
-                <label for="historyType"><strong>Typ:</strong></label>
-                <select id="historyType" style="width: 100%; padding: 8px; margin-top: 5px;">
-                    <option value="activation">Aktivering</option>
-                    <option value="redeem">Inlösen</option>
-                    <option value="reload">Påfyllning</option>
-                </select>
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label for="historyAmount"><strong>Belopp (kr):</strong></label>
-                <input type="number" id="historyAmount" placeholder="Positivt för aktivering/påfyllning, negativt för inlösen" style="width: 100%; padding: 8px; margin-top: 5px;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label for="historyTimestamp"><strong>Datum och tid:</strong></label>
-                <input type="datetime-local" id="historyTimestamp" style="width: 100%; padding: 8px; margin-top: 5px;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label for="historySeller"><strong>Säljare/Användare:</strong></label>
-                <input type="text" id="historySeller" style="width: 100%; padding: 8px; margin-top: 5px;">
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="saveHistoryEntry" style="background: #28a745; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;" title="Spara ändringar i transaktionen">Spara</button>
-                <button id="deleteHistoryEntry" style="background: #dc3545; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; display: none;" title="Ta bort denna transaktion">Ta bort</button>
-                <button id="cancelHistoryEntry" style="background: #6c757d; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;" title="Avbryt redigering av transaktion">Avbryt</button>
-            </div>
+    </div>
+
+    <!-- Edit History Entry Modal -->
+    <div id="editHistoryModal"
+        style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 450px; background: white; border: 2px solid #007bff; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); z-index: 1002;">
+        <h3 id="editHistoryTitle">Redigera händelse</h3>
+        <div style="margin-bottom: 15px;">
+            <label for="historyType"><strong>Typ:</strong></label>
+            <select id="historyType" style="width: 100%; padding: 8px; margin-top: 5px;">
+                <option value="activation">Aktivering</option>
+                <option value="redeem">Inlösen</option>
+                <option value="reload">Påfyllning</option>
+            </select>
         </div>
-        
+        <div style="margin-bottom: 15px;">
+            <label for="historyAmount"><strong>Belopp (kr):</strong></label>
+            <input type="number" id="historyAmount"
+                placeholder="Positivt för aktivering/påfyllning, negativt för inlösen"
+                style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="historyTimestamp"><strong>Datum och tid:</strong></label>
+            <input type="datetime-local" id="historyTimestamp" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="historySeller"><strong>Säljare/Användare:</strong></label>
+            <input type="text" id="historySeller" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button id="saveHistoryEntry"
+                style="background: #28a745; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;"
+                title="Spara ändringar i transaktionen">Spara</button>
+            <button id="deleteHistoryEntry"
+                style="background: #dc3545; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer; display: none;"
+                title="Ta bort denna transaktion">Ta bort</button>
+            <button id="cancelHistoryEntry"
+                style="background: #6c757d; padding: 10px 20px; border: none; border-radius: 5px; color: white; cursor: pointer;"
+                title="Avbryt redigering av transaktion">Avbryt</button>
+        </div>
+    </div>
+
     <!-- Overlay for modal -->
-    <div id="modalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+    <div id="modalOverlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;">
+    </div>
 
     <script src="listPresentkort.js" type="module"></script>
     <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->

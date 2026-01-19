@@ -31,6 +31,11 @@ onAuthStateChanged(auth, (user) => {
         if (importButton && user.email === "fredrik@jarnhandel.com") {
             importButton.style.display = "block";
         }
+        // Update user display
+        const currentUserSpan = document.getElementById("currentUser");
+        if (currentUserSpan) {
+            currentUserSpan.textContent = user.email;
+        }
     }
 });
 
@@ -43,34 +48,130 @@ window.logout = () => {
     });
 };
 
-// DOM elements
-const serialNumberInput = document.getElementById("serialNumber");
+// ==========================================
+// TAB NAVIGATION
+// ==========================================
+
+// Tab switching functionality
+document.querySelectorAll('.tab-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const tabName = button.getAttribute('data-tab');
+        
+        // Remove active class from all tabs and content
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Add active class to clicked tab and corresponding content
+        button.classList.add('active');
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+    });
+});
+
+// ==========================================
+// MODAL MANAGEMENT
+// ==========================================
+
+// Helper function to open modal
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+    }
+}
+
+// Helper function to close modal
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+    }
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('active');
+        e.target.style.display = 'none';
+    }
+});
+
+// ==========================================
+// QUICK ACTIONS
+// ==========================================
+
+// Quick Sell Card
+document.getElementById('quickSellCard')?.addEventListener('click', () => {
+    openModal('activateModal');
+    document.getElementById('activateSerialNumber')?.focus();
+});
+
+// Quick Redeem Card
+document.getElementById('quickRedeemCard')?.addEventListener('click', () => {
+    openModal('redeemModal');
+    document.getElementById('redeemSerialNumber')?.focus();
+});
+
+// Quick Stats
+document.getElementById('quickStats')?.addEventListener('click', async () => {
+    // Switch to list tab and show all cards
+    document.querySelector('[data-tab="list"]')?.click();
+    setTimeout(() => {
+        document.getElementById('listCards')?.click();
+    }, 100);
+});
+
+// Close modal buttons
+document.getElementById('closeActivateModal')?.addEventListener('click', () => closeModal('activateModal'));
+document.getElementById('closeRedeemModal')?.addEventListener('click', () => closeModal('redeemModal'));
+document.getElementById('closeHistory')?.addEventListener('click', () => closeModal('historyModal'));
+document.getElementById('closeFilterModal')?.addEventListener('click', () => closeModal('filterModal'));
+document.getElementById('cancelPrint')?.addEventListener('click', () => closeModal('printModal'));
+document.getElementById('cancelImport')?.addEventListener('click', () => closeModal('importModal'));
+document.getElementById('cancelReauth')?.addEventListener('click', () => closeModal('reauthModal'));
+
+// DOM elements - Updated for new modal structure
 const checkCardButton = document.getElementById("checkCard");
 const cardInfoDiv = document.getElementById("cardInfo");
 const cardValueParagraph = document.getElementById("cardValue");
 const redeemAmountInput = document.getElementById("redeemAmount");
 const redeemCardButton = document.getElementById("redeemCard");
-const activateCardDiv = document.getElementById("activateCard");
 const cardValueInput = document.getElementById("cardValueInput");
 const sellerNameInput = document.getElementById("sellerName");
 const activateCardButton = document.getElementById("activateCardButton");
 const viewHistoryButton = document.getElementById("viewHistory");
-const getNextSerialNumberButton = document.getElementById("getNextSerialNumber");
 const listCardsButton = document.getElementById("listCards");
-const filterDialog = document.getElementById("filterDialog");
 const applyFiltersButton = document.getElementById("applyFilters");
+
+// Button mappings for new UI
+document.getElementById('searchCard')?.addEventListener('click', () => {
+    const serialNumber = document.getElementById('searchSerialNumber')?.value.trim();
+    if (serialNumber) {
+        document.getElementById('redeemSerialNumber').value = serialNumber;
+        openModal('redeemModal');
+        checkCardButton.click();
+    } else {
+        alert('Ange ett serienummer!');
+    }
+});
+
+document.getElementById('showFilters')?.addEventListener('click', () => {
+    openModal('filterModal');
+});
+
+document.getElementById('refreshList')?.addEventListener('click', () => {
+    if (listCardsButton) listCardsButton.click();
+});
 
 // New elements for printing
 const printCardsButton = document.getElementById("printCards");
-const printDialog = document.getElementById("printDialog");
 const printQuantityInput = document.getElementById("printQuantity");
 const nextPrintNumberSpan = document.getElementById("nextPrintNumber");
 const generatePDFButton = document.getElementById("generatePDF");
-const cancelPrintButton = document.getElementById("cancelPrint");
 
 // New elements for import
 const importCardsButton = document.getElementById("importCards");
-const importDialog = document.getElementById("importDialog");
 const excelFileInput = document.getElementById("excelFile");
 const startImportButton = document.getElementById("startImport");
 const cancelImportButton = document.getElementById("cancelImport");
@@ -79,25 +180,14 @@ const importStatusSpan = document.getElementById("importStatus");
 const importProgressBar = document.getElementById("importProgressBar");
 
 // Re-authentication elements for print protection
-const reauthDialog = document.getElementById("reauthDialog");
 const reauthPasswordInput = document.getElementById("reauthPassword");
 const confirmReauthButton = document.getElementById("confirmReauth");
-const cancelReauthButton = document.getElementById("cancelReauth");
 const reauthErrorP = document.getElementById("reauthError");
-
-// Helper function to hide all dialogs
-function hideAllDialogs() {
-    cardInfoDiv.style.display = "none";
-    activateCardDiv.style.display = "none";
-    filterDialog.style.display = "none";
-    printDialog.style.display = "none";
-    document.getElementById("historyDialog").style.display = "none";
-}
 
 // Check card
 checkCardButton.addEventListener("click", async () => {
     try {
-        const serialNumber = serialNumberInput.value.trim();
+        const serialNumber = document.getElementById('redeemSerialNumber')?.value.trim();
         if (!serialNumber) return alert("Ange ett serienummer!");
 
         checkCardButton.disabled = true;
@@ -111,26 +201,29 @@ checkCardButton.addEventListener("click", async () => {
             const expirationDate = new Date(cardData.expirationDate);
             const formattedExpirationDate = `${expirationDate.getFullYear()}-${String(expirationDate.getMonth() + 1).padStart(2, '0')}-${String(expirationDate.getDate()).padStart(2, '0')}`;
 
-            cardValueParagraph.innerHTML = `Aktuellt Saldo: ${cardData.value} kr<br>Utgångsdatum: ${formattedExpirationDate}`;
-            hideAllDialogs();
+            cardValueParagraph.innerHTML = `<strong>Aktuellt Saldo:</strong> ${cardData.value} kr<br><strong>Utgångsdatum:</strong> ${formattedExpirationDate}`;
             cardInfoDiv.style.display = "block";
+            redeemCardButton.style.display = "inline-block";
+            viewHistoryButton.style.display = "inline-block";
         } else {
             alert("Presentkortet ej aktiverat!");
-            hideAllDialogs();
+            cardInfoDiv.style.display = "none";
+            redeemCardButton.style.display = "none";
+            viewHistoryButton.style.display = "none";
         }
     } catch (error) {
         console.error("Error fetching card:", error);
         alert("Ett fel uppstod vid hämtning av presentkort: " + error.message);
     } finally {
         checkCardButton.disabled = false;
-        checkCardButton.textContent = "Lös in / Kontrollera Presentkort";
+        checkCardButton.textContent = "🔍 Kontrollera saldo";
     }
 });
 
 // Redeem card
 redeemCardButton.addEventListener("click", async () => {
     try {
-        const serialNumber = serialNumberInput.value.trim();
+        const serialNumber = document.getElementById('redeemSerialNumber')?.value.trim();
         const redeemAmount = parseFloat(redeemAmountInput.value);
         const redeemSeller = document.getElementById("redeemSeller").value.trim();
 
@@ -192,7 +285,7 @@ redeemCardButton.addEventListener("click", async () => {
         alert("Beloppet har lösts in!");
         const expirationDate = new Date(cardData.expirationDate);
         const formattedExpirationDate = `${expirationDate.getFullYear()}-${String(expirationDate.getMonth() + 1).padStart(2, '0')}-${String(expirationDate.getDate()).padStart(2, '0')}`;
-        cardValueParagraph.innerHTML = `Aktuellt Saldo: ${newValue} kr<br>Utgångsdatum: ${formattedExpirationDate}`;
+        cardValueParagraph.innerHTML = `<strong>Aktuellt Saldo:</strong> ${newValue} kr<br><strong>Utgångsdatum:</strong> ${formattedExpirationDate}`;
         redeemAmountInput.value = "";
         document.getElementById("redeemSeller").value = "";
     } catch (error) {
@@ -200,14 +293,14 @@ redeemCardButton.addEventListener("click", async () => {
         alert("Ett fel uppstod vid inlösen: " + error.message);
     } finally {
         redeemCardButton.disabled = false;
-        redeemCardButton.textContent = "Lös in";
+        redeemCardButton.textContent = "✓ Lös in";
     }
 });
 
 // Activate card
 activateCardButton.addEventListener("click", async () => {
     try {
-        const serialNumber = serialNumberInput.value.trim();
+        const serialNumber = document.getElementById('activateSerialNumber')?.value.trim();
         const cardValue = parseFloat(cardValueInput.value);
         const sellerName = sellerNameInput.value.trim();
 
@@ -279,22 +372,22 @@ activateCardButton.addEventListener("click", async () => {
         alert(`Presentkort ${cleanedSerialNumber} har skapats med värde ${cardValue} kr!\nUtgångsdatum: ${expirationDate.toLocaleDateString('sv-SE')}`);
 
         // Clear form fields
-        serialNumberInput.value = "";
+        document.getElementById('activateSerialNumber').value = "";
         cardValueInput.value = "";
         sellerNameInput.value = "";
-        activateCardDiv.style.display = "none";
+        closeModal('activateModal');
     } catch (error) {
         console.error("Error activating card:", error);
         alert("Ett fel uppstod vid aktivering: " + error.message);
     } finally {
         activateCardButton.disabled = false;
-        activateCardButton.textContent = "Ladda Presentkort";
+        activateCardButton.textContent = "✓ Aktivera Presentkort";
     }
 });
 
 // View history
 viewHistoryButton.addEventListener("click", async () => {
-    const serialNumber = serialNumberInput.value.trim();
+    const serialNumber = document.getElementById('redeemSerialNumber')?.value.trim();
     if (!serialNumber) return alert("Ange ett serienummer!");
 
     try {
@@ -350,62 +443,21 @@ viewHistoryButton.addEventListener("click", async () => {
         }
 
         document.getElementById("historyContent").innerHTML = historyHTML;
-        hideAllDialogs();
-        document.getElementById("historyDialog").style.display = "block";
+        openModal('historyModal');
 
     } catch (error) {
         console.error("Error fetching history:", error);
         alert("Ett fel uppstod vid hämtning av historik: " + error.message);
     } finally {
         viewHistoryButton.disabled = false;
-        viewHistoryButton.textContent = "Visa Historik";
+        viewHistoryButton.textContent = "📜 Visa Historik";
     }
 });
 
-// Get next available serial number (using print number system)
-getNextSerialNumberButton.addEventListener("click", async () => {
-    try {
-        const serialNumber = serialNumberInput.value.trim();
-
-        if (!serialNumber) {
-            return alert("Ange löpnumret från det tryckta presentkortet som du vill sälja.");
-        }
-
-        getNextSerialNumberButton.disabled = true;
-        getNextSerialNumberButton.textContent = "Kontrollerar...";
-
-        // Check if card already exists
-        const cardRef = ref(db, `presentkort/${serialNumber}`);
-        const snapshot = await get(cardRef);
-
-        if (snapshot.exists()) {
-            alert(`Presentkort ${serialNumber} är redan aktiverat!\n\nAktuellt saldo: ${snapshot.val().value} kr\nSäljare: ${snapshot.val().seller}`);
-            return;
-        }
-
-        // Card is available, show activation dialog
-        hideAllDialogs();
-        activateCardDiv.style.display = "block";
-        cardValueInput.focus();
-
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Ett fel uppstod: " + error.message);
-    } finally {
-        getNextSerialNumberButton.disabled = false;
-        getNextSerialNumberButton.textContent = "Sälj Presentkort";
-    }
-});
-
-// Show filter dialog
+// Show list of all cards (navigate to list view)
 listCardsButton.addEventListener("click", () => {
-    // Toggle the visibility of the filter dialog
-    if (filterDialog.style.display === "none" || filterDialog.style.display === "") {
-        hideAllDialogs();
-        filterDialog.style.display = "block";
-    } else {
-        filterDialog.style.display = "none";
-    }
+    // Open the filter modal instead
+    openModal('filterModal');
 });
 
 // View logs button
@@ -424,7 +476,7 @@ applyFiltersButton.addEventListener("click", () => {
     const redeemedTo = document.getElementById("redeemedTo").value;
 
     // Save filter state to sessionStorage
-    sessionStorage.setItem('filterDialogOpen', 'true');
+    sessionStorage.setItem('filterModalOpen', 'true');
     sessionStorage.setItem('filterShowActive', showActive);
     sessionStorage.setItem('filterShowExpired', showExpired);
     sessionStorage.setItem('filterShowOnlyWithBalance', showOnlyWithBalance);
@@ -472,12 +524,8 @@ async function verifyReauth(password) {
 
 // Show re-auth dialog when clicking print button
 printCardsButton.addEventListener("click", async () => {
-    showReauthDialog();
-});
-
-// Cancel re-auth dialog
-cancelReauthButton.addEventListener("click", () => {
-    reauthDialog.style.display = "none";
+    openModal('reauthModal');
+    reauthPasswordInput.focus();
 });
 
 // Allow Enter key to submit re-auth
@@ -505,15 +553,16 @@ confirmReauthButton.addEventListener("click", async () => {
         await verifyReauth(password);
         
         // Log successful re-authentication for print access
-        await logAction("print_reauth_success", {
+        await logAction(db, "print_reauth_success", "", {
             user: auth.currentUser.email,
             timestamp: new Date().toISOString()
         });
         
-        // Hide re-auth dialog and show print dialog
-        reauthDialog.style.display = "none";
+        // Hide re-auth modal
+        closeModal('reauthModal');
+        reauthPasswordInput.value = "";
         
-        // Now show the print dialog
+        // Now show the print modal
         printCardsButton.disabled = true;
         printCardsButton.textContent = "Hämtar...";
 
@@ -529,14 +578,13 @@ confirmReauthButton.addEventListener("click", async () => {
         }
 
         nextPrintNumberSpan.textContent = nextNumber.toString().padStart(4, "0");
-        hideAllDialogs();
-        printDialog.style.display = "block";
+        openModal('printModal');
         
     } catch (error) {
         console.error("Re-authentication failed:", error);
         
         // Log failed re-authentication attempt
-        await logAction("print_reauth_failed", {
+        await logAction(db, "print_reauth_failed", "", {
             user: auth.currentUser?.email || "unknown",
             timestamp: new Date().toISOString(),
             error: error.code || error.message
@@ -559,10 +607,6 @@ confirmReauthButton.addEventListener("click", async () => {
 });
 
 // Cancel print dialog
-cancelPrintButton.addEventListener("click", () => {
-    printDialog.style.display = "none";
-});
-
 // Generate PDF with gift cards
 generatePDFButton.addEventListener("click", async () => {
     try {
@@ -595,14 +639,14 @@ generatePDFButton.addEventListener("click", async () => {
         }
 
         alert(`${quantity} presentkort har genererats!`);
-        printDialog.style.display = "none";
+        closeModal('printModal');
 
     } catch (error) {
         console.error("Error generating PDF:", error);
         alert("Ett fel uppstod vid generering av PDF: " + error.message);
     } finally {
         generatePDFButton.disabled = false;
-        generatePDFButton.textContent = "Generera PDF";
+        generatePDFButton.textContent = "✓ Generera PDF";
     }
 });
 
@@ -684,22 +728,11 @@ async function generateGiftCardPDF(startNumber, quantity) {
     }
 }
 
-// Close history dialog - go back to card info
-document.getElementById("closeHistory").addEventListener("click", () => {
-    document.getElementById("historyDialog").style.display = "none";
-    document.getElementById("cardInfo").style.display = "block";
-});
-
 // Import cards functionality
 importCardsButton.addEventListener("click", () => {
-    hideAllDialogs();
-    importDialog.style.display = "block";
+    openModal('importModal');
     excelFileInput.value = "";
     importProgressDiv.style.display = "none";
-});
-
-cancelImportButton.addEventListener("click", () => {
-    importDialog.style.display = "none";
 });
 
 startImportButton.addEventListener("click", async () => {
@@ -853,7 +886,7 @@ startImportButton.addEventListener("click", async () => {
 
         importProgressDiv.style.display = "none";
         alert(`Import klar!\\n\\nLyckade: ${successCount}\\nFel: ${errorCount}\\nTotalt: ${total}`);
-        importDialog.style.display = "none";
+        closeModal('importModal');
 
     } catch (error) {
         console.error("Import error:", error);
@@ -865,8 +898,8 @@ startImportButton.addEventListener("click", async () => {
     }
 });
 
-// Check if we should open filter dialog on page load
-if (sessionStorage.getItem('filterDialogOpen') === 'true') {
+// Check if we should open filter modal on page load
+if (sessionStorage.getItem('filterModalOpen') === 'true') {
     // Restore filter values from sessionStorage
     const showActive = sessionStorage.getItem('filterShowActive');
     const showExpired = sessionStorage.getItem('filterShowExpired');
@@ -884,9 +917,9 @@ if (sessionStorage.getItem('filterDialogOpen') === 'true') {
     if (redeemedFrom) document.getElementById('redeemedFrom').value = redeemedFrom;
     if (redeemedTo) document.getElementById('redeemedTo').value = redeemedTo;
 
-    // Show filter dialog
-    filterDialog.style.display = 'block';
+    // Show filter modal
+    openModal('filterModal');
 
     // Clear the flag so it doesn't reopen on next page load
-    sessionStorage.removeItem('filterDialogOpen');
+    sessionStorage.removeItem('filterModalOpen');
 }
