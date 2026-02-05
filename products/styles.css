@@ -43,6 +43,11 @@
     position: relative;
 }
 
+.product-info p {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
 /* Select with action button */
 .select-with-action {
     display: flex;
