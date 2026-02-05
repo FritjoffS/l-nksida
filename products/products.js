@@ -445,7 +445,11 @@ window.onload = function() {
 
 // Edit Product Functions
 window.editProduct = function(product, categoryName) {
-    currentEditProduct = { ...product, categoryName };
+    currentEditProduct = { 
+        ...product, 
+        categoryName,
+        originalProductNumber: product.productNumber // Spara originalnummer
+    };
     document.getElementById('modalTitle').textContent = 'Redigera produkt';
     
     populateModalCategories();
@@ -648,16 +652,22 @@ window.saveProduct = async function(event) {
             const oldCategoryRef = ref(database, `products/${currentEditProduct.categoryName}`);
             const oldSnapshot = await get(oldCategoryRef);
             const oldCategoryData = oldSnapshot.val();
-            oldCategoryData.products = oldCategoryData.products.filter(p => p.productNumber !== currentEditProduct.productNumber);
-            await set(oldCategoryRef, oldCategoryData);
+            if (oldCategoryData && oldCategoryData.products) {
+                oldCategoryData.products = oldCategoryData.products.filter(p => p.productNumber !== currentEditProduct.originalProductNumber);
+                await set(oldCategoryRef, oldCategoryData);
+            }
         }
 
-        const existingIndex = categoryData.products.findIndex(p => p.productNumber === productNumber);
+        // Find existing product using original product number if editing
+        const searchNumber = currentEditProduct ? currentEditProduct.originalProductNumber : productNumber;
+        const existingIndex = categoryData.products.findIndex(p => p.productNumber === searchNumber);
 
         if (existingIndex !== -1) {
+            // Update existing product
             categoryData.products[existingIndex] = productData;
             showStatus('Produkt uppdaterad!', 'success');
         } else {
+            // Add new product
             categoryData.products.push(productData);
             showStatus('Produkt tillagd!', 'success');
         }
