@@ -249,9 +249,9 @@ function updateResults() {
                 );
             }).map(product => {
                 // Säkerhetskontroller för produktdata
-                const productName = product.name || 'Okänt produktnamn';
+                const productName = escapeHtml(product.name || 'Okänt produktnamn');
                 const productNumber = product.productNumber || 'Okänt nummer';
-                const productInfo = product.info || 'Ingen info tillgänglig';
+                const productInfo = escapeHtml(product.info || 'Ingen info tillgänglig');
                 const productImage = product.image || '../images/placeholder.png';
                 const productSpecs = product.specs || {};
 
@@ -324,6 +324,13 @@ window.handleImageError = function(img) {
 window.handleImageLoad = function(img) {
     img.classList.remove('loading');
 };
+
+// Escape HTML to prevent XSS but preserve formatting
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 
 // Custom confirmation dialog
 function showConfirmDialog(options) {
