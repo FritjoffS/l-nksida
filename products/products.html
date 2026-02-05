@@ -7,247 +7,8 @@
     <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/navbar.css">
     <link rel="stylesheet" href="../styles/products.css">
-
-    <style>
-        .product-actions {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 5px;
-        }
-
-        .icon-btn {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.2s;
-        }
-
-        .icon-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .icon-btn.edit:hover {
-            background: #ffc107;
-            border-color: #ffc107;
-        }
-
-        .icon-btn.delete:hover {
-            background: #dc3545;
-            border-color: #dc3545;
-            color: white;
-        }
-
-        .product-card {
-            position: relative;
-        }
-
-        /* Select with action button */
-        .select-with-action {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .select-with-action select {
-            flex: 1;
-        }
-
-        .edit-icon-btn {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 36px;
-            height: 36px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.2s;
-        }
-
-        .edit-icon-btn:hover:not(:disabled) {
-            background: #ffc107;
-            border-color: #ffc107;
-            transform: scale(1.05);
-        }
-
-        .edit-icon-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        /* Add Product Button */
-        .add-product-btn {
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-
-        .add-product-btn:hover {
-            background: #218838;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
-        }
-
-        .add-product-btn:active {
-            transform: translateY(0);
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            overflow-y: auto;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: #666;
-            line-height: 1;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-
-        .status-message {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #333;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 6px;
-            z-index: 2000;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-            }
-            to {
-                transform: translateX(0);
-            }
-        }
-
-        .status-message.success {
-            background: #28a745;
-        }
-
-        .status-message.error {
-            background: #dc3545;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css">
 
     <script src="../scripts/loadNavbar.js"></script>
 
@@ -273,7 +34,7 @@
         </select>
 
         <button class="add-product-btn" onclick="openAddProductModal()" title="Lägg till ny produkt">
-            ➕ Lägg till produkt
+            ➕ <span>Lägg till produkt</span>
         </button>
     </div>
 
@@ -375,7 +136,7 @@
 
     <!-- Category Management Modals -->
     <div class="modal" id="categoryModal">
-        <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-content small">
             <div class="modal-header">
                 <h2 id="categoryModalTitle">Lägg till Fabrikat</h2>
                 <button class="close-btn" onclick="closeCategoryModal()">&times;</button>
@@ -394,7 +155,7 @@
     </div>
 
     <div class="modal" id="subcategoryModal">
-        <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-content small">
             <div class="modal-header">
                 <h2 id="subcategoryModalTitle">Lägg till Underkategori</h2>
                 <button class="close-btn" onclick="closeSubcategoryModal()">&times;</button>
@@ -413,7 +174,7 @@
     </div>
 
     <div class="modal" id="subtypeModal">
-        <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-content small">
             <div class="modal-header">
                 <h2 id="subtypeModalTitle">Lägg till Undertyp</h2>
                 <button class="close-btn" onclick="closeSubtypeModal()">&times;</button>
