@@ -332,6 +332,38 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Parse specifications from simple format to JSON
+function parseSpecifications(text) {
+    const specs = {};
+    const lines = text.split('\n');
+    
+    for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) continue;
+        
+        const colonIndex = trimmedLine.indexOf(':');
+        if (colonIndex === -1) continue;
+        
+        const key = trimmedLine.substring(0, colonIndex).trim();
+        const value = trimmedLine.substring(colonIndex + 1).trim();
+        
+        if (key && value) {
+            specs[key] = value;
+        }
+    }
+    
+    return specs;
+}
+
+// Format specifications from JSON to simple format
+function formatSpecifications(specs) {
+    if (!specs || typeof specs !== 'object') return '';
+    
+    return Object.entries(specs)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('\n');
+}
+
 // Custom confirmation dialog
 function showConfirmDialog(options) {
     return new Promise((resolve) => {
@@ -430,7 +462,7 @@ window.editProduct = function(product, categoryName) {
             document.getElementById('productName').value = product.name;
             document.getElementById('productInfo').value = product.info;
             document.getElementById('productImage').value = product.image;
-            document.getElementById('productSpecs').value = product.specs ? JSON.stringify(product.specs, null, 2) : '';
+            document.getElementById('productSpecs').value = product.specs ? formatSpecifications(product.specs) : '';
         }, 50);
     }, 50);
 
@@ -584,12 +616,7 @@ window.saveProduct = async function(event) {
 
         let specs = {};
         if (productSpecsText.trim()) {
-            try {
-                specs = JSON.parse(productSpecsText);
-            } catch (e) {
-                showStatus('Ogiltigt JSON-format i specifikationer', 'error');
-                return;
-            }
+            specs = parseSpecifications(productSpecsText);
         }
 
         const productData = {
