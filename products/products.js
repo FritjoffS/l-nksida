@@ -265,12 +265,17 @@ function updateResults() {
                                 🗑️
                             </button>
                         </div>
-                        <img src="${productImage}" class="product-image" alt="${productName}" onerror="this.src='../images/placeholder.png'">
+                        <img src="${productImage}" 
+                             class="product-image" 
+                             alt="${productName}" 
+                             loading="lazy"
+                             onerror="handleImageError(this)"
+                             onload="handleImageLoad(this)">
                         <div class="product-info">
                             <h3>${productName}</h3>
-                            <div class="product-number-container" style="display: flex; align-items: center;">
-                                <p class="product-number" style="margin-right: 8px;">${productNumber}</p>
-                                <button class="copy-button" data-product-number="${productNumber}" style="background-image: url('../images/copy.jpg'); background-size: contain; background-repeat: no-repeat; width: 24px; height: 24px; border: none; cursor: pointer;"></button>
+                            <div class="product-number-container">
+                                <p class="product-number">${productNumber}</p>
+                                <button class="copy-button" data-product-number="${productNumber}" title="Kopiera produktnummer"></button>
                             </div>                        
                             <p>${productInfo}</p>
                             <div class="specs">
@@ -302,32 +307,94 @@ function updateResults() {
 // Funktion för att kopiera text till urklipp
 function copyTextToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        const message = document.createElement("div");
-        message.textContent = "Produktnumret har kopierats";
-        message.style.position = "fixed";
-        message.style.backgroundColor = "#333";
-        message.style.bottom = "10px";
-        message.style.left = "50%";
-        message.style.transform = "translateX(-50%)";
-        message.style.color = "#fff";
-        message.style.padding = "10px";
-        message.style.borderRadius = "5px";
-        message.style.zIndex = "1000";
-        message.style.fontSize = "48px";
-        message.style.transition = "opacity 1s";
-        message.style.opacity = "1";
-
-        document.body.appendChild(message);
-
-        // Ta bort meddelandet efter 3 sekunder
-        setTimeout(() => {
-            message.style.opacity = "0";
-            setTimeout(() => {
-                document.body.removeChild(message);
-            }, 1000);
-        }, 3000);
+        showStatus(`Produktnummer ${text} kopierat!`, 'success');
     }).catch((err) => {
         console.error('Kunde inte kopiera texten: ', err);
+        showStatus('Kunde inte kopiera produktnummer', 'error');
+    });
+}
+
+// Image loading handlers
+window.handleImageError = function(img) {
+    img.classList.add('error');
+    img.src = '../images/placeholder.png';
+    img.alt = 'Bilden kunde inte laddas';
+};
+
+window.handleImageLoad = function(img) {
+    img.classList.remove('loading');
+};
+
+// Custom confirmation dialog
+function showConfirmDialog(options) {
+    return new Promise((resolve) => {
+        const {
+            title = 'Bekräfta',
+            message = 'Är du säker?',
+            details = '',
+            confirmText = 'OK',
+            cancelText = 'Avbryt',
+            type = 'warning' // 'warning' or 'danger'
+        } = options;
+
+        const iconEmoji = type === 'danger' ? '🗑️' : '⚠️';
+        
+        const dialog = document.createElement('div');
+        dialog.className = 'confirmation-dialog';
+        dialog.innerHTML = `
+            <div class="confirmation-content">
+                <div class="confirmation-header">
+                    <span class="confirmation-icon ${type}">${iconEmoji}</span>
+                    <h3>${title}</h3>
+                </div>
+                <div class="confirmation-message">${message}</div>
+                ${details ? `<div class="confirmation-details">${details}</div>` : ''}
+                <div class="confirmation-actions">
+                    <button class="btn btn-secondary" id="confirmCancel">${cancelText}</button>
+                    <button class="btn ${type === 'danger' ? 'btn-danger' : 'btn-success'}" id="confirmOk">${confirmText}</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(dialog);
+
+        const okBtn = dialog.querySelector('#confirmOk');
+        const cancelBtn = dialog.querySelector('#confirmCancel');
+
+        const cleanup = () => {
+            dialog.remove();
+        };
+
+        okBtn.addEventListener('click', () => {
+            cleanup();
+            resolve(true);
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            cleanup();
+            resolve(false);
+        });
+
+        // Close on background click
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                cleanup();
+                resolve(false);
+            }
+        });
+
+        // Focus OK button for keyboard accessibility
+        okBtn.focus();
+
+        // ESC key to cancel
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                cleanup();
+                resolve(false);
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
     });
 }
 
@@ -572,9 +639,16 @@ window.saveProduct = async function(event) {
 };
 
 window.deleteProduct = async function(categoryName, productNumber) {
-    if (!confirm(`Är du säker på att du vill ta bort produkten ${productNumber}?`)) {
-        return;
-    }
+    const confirmed = await showConfirmDialog({
+        title: 'Ta bort produkt',
+        message: `Är du säker på att du vill ta bort produkt ${productNumber}?`,
+        details: 'Detta kan inte ångras.',
+        confirmText: 'Ta bort',
+        cancelText: 'Avbryt',
+        type: 'danger'
+    });
+
+    if (!confirmed) return;
 
     try {
         const categoryRef = ref(database, `products/${categoryName}`);
@@ -600,11 +674,19 @@ window.deleteProduct = async function(categoryName, productNumber) {
 function showStatus(message, type = 'success') {
     const statusDiv = document.createElement('div');
     statusDiv.className = `status-message ${type}`;
-    statusDiv.textContent = message;
+    
+    // Add icon based on type
+    const icon = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
+    statusDiv.innerHTML = `<span style="font-size: 18px; font-weight: bold;">${icon}</span> ${message}`;
+    
     document.body.appendChild(statusDiv);
 
     setTimeout(() => {
-        statusDiv.remove();
+        statusDiv.style.opacity = '0';
+        statusDiv.style.transform = 'translateX(400px)';
+        setTimeout(() => {
+            statusDiv.remove();
+        }, 300);
     }, 3000);
 }
 
@@ -662,13 +744,25 @@ window.deleteCategory = async function() {
 
     // Kontrollera om det finns produkter i kategorin
     const category = productsDB.categories.find(c => c.name === categoryName);
+    
+    let message = `Är du säker på att du vill ta bort fabrikat "${categoryName}"?`;
+    let details = 'Detta kan inte ångras.';
+    
     if (category && category.products && category.products.length > 0) {
-        if (!confirm(`Fabrikat "${categoryName}" innehåller ${category.products.length} produkter. Är du säker på att du vill ta bort fabrikatet och alla dess produkter?`)) {
-            return;
-        }
-    } else if (!confirm(`Är du säker på att du vill ta bort fabrikat "${categoryName}"?`)) {
-        return;
+        message = `Fabrikat "${categoryName}" innehåller ${category.products.length} produkter.`;
+        details = `Alla ${category.products.length} produkter kommer att tas bort permanent. Detta kan inte ångras.`;
     }
+
+    const confirmed = await showConfirmDialog({
+        title: 'Ta bort fabrikat',
+        message: message,
+        details: details,
+        confirmText: 'Ta bort',
+        cancelText: 'Avbryt',
+        type: 'danger'
+    });
+
+    if (!confirmed) return;
 
     try {
         const categoryRef = ref(database, `products/${categoryName}`);
@@ -797,13 +891,24 @@ window.deleteSubcategory = async function() {
     // Kontrollera om det finns produkter i underkategorin
     const productsInSubcategory = category.products ? category.products.filter(p => p.subcategory === subcategoryName).length : 0;
     
+    let message = `Är du säker på att du vill ta bort underkategori "${subcategoryName}"?`;
+    let details = 'Detta kan inte ångras.';
+    
     if (productsInSubcategory > 0) {
-        if (!confirm(`Underkategori "${subcategoryName}" innehåller ${productsInSubcategory} produkter. Är du säker på att du vill ta bort underkategorin och alla dess produkter?`)) {
-            return;
-        }
-    } else if (!confirm(`Är du säker på att du vill ta bort underkategori "${subcategoryName}"?`)) {
-        return;
+        message = `Underkategori "${subcategoryName}" innehåller ${productsInSubcategory} produkter.`;
+        details = `Alla ${productsInSubcategory} produkter kommer att tas bort permanent. Detta kan inte ångras.`;
     }
+
+    const confirmed = await showConfirmDialog({
+        title: 'Ta bort underkategori',
+        message: message,
+        details: details,
+        confirmText: 'Ta bort',
+        cancelText: 'Avbryt',
+        type: 'danger'
+    });
+
+    if (!confirmed) return;
 
     try {
         const categoryRef = ref(database, `products/${categoryName}`);
@@ -971,13 +1076,24 @@ window.deleteSubtype = async function() {
     const productsWithSubtype = category.products ? 
         category.products.filter(p => p.subcategory === subcategoryName && p.subtype === subtypeName).length : 0;
     
+    let message = `Är du säker på att du vill ta bort undertyp "${subtypeName}"?`;
+    let details = 'Detta kan inte ångras.';
+    
     if (productsWithSubtype > 0) {
-        if (!confirm(`Undertyp "${subtypeName}" används av ${productsWithSubtype} produkter. Är du säker på att du vill ta bort undertypen? Produkterna kommer att bli utan undertyp.`)) {
-            return;
-        }
-    } else if (!confirm(`Är du säker på att du vill ta bort undertyp "${subtypeName}"?`)) {
-        return;
+        message = `Undertyp "${subtypeName}" används av ${productsWithSubtype} produkter.`;
+        details = `Produkterna kommer att förlora sin undertyp-kategorisering. Detta kan inte ångras.`;
     }
+
+    const confirmed = await showConfirmDialog({
+        title: 'Ta bort undertyp',
+        message: message,
+        details: details,
+        confirmText: 'Ta bort',
+        cancelText: 'Avbryt',
+        type: 'warning'
+    });
+
+    if (!confirmed) return;
 
     try {
         const categoryRef = ref(database, `products/${categoryName}`);
