@@ -16,6 +16,7 @@ const linkForm = document.getElementById('linkForm');
 const modalTitle = document.getElementById('modalTitle');
 const linkNameInput = document.getElementById('linkName');
 const linkUrlInput = document.getElementById('linkUrl');
+const linkImageInput = document.getElementById('linkImage');
 const deleteBtn = document.getElementById('deleteBtn');
 const addLinkBtn = document.getElementById('addLinkBtn');
 const closeModalBtn = document.getElementById('closeModalBtn');
@@ -74,6 +75,19 @@ function isValidUrl(urlString) {
   }
 }
 
+// Validate image URL (allows data URLs and regular URLs)
+function isValidImageUrl(urlString) {
+  if (!urlString) return false;
+  
+  // Allow data URLs for images
+  if (urlString.startsWith('data:image/')) {
+    return true;
+  }
+  
+  // Also allow regular http/https URLs
+  return isValidUrl(urlString);
+}
+
 // Function to check if a user is logged in or not
 function checkAuthState() {
   showLoading();
@@ -121,6 +135,7 @@ function openModal(editKey = null) {
     if (link) {
       linkNameInput.value = link.buttonId;
       linkUrlInput.value = link.linkToFollow;
+      linkImageInput.value = link.imageUrl || '';
     }
     deleteBtn.style.display = 'block';
   } else {
@@ -128,6 +143,7 @@ function openModal(editKey = null) {
     modalTitle.textContent = 'Lägg till länk';
     linkNameInput.value = '';
     linkUrlInput.value = '';
+    linkImageInput.value = '';
     deleteBtn.style.display = 'none';
   }
   
@@ -147,6 +163,7 @@ async function saveLink(event) {
   
   const name = linkNameInput.value.trim();
   const url = linkUrlInput.value.trim();
+  const imageUrl = linkImageInput.value.trim();
   
   if (!name || !url) {
     showToast('Både benämning och URL krävs', 'error');
@@ -155,6 +172,12 @@ async function saveLink(event) {
   
   if (!isValidUrl(url)) {
     showToast('Ange en giltig URL (börjar med http:// eller https://)', 'error');
+    return;
+  }
+  
+  // Validate image URL if provided
+  if (imageUrl && !isValidImageUrl(imageUrl)) {
+    showToast('Ange en giltig bild-URL (http/https eller data:image/...)', 'error');
     return;
   }
   
@@ -167,9 +190,13 @@ async function saveLink(event) {
       await remove(oldRef);
     }
     
-    // Save the new/updated entry
+    // Save the new/updated entry as an object
     const linkRef = ref(db, "kontor/" + name);
-    await set(linkRef, url);
+    const linkData = {
+      url: url,
+      imageUrl: imageUrl || null
+    };
+    await set(linkRef, linkData);
     
     showToast(currentEditKey ? 'Länk uppdaterad!' : 'Länk tillagd!', 'success');
     closeModal();
@@ -219,9 +246,15 @@ async function loadButtons() {
     
     if (snapshot.exists()) {
       snapshot.forEach((childSnapshot) => {
+        const data = childSnapshot.val();
+        // Support both old format (string) and new format (object)
+        const linkToFollow = typeof data === 'string' ? data : data.url;
+        const imageUrl = typeof data === 'object' ? data.imageUrl : null;
+        
         linksData.push({
           buttonId: childSnapshot.key,
-          linkToFollow: childSnapshot.val()
+          linkToFollow: linkToFollow,
+          imageUrl: imageUrl
         });
       });
 
@@ -229,7 +262,7 @@ async function loadButtons() {
       linksData.sort((a, b) => a.buttonId.localeCompare(b.buttonId, 'sv'));
 
       // Create buttons
-      linksData.forEach(({ buttonId, linkToFollow }) => {
+      linksData.forEach(({ buttonId, linkToFollow, imageUrl }) => {
         if (!buttonId || typeof buttonId !== 'string') return;
         if (!isValidUrl(linkToFollow)) return;
 
@@ -243,25 +276,32 @@ async function loadButtons() {
         button.className = "linkButton";
         button.setAttribute('aria-label', `Öppna ${buttonId}`);
 
-        // Set background image
-        const imgUrl = "../images/" + encodeURIComponent(buttonId) + ".png";
-        button.style.backgroundImage = "url('" + imgUrl + "')";
-        button.style.backgroundPosition = "center";
-
-        // Try to load the image, if it fails, display text
-        const img = new Image();
-        img.onload = function () {
-          button.setAttribute('aria-label', `Öppna ${buttonId}`);
-        };
-        img.onerror = function () {
-          button.style.backgroundImage = "none";
+        // Set background image - use custom URL if provided, otherwise fall back to text
+        if (imageUrl && isValidImageUrl(imageUrl)) {
+          button.style.backgroundImage = "url('" + imageUrl + "')";
+          button.style.backgroundPosition = "center";
+          button.style.backgroundSize = "contain";
+          button.style.backgroundRepeat = "no-repeat";
+          
+          // Verify the image loads
+          const img = new Image();
+          img.onerror = function () {
+            button.style.backgroundImage = "none";
+            button.style.backgroundColor = "#555";
+            button.textContent = buttonId.replace(/Button$/, "");
+            button.style.color = "#fff";
+            button.style.fontSize = "16px";
+            button.style.fontWeight = "bold";
+          };
+          img.src = imageUrl;
+        } else {
+          // No image URL provided, show text
           button.style.backgroundColor = "#555";
           button.textContent = buttonId.replace(/Button$/, "");
           button.style.color = "#fff";
           button.style.fontSize = "16px";
           button.style.fontWeight = "bold";
-        };
-        img.src = imgUrl;
+        }
 
         // Click to open link
         button.addEventListener("click", function (e) {
