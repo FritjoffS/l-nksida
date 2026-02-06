@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js";
+import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js";
 import { firebaseConfig } from "../scripts/firebase-config.js";
 
 // Initialize Firebase
@@ -11,6 +11,19 @@ const db = getDatabase(app);
 // DOM Elements
 const loadingOverlay = document.getElementById('loadingOverlay');
 const buttonContainer = document.getElementById('buttonContainer');
+const linkModal = document.getElementById('linkModal');
+const linkForm = document.getElementById('linkForm');
+const modalTitle = document.getElementById('modalTitle');
+const linkNameInput = document.getElementById('linkName');
+const linkUrlInput = document.getElementById('linkUrl');
+const deleteBtn = document.getElementById('deleteBtn');
+const addLinkBtn = document.getElementById('addLinkBtn');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+
+// State
+let currentEditKey = null;
+let linksData = [];
 
 // Show loading state
 function showLoading() {
@@ -55,7 +68,6 @@ function showToast(message, type = 'info') {
 function isValidUrl(urlString) {
   try {
     const url = new URL(urlString);
-    // Only allow http and https protocols
     return url.protocol === 'http:' || url.protocol === 'https:';
   } catch (e) {
     return false;
@@ -68,15 +80,12 @@ function checkAuthState() {
   
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      // User is not signed in, redirect to the login page
       window.location.href = "../index/login.html";
     } else {
       console.log("User is logged in:", user.email);
-      // User authenticated, load buttons
       loadButtons();
     }
   }, (error) => {
-    // Handle auth errors
     console.error("Auth error:", error);
     hideLoading();
     showToast('Autentiseringsfel. Omdirigerar till login...', 'error');
@@ -95,19 +104,106 @@ async function logout() {
   } catch (error) {
     hideLoading();
     console.error("Logout error:", error);
-    
-    const errorMessages = {
-      'auth/network-request-failed': 'Nätverksfel. Kontrollera din internetanslutning.',
-      'default': 'Ett fel uppstod vid utloggning. Försök igen.'
-    };
-    
-    const message = errorMessages[error.code] || errorMessages.default;
-    showToast(message, 'error');
+    showToast('Ett fel uppstod vid utloggning.', 'error');
   }
 }
 
-// Attach logout to the global window object for navbar
 window.logout = logout;
+
+// Modal Functions
+function openModal(editKey = null) {
+  currentEditKey = editKey;
+  
+  if (editKey) {
+    // Edit mode
+    modalTitle.textContent = 'Redigera länk';
+    const link = linksData.find(l => l.buttonId === editKey);
+    if (link) {
+      linkNameInput.value = link.buttonId;
+      linkUrlInput.value = link.linkToFollow;
+    }
+    deleteBtn.style.display = 'block';
+  } else {
+    // Add mode
+    modalTitle.textContent = 'Lägg till länk';
+    linkNameInput.value = '';
+    linkUrlInput.value = '';
+    deleteBtn.style.display = 'none';
+  }
+  
+  linkModal.classList.add('active');
+  linkNameInput.focus();
+}
+
+function closeModal() {
+  linkModal.classList.remove('active');
+  currentEditKey = null;
+  linkForm.reset();
+}
+
+// Save link (add or update)
+async function saveLink(event) {
+  event.preventDefault();
+  
+  const name = linkNameInput.value.trim();
+  const url = linkUrlInput.value.trim();
+  
+  if (!name || !url) {
+    showToast('Både benämning och URL krävs', 'error');
+    return;
+  }
+  
+  if (!isValidUrl(url)) {
+    showToast('Ange en giltig URL (börjar med http:// eller https://)', 'error');
+    return;
+  }
+  
+  showLoading();
+  
+  try {
+    // If editing and name changed, remove old entry
+    if (currentEditKey && currentEditKey !== name) {
+      const oldRef = ref(db, "kontor/" + currentEditKey);
+      await remove(oldRef);
+    }
+    
+    // Save the new/updated entry
+    const linkRef = ref(db, "kontor/" + name);
+    await set(linkRef, url);
+    
+    showToast(currentEditKey ? 'Länk uppdaterad!' : 'Länk tillagd!', 'success');
+    closeModal();
+    await loadButtons();
+  } catch (error) {
+    console.error("Error saving link:", error);
+    hideLoading();
+    showToast('Kunde inte spara länken', 'error');
+  }
+}
+
+// Delete link
+async function deleteLink() {
+  if (!currentEditKey) return;
+  
+  if (!confirm(`Är du säker på att du vill radera "${currentEditKey}"?`)) {
+    return;
+  }
+  
+  showLoading();
+  
+  try {
+    const linkRef = ref(db, "kontor/" + currentEditKey);
+    await remove(linkRef);
+    
+    showToast('Länk raderad!', 'success');
+    closeModal();
+    await loadButtons();
+  } catch (error) {
+    console.error("Error deleting link:", error);
+    hideLoading();
+    showToast('Kunde inte radera länken', 'error');
+  }
+}
 
 // Function to load buttons dynamically and attach event listeners
 async function loadButtons() {
@@ -117,54 +213,47 @@ async function loadButtons() {
     const kontorRef = ref(db, "kontor");
     const snapshot = await get(kontorRef);
     
+    // Clear container
+    buttonContainer.innerHTML = '';
+    linksData = [];
+    
     if (snapshot.exists()) {
-      // Collect all children into an array
-      const buttonsData = [];
       snapshot.forEach((childSnapshot) => {
-        buttonsData.push({
+        linksData.push({
           buttonId: childSnapshot.key,
           linkToFollow: childSnapshot.val()
         });
       });
 
-      // Sort alphabetically by buttonId
-      buttonsData.sort((a, b) => a.buttonId.localeCompare(b.buttonId));
+      // Sort alphabetically
+      linksData.sort((a, b) => a.buttonId.localeCompare(b.buttonId, 'sv'));
 
-      // Create buttons in sorted order
-      buttonsData.forEach(({ buttonId, linkToFollow }) => {
-        // Validate button ID (basic sanitization)
-        if (!buttonId || typeof buttonId !== 'string') {
-          console.warn('Invalid buttonId:', buttonId);
-          return;
-        }
+      // Create buttons
+      linksData.forEach(({ buttonId, linkToFollow }) => {
+        if (!buttonId || typeof buttonId !== 'string') return;
+        if (!isValidUrl(linkToFollow)) return;
 
-        // Validate URL
-        if (!isValidUrl(linkToFollow)) {
-          console.warn(`Invalid URL for button ${buttonId}:`, linkToFollow);
-          return;
-        }
+        // Create button wrapper
+        const wrapper = document.createElement("div");
+        wrapper.className = "link-button-wrapper";
+        wrapper.setAttribute('role', 'listitem');
 
-        // Create a button dynamically
+        // Create the main button
         const button = document.createElement("button");
-        button.id = buttonId;
         button.className = "linkButton";
-        button.setAttribute('role', 'listitem');
-        button.setAttribute('aria-label', `Öppna ${buttonId.replace(/Button$/, '')} i ny flik`);
+        button.setAttribute('aria-label', `Öppna ${buttonId}`);
 
-        // Set background image for the button (unique per button)
+        // Set background image
         const imgUrl = "../images/" + encodeURIComponent(buttonId) + ".png";
         button.style.backgroundImage = "url('" + imgUrl + "')";
         button.style.backgroundPosition = "center";
-        button.style.color = "#fff";
 
-        // Try to load the image, if it fails, display the key as text
+        // Try to load the image, if it fails, display text
         const img = new Image();
         img.onload = function () {
-          // Image loaded successfully
-          button.setAttribute('aria-label', `Öppna ${buttonId.replace(/Button$/, '')}`);
+          button.setAttribute('aria-label', `Öppna ${buttonId}`);
         };
         img.onerror = function () {
-          // Image failed, show text instead
           button.style.backgroundImage = "none";
           button.style.backgroundColor = "#555";
           button.textContent = buttonId.replace(/Button$/, "");
@@ -174,46 +263,48 @@ async function loadButtons() {
         };
         img.src = imgUrl;
 
-        // Attach event listener to the button
-        button.addEventListener("click", function () {
+        // Click to open link
+        button.addEventListener("click", function (e) {
+          // Ignore if clicking on edit button
+          if (e.target.closest('.edit-btn')) return;
+          
           if (linkToFollow && isValidUrl(linkToFollow)) {
-            // Open with security attributes
             const newWindow = window.open(linkToFollow, "_blank", "noopener,noreferrer");
             if (!newWindow) {
               showToast('Popup blockerad. Tillåt popups för denna sida.', 'error');
             }
-          } else {
-            console.error(`Invalid URL for button: ${buttonId}`);
-            showToast('Ogiltig länk', 'error');
           }
         });
 
-        // Append the button to the container
-        buttonContainer.appendChild(button);
+        // Create edit button overlay
+        const editBtn = document.createElement("button");
+        editBtn.className = "edit-btn";
+        editBtn.innerHTML = "✏️";
+        editBtn.title = "Redigera länk";
+        editBtn.setAttribute('aria-label', `Redigera ${buttonId}`);
+        editBtn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          openModal(buttonId);
+        });
+
+        wrapper.appendChild(button);
+        wrapper.appendChild(editBtn);
+        buttonContainer.appendChild(wrapper);
       });
 
       hideLoading();
       
-      if (buttonsData.length === 0) {
+      if (linksData.length === 0) {
         showEmptyState();
       }
     } else {
-      console.log("No data available");
       hideLoading();
       showEmptyState();
     }
   } catch (error) {
-    console.error("Error loading buttons from database:", error);
+    console.error("Error loading buttons:", error);
     hideLoading();
-    
-    const errorMessages = {
-      'PERMISSION_DENIED': 'Du har inte behörighet att ladda kontorslänkar.',
-      'NETWORK_ERROR': 'Nätverksfel. Kontrollera din internetanslutning.',
-      'default': 'Ett fel uppstod vid laddning av länkar. Försök igen senare.'
-    };
-    
-    const message = errorMessages[error.code] || errorMessages.default;
-    showToast(message, 'error');
+    showToast('Ett fel uppstod vid laddning av länkar.', 'error');
     showEmptyState('Ett fel uppstod vid laddning');
   }
 }
@@ -225,13 +316,52 @@ function showEmptyState(message = 'Inga kontorslänkar tillgängliga') {
       <div class="empty-state">
         <div class="empty-icon">🏢</div>
         <h2>${message}</h2>
-        <p>Kontakta administratören om du tror detta är ett fel.</p>
+        <p>Klicka på "Lägg till länk" för att skapa din första länk.</p>
       </div>
     `;
   }
 }
 
-// Initialize on page load
+// Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
   checkAuthState();
+  
+  // Add link button
+  if (addLinkBtn) {
+    addLinkBtn.addEventListener('click', () => openModal());
+  }
+  
+  // Close modal buttons
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', closeModal);
+  }
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', closeModal);
+  }
+  
+  // Form submit
+  if (linkForm) {
+    linkForm.addEventListener('submit', saveLink);
+  }
+  
+  // Delete button
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', deleteLink);
+  }
+  
+  // Close modal on overlay click
+  if (linkModal) {
+    linkModal.addEventListener('click', (e) => {
+      if (e.target === linkModal) {
+        closeModal();
+      }
+    });
+  }
+  
+  // Close modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && linkModal.classList.contains('active')) {
+      closeModal();
+    }
+  });
 });
