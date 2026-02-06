@@ -21,7 +21,6 @@
   
   <link rel="stylesheet" href="../styles/global.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
-  <link rel="stylesheet" href="../styles/kontor-buttons.css" />
   <link rel="stylesheet" href="kontor.css" />
   
   <!-- Google Analytics -->
@@ -37,12 +36,46 @@
 
   <div id="navbar" role="navigation" aria-label="Huvudnavigering"></div>
 
-  <main role="main">
+
     <div class="container" id="buttonContainer" role="list" aria-label="Kontorslänkar">
       <!-- Dynamic buttons will be loaded here -->
     </div>
   </main>
-  
+
+  <!-- Add/Edit Link Modal -->
+  <div class="modal" id="linkModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Lägg till länk</h2>
+        <button class="close-btn" id="closeModalBtn" aria-label="Stäng">&times;</button>
+      </div>
+      <form id="linkForm">
+        <div class="form-group">
+          <label for="linkName">Benämning *</label>
+          <input type="text" id="linkName" required placeholder="T.ex. Fortnox">
+        </div>
+        <div class="form-group">
+          <label for="linkUrl">URL *</label>
+          <input type="url" id="linkUrl" required placeholder="https://...">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelBtn">Avbryt</button>
+          <button type="button" class="btn btn-danger" id="deleteBtn" style="display: none;">Radera</button>
+          <button type="submit" class="btn btn-success">Spara</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+    <main role="main">
+    <!-- Action bar -->
+    <div class="action-bar">
+      <button class="add-link-btn" id="addLinkBtn" title="Lägg till ny länk">
+        ➕ <span>Lägg till länk</span>
+      </button>
+    </div>
+
+
   <script type="module" src="kontor.js"></script>
   <script src="../scripts/loadNavbar.js"></script>
   
