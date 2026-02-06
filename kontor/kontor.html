@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="author" content="Fredrik Söderberg" />
   <title>Kontor</title>
-  
+
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="../manifest.json" />
   <meta name="theme-color" content="#ff6600" />
@@ -18,11 +18,11 @@
   <meta name="application-name" content="Järnhandel" />
   <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
-  
+
   <link rel="stylesheet" href="../styles/global.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
   <link rel="stylesheet" href="kontor.css" />
-  
+
   <!-- Google Analytics -->
   <script type="module" src="../scripts/analytics.js" async></script>
 </head>
@@ -36,11 +36,20 @@
 
   <div id="navbar" role="navigation" aria-label="Huvudnavigering"></div>
 
+  <main role="main">
+    <!-- Action bar -->
+    <div class="action-bar">
+      <button class="add-link-btn" id="addLinkBtn" title="Lägg till ny länk">
+        ➕ <span>Lägg till länk</span>
+      </button>
+    </div>
 
     <div class="container" id="buttonContainer" role="list" aria-label="Kontorslänkar">
       <!-- Dynamic buttons will be loaded here -->
     </div>
   </main>
+
+
 
   <!-- Add/Edit Link Modal -->
   <div class="modal" id="linkModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -67,31 +76,22 @@
     </div>
   </div>
 
-    <main role="main">
-    <!-- Action bar -->
-    <div class="action-bar">
-      <button class="add-link-btn" id="addLinkBtn" title="Lägg till ny länk">
-        ➕ <span>Lägg till länk</span>
-      </button>
-    </div>
-
-
   <script type="module" src="kontor.js"></script>
   <script src="../scripts/loadNavbar.js"></script>
-  
+
   <!-- PWA Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
+      window.addEventListener('load', function () {
         navigator.serviceWorker.register('../sw.js')
-          .then(function(registration) {
+          .then(function (registration) {
             console.log('[PWA] Service Worker registered:', registration.scope);
-            
+
             // Check for updates
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
               console.log('[PWA] New Service Worker found');
-              
+
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   console.log('[PWA] Update available');
@@ -103,10 +103,10 @@
               });
             });
           })
-          .catch(function(err) {
+          .catch(function (err) {
             console.error('[PWA] Service Worker registration failed:', err);
           });
-          
+
         // Reload page when new service worker takes control
         let refreshing = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
