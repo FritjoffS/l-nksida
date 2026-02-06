@@ -1,6 +1,6 @@
 // Service Worker för Sollebrunns Järnhandel PWA
-const CACHE_NAME = 'jarnhandel-v2.1.2';
-const CACHE_VERSION = '2.1.2';
+const CACHE_NAME = 'jarnhandel-v2.1.3';
+const CACHE_VERSION = '2.1.3';
 
 // Core files that should always be cached
 const CORE_CACHE = [
@@ -85,7 +85,28 @@ self.addEventListener('fetch', function(event) {
     return;
   }
   
-  // For other requests: Cache First, fallback to Network
+  // For CSS and JS files: Network First (so changes load immediately)
+  if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          if (response.ok) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Network failed, try cache
+          return caches.match(request);
+        })
+    );
+    return;
+  }
+  
+  // For other requests (images, etc): Cache First, fallback to Network
   event.respondWith(
     caches.match(request)
       .then(function(cachedResponse) {
