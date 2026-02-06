@@ -382,7 +382,9 @@ button {
   display: inline-block;
   width: 200px;
   height: 133px;
-  background-size: cover;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
   border: 2px solid black;
   border-radius: 10px;
   cursor: pointer;
