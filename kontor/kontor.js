@@ -258,7 +258,7 @@ async function loadButtons() {
         });
       });
 
-      // Sort alphabetically
+      // Sort alphabetically by buttonid
       linksData.sort((a, b) => a.buttonId.localeCompare(b.buttonId, 'sv'));
 
       // Create buttons
