@@ -2,6 +2,8 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.1.3] Ändrat caching-strategi för CSS/JS till "Network First"
+
 ## [2.1.1] - 25-10-28
 
 ### Test av update-version.bat
