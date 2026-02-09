@@ -1,1 +1,0 @@
-Ändra alla referendser "template" till önskad benämning
