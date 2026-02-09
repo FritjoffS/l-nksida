@@ -1,3 +1,6 @@
+// ES Module - Firebase imports
+import { database, ref, get } from './firebase-config.js';
+
 // Funktion för att kopiera texten
 function copyTextToClipboard(textToCopy) {
     // Använd Clipboard API för att kopiera texten
@@ -33,10 +36,9 @@ function copyTextToClipboard(textToCopy) {
 
 // Function to load buttons dynamically and attach event listeners
 function loadButtons() {
-    const database = firebase.database();
     const container = document.querySelector(".container");
 
-    database.ref("arbetsbeskr").once("value").then(snapshot => {
+    get(ref(database, "arbetsbeskr")).then(snapshot => {
         snapshot.forEach(childSnapshot => {
             const buttonId = childSnapshot.key;
             const textToCopy = childSnapshot.val();
@@ -64,7 +66,5 @@ function loadButtons() {
     });
 }
 
-// Call loadButtons on page load
-window.onload = function () {
-    loadButtons();
-};
+// Export for use from HTML
+window.loadButtons = loadButtons;

@@ -1,6 +1,9 @@
+// ES Module - Firebase imports
+import { auth, database, onAuthStateChanged, signOut, ref, get } from '../scripts/firebase-config.js';
+
 // Function to check if a user is logged in or not
 function checkAuthState() {
-  firebase.auth().onAuthStateChanged(function (user) {
+  onAuthStateChanged(auth, function (user) {
     if (!user) {
       // User is not signed in, redirect to the login page
       window.location.href = "../index/login.html";
@@ -11,8 +14,8 @@ function checkAuthState() {
 }
 
 // Function to log out the user
-function logout() {
-  firebase.auth().signOut().then(function () {
+window.logout = function logout() {
+  signOut(auth).then(function () {
     // Sign-out successful, redirect to login page
     window.location.href = "../index/login.html";
   }).catch(function (error) {
@@ -23,10 +26,9 @@ function logout() {
 
 // Function to load buttons dynamically and attach event listeners
 function loadButtons() {
-  const database = firebase.database();
   const container = document.querySelector(".container");
 
-  database.ref("template").once("value").then(snapshot => {
+  get(ref(database, "template")).then(snapshot => {
     // Collect all children into an array
     const buttonsData = [];
     snapshot.forEach(childSnapshot => {

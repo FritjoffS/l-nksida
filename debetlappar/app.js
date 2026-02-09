@@ -1,5 +1,6 @@
-const db = firebase.database();
-const lastNumberRef = db.ref('debetlappar/lastNumber'); // Firebase reference for lastNumber
+import { database, ref, get, set } from '../scripts/firebase-config.js';
+
+const lastNumberRef = ref(database, 'debetlappar/lastNumber'); // Firebase reference for lastNumber
 
 let lastNumber = 0;
 let pdfDoc = null;
@@ -11,7 +12,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 // Fetch lastNumber from Firebase
 async function fetchLastNumber() {
     try {
-        const snapshot = await lastNumberRef.once('value');
+        const snapshot = await get(lastNumberRef);
         lastNumber = snapshot.exists() ? snapshot.val() : 0;
         console.log('Fetched lastNumber from Firebase:', lastNumber);
     } catch (error) {
@@ -27,7 +28,7 @@ async function fetchLastNumber() {
 // Update lastNumber in Firebase
 async function updateLastNumberInFirebase(num) {
     try {
-        await lastNumberRef.set(num);
+        await set(lastNumberRef, num);
         lastNumber = num;
         console.log('Updated lastNumber in Firebase:', num);
     } catch (error) {

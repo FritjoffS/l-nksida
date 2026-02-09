@@ -6,8 +6,8 @@ Denna migration flyttar produktdatabasen från lokala JavaScript-filer till Fire
 ## Vad som har ändrats
 
 ### 1. Firebase-konfiguration
-- **Fil**: `scripts/firebase-init.js`
-- **Ändring**: Lagt till Firebase Database SDK och initierat database-referens
+- **Fil**: `scripts/firebase-config.js`
+- **Ändring**: Centraliserad Firebase-konfiguration med ES modules (Firebase SDK 10.x)
 
 ### 2. Produktsida
 - **Fil**: `products/products.html`

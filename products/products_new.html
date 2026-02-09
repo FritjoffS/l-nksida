@@ -353,11 +353,6 @@
         }
     </style>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
-    <script src="../scripts/firebase-init.js"></script>
     <script src="../scripts/loadNavbar.js"></script>
 </head>
 
@@ -533,7 +528,9 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { auth, database, onAuthStateChanged, ref, get, set, remove } from '../scripts/firebase-config.js';
+
         let productsData = { categories: [] };
         let isDataLoaded = false;
         let currentEditProduct = null;
@@ -547,7 +544,7 @@
         });
 
         function checkAuthState() {
-            firebase.auth().onAuthStateChanged(function (user) {
+            onAuthStateChanged(auth, function (user) {
                 if (!user) {
                     window.location.href = "../index/login.html";
                 } else {
@@ -559,8 +556,8 @@
 
         async function loadAllData() {
             try {
-                const productsRef = firebase.database().ref('products');
-                const snapshot = await productsRef.once('value');
+                const productsRef = ref(database, 'products');
+                const snapshot = await get(productsRef);
                 const data = snapshot.val();
 
                 if (data) {
@@ -735,8 +732,8 @@
                 };
 
                 // Get current category data
-                const categoryRef = firebase.database().ref(`products/${categoryName}`);
-                const categorySnapshot = await categoryRef.once('value');
+                const categoryRef = ref(database, `products/${categoryName}`);
+                const categorySnapshot = await get(categoryRef);
                 const categoryData = categorySnapshot.val();
 
                 if (!categoryData) {
@@ -750,11 +747,11 @@
 
                 // If editing, remove old product if category changed
                 if (currentEditProduct && currentEditProduct.categoryName !== categoryName) {
-                    const oldCategoryRef = firebase.database().ref(`products/${currentEditProduct.categoryName}`);
-                    const oldSnapshot = await oldCategoryRef.once('value');
+                    const oldCategoryRef = ref(database, `products/${currentEditProduct.categoryName}`);
+                    const oldSnapshot = await get(oldCategoryRef);
                     const oldCategoryData = oldSnapshot.val();
                     oldCategoryData.products = oldCategoryData.products.filter(p => p.productNumber !== currentEditProduct.productNumber);
-                    await oldCategoryRef.set(oldCategoryData);
+                    await set(oldCategoryRef, oldCategoryData);
                 }
 
                 const existingIndex = categoryData.products.findIndex(p => p.productNumber === productNumber);
@@ -767,7 +764,7 @@
                     showStatus('Produkt tillagd!', 'success');
                 }
 
-                await categoryRef.set(categoryData);
+                await set(categoryRef, categoryData);
 
                 closeModal();
                 await loadAllData();
@@ -783,12 +780,12 @@
             }
 
             try {
-                const categoryRef = firebase.database().ref(`products/${categoryName}`);
-                const snapshot = await categoryRef.once('value');
+                const categoryRef = ref(database, `products/${categoryName}`);
+                const snapshot = await get(categoryRef);
                 const categoryData = snapshot.val();
 
                 categoryData.products = categoryData.products.filter(p => p.productNumber !== productNumber);
-                await categoryRef.set(categoryData);
+                await set(categoryRef, categoryData);
 
                 showStatus('Produkt borttagen', 'success');
                 await loadAllData();
@@ -943,13 +940,13 @@
                 if (isEditingCategory && currentCategoryForEdit) {
                     // Editing existing category
                     if (newName !== currentCategoryForEdit) {
-                        const oldCategoryRef = firebase.database().ref(`products/${currentCategoryForEdit}`);
-                        const snapshot = await oldCategoryRef.once('value');
+                        const oldCategoryRef = ref(database, `products/${currentCategoryForEdit}`);
+                        const snapshot = await get(oldCategoryRef);
                         const categoryData = snapshot.val();
 
                         // Check if new name already exists
-                        const newCategoryRef = firebase.database().ref(`products/${newName}`);
-                        const newSnapshot = await newCategoryRef.once('value');
+                        const newCategoryRef = ref(database, `products/${newName}`);
+                        const newSnapshot = await get(newCategoryRef);
                         if (newSnapshot.exists()) {
                             showStatus('Ett fabrikat med detta namn finns redan', 'error');
                             return;
@@ -957,22 +954,22 @@
 
                         // Create with new name and delete old
                         categoryData.name = newName;
-                        await newCategoryRef.set(categoryData);
-                        await oldCategoryRef.remove();
+                        await set(newCategoryRef, categoryData);
+                        await remove(oldCategoryRef);
 
                         showStatus(`Fabrikat ändrat till "${newName}"`, 'success');
                     }
                 } else {
                     // Adding new category
-                    const categoryRef = firebase.database().ref(`products/${newName}`);
-                    const snapshot = await categoryRef.once('value');
+                    const categoryRef = ref(database, `products/${newName}`);
+                    const snapshot = await get(categoryRef);
 
                     if (snapshot.exists()) {
                         showStatus('Fabrikatet finns redan', 'error');
                         return;
                     }
 
-                    await categoryRef.set({
+                    await set(categoryRef, {
                         name: newName,
                         subgroups: [],
                         products: []
@@ -1040,8 +1037,8 @@
             }
 
             try {
-                const categoryRef = firebase.database().ref(`products/${categoryName}`);
-                const snapshot = await categoryRef.once('value');
+                const categoryRef = ref(database, `products/${categoryName}`);
+                const snapshot = await get(categoryRef);
                 const categoryData = snapshot.val();
 
                 if (!categoryData) {
@@ -1094,7 +1091,7 @@
                     showStatus(`Underkategori "${newName}" tillagd!`, 'success');
                 }
 
-                await categoryRef.set(categoryData);
+                await set(categoryRef, categoryData);
                 closeSubcategoryModal();
                 await loadAllData();
 
@@ -1161,8 +1158,8 @@
             }
 
             try {
-                const categoryRef = firebase.database().ref(`products/${categoryName}`);
-                const snapshot = await categoryRef.once('value');
+                const categoryRef = ref(database, `products/${categoryName}`);
+                const snapshot = await get(categoryRef);
                 const categoryData = snapshot.val();
 
                 const subgroup = categoryData.subgroups.find(sg => sg.name === subcategoryName);
@@ -1212,7 +1209,7 @@
                     showStatus(`Undertyp "${newName}" tillagd!`, 'success');
                 }
 
-                await categoryRef.set(categoryData);
+                await set(categoryRef, categoryData);
                 closeSubtypeModal();
                 await loadAllData();
 

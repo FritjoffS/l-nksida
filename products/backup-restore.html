@@ -82,12 +82,6 @@
             color: #0c5460;
         }
     </style>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
-    <script src="../scripts/firebase-init.js"></script>
 </head>
 
 <body>
@@ -120,7 +114,9 @@
         <button onclick="importFromJson()" class="danger">Importera från JSON (Varning: Ersätter all data!)</button>
     </div>
 
-    <script>
+    <script type="module">
+        import { auth, database, onAuthStateChanged, ref, get, set } from '../scripts/firebase-config.js';
+
         let backupData = null;
 
         function addStatus(message, type = 'info') {
@@ -133,7 +129,7 @@
         }
 
         // Check authentication
-        firebase.auth().onAuthStateChanged(function (user) {
+        onAuthStateChanged(auth, function (user) {
             if (!user) {
                 addStatus('Du måste vara inloggad för att använda detta verktyg', 'error');
                 setTimeout(() => {
@@ -142,12 +138,12 @@
             }
         });
 
-        async function createBackup() {
+        window.createBackup = async function createBackup() {
             try {
                 addStatus('Skapar backup...', 'info');
 
-                const productsRef = firebase.database().ref('products');
-                const snapshot = await productsRef.once('value');
+                const productsRef = ref(database, 'products');
+                const snapshot = await get(productsRef);
                 const data = snapshot.val();
 
                 if (data) {
@@ -169,7 +165,7 @@
             }
         }
 
-        function downloadBackup() {
+        window.downloadBackup = function downloadBackup() {
             if (!backupData) {
                 addStatus('Ingen backup att ladda ner. Skapa en backup först.', 'error');
                 return;
@@ -186,7 +182,7 @@
             addStatus('✓ Backup nedladdad!', 'success');
         }
 
-        async function restoreFromFile() {
+        window.restoreFromFile = async function restoreFromFile() {
             const fileInput = document.getElementById('backupFile');
             const file = fileInput.files[0];
 
@@ -201,17 +197,17 @@
 
             try {
                 const fileText = await file.text();
-                const backupData = JSON.parse(fileText);
+                const backupDataParsed = JSON.parse(fileText);
 
-                if (!backupData.data) {
+                if (!backupDataParsed.data) {
                     addStatus('Ogiltig backup-fil format', 'error');
                     return;
                 }
 
                 addStatus('Återställer från backup...', 'info');
 
-                const productsRef = firebase.database().ref('products');
-                await productsRef.set(backupData.data);
+                const productsRef = ref(database, 'products');
+                await set(productsRef, backupDataParsed.data);
 
                 addStatus('✓ Databas återställd från backup!', 'success');
 
@@ -220,12 +216,12 @@
             }
         }
 
-        async function exportToJson() {
+        window.exportToJson = async function exportToJson() {
             try {
                 addStatus('Exporterar data...', 'info');
 
-                const productsRef = firebase.database().ref('products');
-                const snapshot = await productsRef.once('value');
+                const productsRef = ref(database, 'products');
+                const snapshot = await get(productsRef);
                 const data = snapshot.val();
 
                 if (data) {
@@ -245,7 +241,7 @@
             }
         }
 
-        async function importFromJson() {
+        window.importFromJson = async function importFromJson() {
             const jsonText = document.getElementById('jsonData').value.trim();
 
             if (!jsonText) {
@@ -276,8 +272,8 @@
 
                 addStatus('Importerar data...', 'info');
 
-                const productsRef = firebase.database().ref('products');
-                await productsRef.set(dataToImport);
+                const productsRef = ref(database, 'products');
+                await set(productsRef, dataToImport);
 
                 addStatus('✓ Data importerad!', 'success');
 

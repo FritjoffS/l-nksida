@@ -9,44 +9,6 @@
   <link rel="stylesheet" href="../styles/global.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
   <link rel="stylesheet" href="../styles/generic-buttons.css" />
-  <!-- Add Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
-  <script src="../scripts/firebase-init.js"></script>
-
-  <script>
-
-    // Function to check if a user is logged in or not
-    function checkAuthState() {
-      firebase.auth().onAuthStateChanged(function (user) {
-        if (!user) {
-          // User is not signed in, redirect to the login page
-          window.location.href = "../index/login.html";
-        }
-      });
-    }
-
-    // Function to log out the user
-    function logout() {
-      firebase.auth().signOut().then(function () {
-        // Sign-out successful, redirect to login page
-        window.location.href = "../index/login.html";
-      }).catch(function (error) {
-        // Handle errors here
-        console.error("Logout error:", error);
-      });
-    }
-
-
-
-    // Load buttons on page load
-    window.onload = function () {
-      checkAuthState();
-      loadButtons();
-    };
-  </script>
-
 </head>
 
 <body>
@@ -55,8 +17,36 @@
   <div class="container">
   </div>
 
-  <script src="../scripts/aviseringar.js"></script>
-  <script src="../scripts/loadNavbar.js"></script> <!-- Add script to load navbar -->
+  <script type="module">
+    import { auth, onAuthStateChanged, signOut } from '../scripts/firebase-config.js';
+    import '../scripts/aviseringar.js';
+
+    // Function to check if a user is logged in or not
+    function checkAuthState() {
+      onAuthStateChanged(auth, function (user) {
+        if (!user) {
+          // User is not signed in, redirect to the login page
+          window.location.href = "../index/login.html";
+        }
+      });
+    }
+
+    // Function to log out the user
+    window.logout = function logout() {
+      signOut(auth).then(function () {
+        // Sign-out successful, redirect to login page
+        window.location.href = "../index/login.html";
+      }).catch(function (error) {
+        // Handle errors here
+        console.error("Logout error:", error);
+      });
+    };
+
+    // Load on page load
+    checkAuthState();
+    window.loadButtons();
+  </script>
+  <script src="../scripts/loadNavbar.js"></script>
 
 </body>
 
