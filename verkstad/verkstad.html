@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="author" content="Fredrik Söderberg">
   <title>Verkstad</title>
-  
+
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="../manifest.json" />
   <meta name="theme-color" content="#ff6600" />
@@ -18,13 +18,17 @@
   <meta name="application-name" content="Järnhandel" />
   <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
-  
+
   <link rel="stylesheet" href="../styles/global.css">
-  <link rel="stylesheet" href="../styles/search.css">
   <link rel="stylesheet" href="../styles/navbar.css">
-  <link rel="stylesheet" href="../styles/generic-buttons.css">
+  <!-- <link rel="stylesheet" href="../styles/generic-buttons.css"> -->
   <link rel="stylesheet" href="verkstad.css">
 </head>
+
+<!-- Google Analytics -->
+<script type="module" src="../scripts/analytics.js" async></script>
+</head>
+
 
 <body>
   <!-- Loading overlay -->
@@ -36,16 +40,49 @@
   <div id="navbar" role="navigation" aria-label="Huvudnavigering"></div>
 
   <main role="main">
-    <div class="container" id="buttonContainer" role="list" aria-label="Verkstadslänkar"></div>
+    <!-- Action bar -->
+    <div class="action-bar">
+      <button class="add-link-btn" id="addLinkBtn" title="Lägg till ny länk">
+        ➕ <span>Lägg till länk</span>
+      </button>
+    </div>
 
-    <div class="search-bar" role="search">
-      <form action="https://www.google.com/search" method="get" target="_blank" rel="noopener noreferrer">
-        <label for="searchInput" class="sr-only">Sök på Google</label>
-        <input type="text" id="searchInput" name="q" placeholder="Search Google" aria-label="Sökfält för Google">
-        <button class="search-bar button" type="submit" aria-label="Sök">Search</button>
-      </form>
+    <div class="container" id="buttonContainer" role="list" aria-label="Kontorslänkar">
+      <!-- Dynamic buttons will be loaded here -->
     </div>
   </main>
+
+  <!-- Add/Edit Link Modal -->
+  <div class="modal" id="linkModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Lägg till länk</h2>
+        <button class="close-btn" id="closeModalBtn" aria-label="Stäng">&times;</button>
+      </div>
+      <form id="linkForm">
+        <div class="form-group">
+          <label for="linkName">Benämning *</label>
+          <input type="text" id="linkName" required placeholder="T.ex. Fortnox">
+        </div>
+        <div class="form-group">
+          <label for="linkUrl">URL *</label>
+          <input type="url" id="linkUrl" required placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label for="linkImage">Bild-URL</label>
+          <input type="text" id="linkImage" placeholder="https://... eller data:image/...  (valfritt)">
+          <small class="form-hint">Lämna tomt för att visa benämningen som text</small>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelBtn">Avbryt</button>
+          <button type="button" class="btn btn-danger" id="deleteBtn" style="display: none;">Radera</button>
+          <button type="submit" class="btn btn-success">Spara</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
 
   <script type="module" src="verkstad.js"></script>
   <script src="../scripts/loadNavbar.js"></script>
@@ -53,16 +90,16 @@
   <!-- PWA Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
+      window.addEventListener('load', function () {
         navigator.serviceWorker.register('../sw.js')
-          .then(function(registration) {
+          .then(function (registration) {
             console.log('[PWA] Service Worker registered:', registration.scope);
-            
+
             // Check for updates
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
               console.log('[PWA] New Service Worker found');
-              
+
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   console.log('[PWA] Update available');
@@ -74,10 +111,10 @@
               });
             });
           })
-          .catch(function(err) {
+          .catch(function (err) {
             console.error('[PWA] Service Worker registration failed:', err);
           });
-          
+
         // Reload page when new service worker takes control
         let refreshing = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
