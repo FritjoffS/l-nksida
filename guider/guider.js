@@ -11,11 +11,76 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
+// DOM Elements
+let loadingOverlay, guideContainer, guideModal, guideForm, modalTitle;
+let guideNameInput, guideDescriptionInput, guideCategoryInput, guideIdInput;
+let addGuideBtn, closeModalBtn, cancelBtn, deleteBtn, searchInput;
+
+// State
 let allGuides = [];
 let currentEditGuideId = null;
 
+// Initialize DOM elements
+function initDOMElements() {
+    loadingOverlay = document.getElementById('loadingOverlay');
+    guideContainer = document.getElementById('guideContainer');
+    guideModal = document.getElementById('guideModal');
+    guideForm = document.getElementById('guideForm');
+    modalTitle = document.getElementById('modalTitle');
+    guideNameInput = document.getElementById('guideName');
+    guideDescriptionInput = document.getElementById('guideDescription');
+    guideCategoryInput = document.getElementById('guideCategory');
+    guideIdInput = document.getElementById('guideId');
+    addGuideBtn = document.getElementById('addGuideBtn');
+    closeModalBtn = document.getElementById('closeModalBtn');
+    cancelBtn = document.getElementById('cancelBtn');
+    deleteBtn = document.getElementById('deleteBtn');
+    searchInput = document.getElementById('searchInput');
+}
+
+// Show loading state
+function showLoading() {
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'flex';
+    }
+}
+
+// Hide loading state
+function hideLoading() {
+    if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+    }
+}
+
+// Show toast notification (matching verkstad pattern)
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${type === 'error' ? '#f44336' : type === 'success' ? '#4CAF50' : '#2196F3'};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 // Check auth state and load guides
 function checkAuthState() {
+    showLoading();
+    
     onAuthStateChanged(auth, (user) => {
         if (user) {
             console.log("User is signed in, loading guides...");
@@ -24,19 +89,24 @@ function checkAuthState() {
             console.log("User not authenticated, redirecting to login");
             window.location.href = "../index/login.html";
         }
+    }, (error) => {
+        console.error("Auth error:", error);
+        hideLoading();
+        showToast('Autentiseringsfel. Omdirigerar till login...', 'error');
+        setTimeout(() => {
+            window.location.href = "../index/login.html";
+        }, 2000);
     });
 }
 
 // Load guides from Firebase
 async function loadGuides() {
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const guideContainer = document.getElementById('guideContainer');
-    loadingIndicator.style.display = 'block';
-    guideContainer.style.display = 'none';
+    showLoading();
 
     try {
         const guidesRef = ref(database, 'guider');
         const snapshot = await get(guidesRef);
+        
         if (snapshot.exists()) {
             const guidesData = snapshot.val();
             allGuides = Object.keys(guidesData).map(key => ({
@@ -44,26 +114,26 @@ async function loadGuides() {
                 ...guidesData[key]
             }));
             // Sortera guiderna alfabetiskt baserat på displayName
-            allGuides.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''));
+            allGuides.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || '', 'sv'));
             console.log(`${allGuides.length} guides loaded and sorted.`);
         } else {
             allGuides = [];
             console.log("No guides found in database.");
         }
+        
+        hideLoading();
         displayGuides();
     } catch (error) {
         console.error("Error loading guides:", error);
-        loadingIndicator.innerHTML = '<p style="color: red;">Fel vid laddning av guider.</p>';
-    } finally {
-        loadingIndicator.style.display = 'none';
-        guideContainer.style.display = 'grid';
+        hideLoading();
+        showToast('Fel vid laddning av guider.', 'error');
+        showEmptyState('Ett fel uppstod vid laddning');
     }
 }
 
 // Display guides based on current filters
 function displayGuides() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const guideContainer = document.getElementById('guideContainer');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
 
     const filteredGuides = allGuides.filter(guide => {
         const name = guide.displayName?.toLowerCase() || '';
@@ -73,63 +143,121 @@ function displayGuides() {
     });
 
     if (filteredGuides.length === 0) {
-        guideContainer.innerHTML = '<div class="no-results">Inga guider hittades.</div>';
+        showEmptyState(searchTerm ? 'Inga guider matchar sökningen' : null);
         return;
     }
 
     guideContainer.innerHTML = filteredGuides.map(guide => `
-        <div class="product-card" style="position: relative;">
-            <div class="product-actions">
-                <button class="icon-btn edit" onclick='window.openEditGuideModal("${guide.id}")' title="Redigera guide">✏️</button>
-                <button class="icon-btn delete" onclick='window.deleteGuide("${guide.id}")' title="Ta bort guide">🗑️</button>
+        <div class="guide-card" role="listitem">
+            <div class="guide-actions">
+                <button class="icon-btn edit" data-guide-id="${guide.id}" title="Redigera guide">✏️</button>
+                <button class="icon-btn delete" data-guide-id="${guide.id}" title="Ta bort guide">🗑️</button>
             </div>
-            <div class="product-info" onclick="window.location.href='guide.html?guide=${guide.id}'" style="cursor: pointer; padding-top: 40px;">
+            <div class="guide-info" data-guide-id="${guide.id}">
                 <h3>${guide.displayName || 'Namnlös Guide'}</h3>
                 <p>${guide.description || 'Ingen beskrivning.'}</p>
-                ${guide.category ? `<span class="product-category-badge">${guide.category}</span>` : ''}
+                ${guide.category ? `<span class="guide-category">${guide.category}</span>` : ''}
             </div>
         </div>
     `).join('');
+
+    // Attach event listeners to guide cards
+    attachGuideEventListeners();
+}
+
+// Attach event listeners to guide cards
+function attachGuideEventListeners() {
+    // Edit buttons
+    guideContainer.querySelectorAll('.icon-btn.edit').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const guideId = btn.dataset.guideId;
+            openEditGuideModal(guideId);
+        });
+    });
+
+    // Delete buttons
+    guideContainer.querySelectorAll('.icon-btn.delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const guideId = btn.dataset.guideId;
+            deleteGuide(guideId);
+        });
+    });
+
+    // Guide info click (open guide)
+    guideContainer.querySelectorAll('.guide-info').forEach(info => {
+        info.addEventListener('click', () => {
+            const guideId = info.dataset.guideId;
+            window.location.href = `guide.html?guide=${guideId}`;
+        });
+    });
+}
+
+// Show empty state
+function showEmptyState(message = null) {
+    const defaultMessage = 'Inga guider tillgängliga';
+    guideContainer.innerHTML = `
+        <div class="no-results">
+            <div class="empty-icon">📖</div>
+            <h3>${message || defaultMessage}</h3>
+            <p>Klicka på "Lägg till guide" för att skapa din första guide.</p>
+        </div>
+    `;
 }
 
 // Modal handling
-window.openAddGuideModal = () => {
+function openAddGuideModal() {
     currentEditGuideId = null;
-    document.getElementById('modalTitle').textContent = 'Lägg till ny guide';
-    document.getElementById('guideForm').reset();
-    document.getElementById('guideId').value = '';
-    document.getElementById('guideModal').classList.add('active');
-};
+    modalTitle.textContent = 'Lägg till ny guide';
+    guideForm.reset();
+    guideIdInput.value = '';
+    deleteBtn.style.display = 'none';
+    guideModal.classList.add('active');
+    guideNameInput.focus();
+}
 
-window.openEditGuideModal = (guideId) => {
+function openEditGuideModal(guideId) {
     currentEditGuideId = guideId;
     const guide = allGuides.find(g => g.id === guideId);
     if (!guide) return;
 
-    document.getElementById('modalTitle').textContent = 'Redigera guide';
-    document.getElementById('guideId').value = guide.id;
-    document.getElementById('guideName').value = guide.displayName || '';
-    document.getElementById('guideDescription').value = guide.description || '';
-    document.getElementById('guideCategory').value = guide.category || '';
-    document.getElementById('guideModal').classList.add('active');
-};
+    modalTitle.textContent = 'Redigera guide';
+    guideIdInput.value = guide.id;
+    guideNameInput.value = guide.displayName || '';
+    guideDescriptionInput.value = guide.description || '';
+    guideCategoryInput.value = guide.category || '';
+    deleteBtn.style.display = 'block';
+    guideModal.classList.add('active');
+    guideNameInput.focus();
+}
 
-window.closeModal = () => {
-    document.getElementById('guideModal').classList.remove('active');
-};
+function closeModal() {
+    guideModal.classList.remove('active');
+    currentEditGuideId = null;
+    guideForm.reset();
+}
 
 // Save or update guide
-window.saveGuide = async (event) => {
+async function saveGuide(event) {
     event.preventDefault();
-    const guideName = document.getElementById('guideName').value;
-    const guideDescription = document.getElementById('guideDescription').value;
-    const guideCategory = document.getElementById('guideCategory').value;
+    
+    const guideName = guideNameInput.value.trim();
+    const guideDescription = guideDescriptionInput.value.trim();
+    const guideCategory = guideCategoryInput.value.trim();
+
+    if (!guideName) {
+        showToast('Guidenamn krävs', 'error');
+        return;
+    }
 
     const guideData = {
         displayName: guideName,
         description: guideDescription,
         category: guideCategory,
     };
+
+    showLoading();
 
     try {
         let guideRef;
@@ -149,63 +277,94 @@ window.saveGuide = async (event) => {
         }
         
         await set(guideRef, guideData);
-        showStatus(currentEditGuideId ? 'Guide uppdaterad!' : 'Guide tillagd!', 'success');
+        showToast(currentEditGuideId ? 'Guide uppdaterad!' : 'Guide tillagd!', 'success');
         closeModal();
-        loadGuides();
+        await loadGuides();
     } catch (error) {
         console.error("Error saving guide:", error);
-        showStatus('Fel vid sparande av guide.', 'error');
+        hideLoading();
+        showToast('Kunde inte spara guiden', 'error');
     }
-};
+}
 
 // Delete guide
-window.deleteGuide = async (guideId) => {
+async function deleteGuide(guideId) {
     const guide = allGuides.find(g => g.id === guideId);
     if (!guide) return;
 
-    if (confirm(`Är du säker på att du vill ta bort guiden "${guide.displayName || guide.id}"?`)) {
-        try {
-            const guideRef = ref(database, `guider/${guideId}`);
-            await remove(guideRef);
-            showStatus('Guide borttagen!', 'success');
-            loadGuides();
-        } catch (error) {
-            console.error("Error deleting guide:", error);
-            showStatus('Fel vid borttagning av guide.', 'error');
+    if (!confirm(`Är du säker på att du vill ta bort guiden "${guide.displayName || guide.id}"?`)) {
+        return;
+    }
+
+    showLoading();
+
+    try {
+        const guideRef = ref(database, `guider/${guideId}`);
+        await remove(guideRef);
+        showToast('Guide borttagen!', 'success');
+        closeModal();
+        await loadGuides();
+    } catch (error) {
+        console.error("Error deleting guide:", error);
+        hideLoading();
+        showToast('Kunde inte radera guiden', 'error');
+    }
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    // Add guide button
+    if (addGuideBtn) {
+        addGuideBtn.addEventListener('click', () => openAddGuideModal());
+    }
+    
+    // Close modal buttons
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeModal);
+    }
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeModal);
+    }
+    
+    // Form submit
+    if (guideForm) {
+        guideForm.addEventListener('submit', saveGuide);
+    }
+    
+    // Delete button
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            if (currentEditGuideId) {
+                deleteGuide(currentEditGuideId);
+            }
+        });
+    }
+
+    // Search input
+    if (searchInput) {
+        searchInput.addEventListener('input', displayGuides);
+    }
+    
+    // Close modal on overlay click
+    if (guideModal) {
+        guideModal.addEventListener('click', (e) => {
+            if (e.target === guideModal) {
+                closeModal();
+            }
+        });
+    }
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && guideModal && guideModal.classList.contains('active')) {
+            closeModal();
         }
-    }
-};
-
-// Utility to show status messages
-function showStatus(message, type = 'success') {
-    // First, remove any existing status messages to prevent overlap
-    const existingStatus = document.querySelector('.status-message');
-    if (existingStatus) {
-        existingStatus.remove();
-    }
-
-    const statusDiv = document.createElement('div');
-    statusDiv.className = `status-message ${type}`;
-    statusDiv.textContent = message;
-    document.body.appendChild(statusDiv);
-
-    // Animate in
-    setTimeout(() => {
-        statusDiv.style.transform = 'translateX(0)';
-    }, 10);
-
-
-    // Animate out and remove
-    setTimeout(() => {
-        statusDiv.style.transform = 'translateX(400px)';
-        setTimeout(() => {
-            statusDiv.remove();
-        }, 300);
-    }, 3000);
+    });
 }
 
 // Initial setup
 document.addEventListener('DOMContentLoaded', () => {
+    initDOMElements();
+    setupEventListeners();
     checkAuthState();
-    document.getElementById('searchInput').addEventListener('input', displayGuides);
 });
