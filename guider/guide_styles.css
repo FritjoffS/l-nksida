@@ -1,53 +1,757 @@
-body {
-    /* background-image: url("../images/b-m-back.jpg"); */
-    /* background-size: cover; */
-    /* background-repeat: no-repeat; */
-    /* font-family: Arial, Helvetica, sans-serif; */
-    /* margin: 0; */
-}
+/**
+ * Guider-specifik CSS
+ * Kompletterar link-app.css med guider-specifika stilar
+ */
 
-.center-bg {
-    background-color: #f2f2f2;
-    margin: auto;
-    margin-top: 150px;
-    width: 50%;
-    padding: 10px;
-    border: 1px solid #888;
-}
-
-h1 {
-    margin: 20px;
-    text-align: center;
-    font-size: 50px;
-    color: #4d4d4d;
-}
-
-p {
-    margin: 20px;
-    text-align: center;
-    font-size: 20px;
-    color: #4d4d4d;
-}
-
-img {
+/* Action bar specific styles for guider */
+.guider-action-bar {
     display: flex;
-    margin-left: auto;
-    margin-right: auto;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 15px;
 }
 
-section {
-    margin-top: 100px;
+.guider-action-bar .search-container {
+    flex: 1;
+    max-width: 400px;
 }
 
-/* Preserve text formatting and line breaks */
-.guide-step p {
+.guider-action-bar #searchInput {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.guider-action-bar #searchInput:focus {
+    outline: none;
+    border-color: #ff6600;
+    box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+}
+
+/* Guide grid */
+.guide-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Guide card */
+.guide-card {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.guide-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.guide-card .guide-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+}
+
+.guide-card:hover .guide-actions {
+    opacity: 1;
+}
+
+.guide-actions .icon-btn {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.guide-actions .icon-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.guide-actions .icon-btn.edit:hover {
+    background: #ffc107;
+    border-color: #ffc107;
+}
+
+.guide-actions .icon-btn.delete:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.guide-card .guide-info {
+    padding: 25px 20px;
+    cursor: pointer;
+}
+
+.guide-card .guide-info h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1.2em;
+}
+
+.guide-card .guide-info p {
+    margin: 0 0 15px 0;
+    color: #666;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+.guide-card .guide-category {
+    display: inline-block;
+    background: #e9ecef;
+    color: #495057;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+/* Textarea in modal */
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    min-height: 80px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #ff6600;
+    box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+}
+
+/* No results state */
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.no-results .empty-icon {
+    font-size: 60px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.no-results h3 {
+    font-size: 1.3em;
+    margin: 0 0 10px 0;
+    color: #444;
+}
+
+.no-results p {
+    margin: 0;
+    font-size: 1em;
+}
+
+/* ============================================
+   Guide View Page Styles (guide.html)
+   ============================================ */
+
+/* Action bar for guide view */
+.guide-view-action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    gap: 15px;
+}
+
+.back-link {
+    color: #666;
+    text-decoration: none;
+    font-size: 1em;
+    padding: 10px 15px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.back-link:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #333;
+}
+
+/* Guide header */
+.guide-header {
+    text-align: center;
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.guide-header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    color: #333;
+    background-color: white;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+/* Steps container */
+.guide-steps-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Individual step styling */
+.guide-step {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.guide-step:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.guide-step .step-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.guide-step .step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #ff6600;
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 1.2em;
+    flex-shrink: 0;
+}
+
+.guide-step .step-header h2 {
+    margin: 0;
+    font-size: 1.4em;
+    color: #333;
+}
+
+.guide-step .step-content p {
+    margin: 0 0 20px 0;
+    color: #555;
+    line-height: 1.7;
+    font-size: 1.05em;
     white-space: pre-wrap;
     word-wrap: break-word;
-    text-align: center;
 }
 
-/* Specific styling for separator lines */
-.guide-step p:last-child {
+.guide-step .step-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: block;
+    margin: 20px auto 0;
+}
+
+/* Empty state for guide view */
+.guide-steps-container .empty-state {
     text-align: center;
-    white-space: normal;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.guide-steps-container .empty-state .empty-icon {
+    font-size: 60px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.guide-steps-container .empty-state h3 {
+    font-size: 1.3em;
+    margin: 0 0 10px 0;
+    color: #444;
+}
+
+.guide-steps-container .empty-state p {
+    margin: 0;
+    color: #666;
+}
+
+/* ==========================================================================
+   Inline Step Editing Styles
+   ========================================================================== */
+
+/* Edit button in step header */
+.step-edit-btn {
+    margin-left: auto !important;
+    opacity: 0;
+    transition: opacity 0.2s;
+    background: #ffc107;
+    color: #333;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.guide-step:hover .step-edit-btn {
+    opacity: 1;
+}
+
+.step-edit-btn:hover {
+    background: #e6ac00;
+    transform: scale(1.05);
+}
+
+/* Hidden state */
+.hidden {
+    display: none !important;
+}
+
+/* Editing state for step card */
+.guide-step.editing {
+    border: 2px solid #ff6600;
+    box-shadow: 0 6px 20px rgba(255, 102, 0, 0.2);
+}
+
+/* Edit mode container */
+.step-edit-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.step-edit-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.step-edit-header h3 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #333;
+}
+
+/* Edit form */
+.step-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.step-edit-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.step-edit-form .form-group label {
+    font-weight: 600;
+    font-size: 0.9em;
+    color: #333;
+}
+
+.step-edit-form input[type="text"],
+.step-edit-form textarea {
+    padding: 12px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.step-edit-form input[type="text"]:focus,
+.step-edit-form textarea:focus {
+    outline: none;
+    border-color: #ff6600;
+    box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+}
+
+.step-edit-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Image input group with upload button */
+.image-input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.image-input-group input[type="text"] {
+    flex: 1;
+}
+
+.image-input-group .upload-image-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* Image preview */
+.edit-image-preview {
+    max-width: 200px;
+    height: auto;
+    border-radius: 6px;
+    margin-top: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.edit-image-preview-placeholder {
+    width: 200px;
+    height: 100px;
+    background: #f0f0f0;
+    border: 2px dashed #ccc;
+    border-radius: 6px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 0.9em;
+}
+
+/* Step edit actions */
+.step-edit-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+    flex-wrap: wrap;
+}
+
+.step-move-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.step-save-controls {
+    display: flex;
+    gap: 8px;
+}
+
+/* Button styles for edit mode */
+.btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.btn-primary {
+    background: #ff6600;
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #e55a00;
+}
+
+.btn-secondary {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #d0d0d0;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background: #218838;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #c82333;
+}
+
+.btn-icon {
+    background: #f0f0f0;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 16px;
+}
+
+.btn-icon:hover:not(:disabled) {
+    background: #e0e0e0;
+    transform: scale(1.05);
+}
+
+.btn-icon:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Add step section at bottom */
+.add-step-section {
+    display: flex;
+    justify-content: center;
+    padding: 30px 20px;
+    margin-top: 10px;
+}
+
+.add-step-bottom-btn {
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    border: 2px dashed #ff6600;
+    background: rgba(255, 102, 0, 0.05);
+    color: #ff6600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.add-step-bottom-btn:hover {
+    background: #ff6600;
+    color: white;
+    border-style: solid;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+}
+
+/* Responsive adjustments for inline editing */
+@media (max-width: 600px) {
+    .step-edit-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .step-move-controls,
+    .step-save-controls {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .step-edit-btn {
+        opacity: 1;
+    }
+}
+
+/* Modal large variant */
+.modal-large {
+    max-width: 800px !important;
+}
+
+/* Modal actions spread */
+.modal-actions-spread {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-actions-right {
+    display: flex;
+    gap: 10px;
+}
+
+/* Steps editor in modal */
+.steps-editor {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 10px 0;
+}
+
+.step-editor {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid #e9ecef;
+}
+
+.step-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.step-editor-header h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.step-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover:not(:disabled) {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.btn-icon:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-icon.delete-step:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .guider-action-bar {
+        flex-direction: column;
+        padding: 15px;
+    }
+
+    .guider-action-bar .search-container {
+        max-width: none;
+        width: 100%;
+    }
+
+    .guider-action-bar .add-link-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .guide-grid {
+        grid-template-columns: 1fr;
+        padding: 15px;
+    }
+
+    /* Always show actions on mobile */
+    .guide-card .guide-actions {
+        opacity: 1;
+    }
+
+    .guide-view-action-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .guide-view-action-bar .back-link {
+        width: 100%;
+        text-align: center;
+    }
+
+    .guide-view-action-bar .add-link-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .guide-header h1 {
+        font-size: 1.8em;
+    }
+
+    .guide-step {
+        padding: 20px;
+    }
+
+    .guide-step .step-header h2 {
+        font-size: 1.2em;
+    }
+
+    .modal-actions-spread {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-actions-right {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .modal-actions-right .btn {
+        width: 100%;
+        text-align: center;
+    }
 }
