@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Fredrik Söderberg">
+    <title>Guide Administration</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="../manifest.json" />
+    <meta name="theme-color" content="#ff6600" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Järnhandel" />
+    <link rel="apple-touch-icon" href="../logo.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Järnhandel" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
+
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/navbar.css">
+    <link rel="stylesheet" href="../styles/link-app.css">
+    <link rel="stylesheet" href="guide_styles.css">
+    <link rel="stylesheet" href="admin_styles.css">
+
+    <!-- Cloudinary Upload Widget -->
+    <script src="https://upload-widget.cloudinary.com/global/all.js" async></script>
+</head>
+
+<!-- Google Analytics -->
+<script type="module" src="../scripts/analytics.js" async></script>
+
+<body>
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" role="alert" aria-live="polite">
+        <div class="spinner"></div>
+        <p>Laddar...</p>
+    </div>
+
+    <div id="navbar" role="navigation" aria-label="Huvudnavigering"></div>
+
+    <main role="main" class="admin-main">
+        <!-- Header -->
+        <div class="admin-header">
+            <h1>Guide Administration</h1>
+            <p>Hantera guider och deras steg</p>
+        </div>
+
+        <!-- Guide Selector Section -->
+        <section class="admin-section">
+            <h2>Välj Guide</h2>
+            <div class="guide-selector-container">
+                <div class="form-group">
+                    <label for="guideSelector">Guide:</label>
+                    <select id="guideSelector">
+                        <option value="">-- Välj guide --</option>
+                        <option value="newGuide">➕ Skapa ny guide</option>
+                    </select>
+                </div>
+
+                <div id="customGuideSection" class="form-group" style="display: none;">
+                    <label for="customGuideName">Namn på ny guide:</label>
+                    <input type="text" id="customGuideName" placeholder="t.ex. kassaGuide">
+                    <small class="form-hint">Använd camelCase utan mellanslag</small>
+                </div>
+
+                <div id="guideDisplayNameSection" class="guide-display-name-section" style="display: none;">
+                    <div class="form-group">
+                        <label for="guideDisplayName">Visningsnamn:</label>
+                        <input type="text" id="guideDisplayName" placeholder="T.ex. Kassa Guide">
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-success" id="updateNameBtn">Uppdatera namn</button>
+                        <button class="btn btn-danger" id="deleteGuideBtn">🗑️ Ta bort guide</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add New Step Section -->
+        <section class="admin-section">
+            <h2>Lägg till nytt steg</h2>
+            <div class="add-step-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newTitle">Titel *</label>
+                        <input type="text" id="newTitle" placeholder="T.ex. Öppna programmet" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newText">Beskrivning *</label>
+                    <textarea id="newText" rows="4" placeholder="Beskriv vad som ska göras i detta steg..." required></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newImageUrl">Bild-URL (valfritt)</label>
+                        <input type="text" id="newImageUrl" placeholder="https://...">
+                    </div>
+                    <div class="form-group form-group-small">
+                        <label>&nbsp;</label>
+                        <button type="button" class="btn btn-secondary" id="uploadNewImageBtn">📷 Ladda upp</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newAltText">Alt-text för bild (valfritt)</label>
+                    <input type="text" id="newAltText" placeholder="Beskrivning av bilden för tillgänglighet">
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-success" id="addStepBtn">➕ Lägg till steg</button>
+                    <button class="btn btn-secondary" id="clearFormBtn">Rensa</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Steps Grid -->
+        <section class="admin-section">
+            <h2>Sparade steg</h2>
+            <div id="stepsGrid" class="steps-grid">
+                <!-- Steps will be rendered here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Edit Step Modal -->
+    <div class="modal" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="editModalTitle">Redigera steg</h2>
+                <button class="close-btn" id="closeEditModalBtn" aria-label="Stäng">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="editStepId">Steg-ID</label>
+                <input type="text" id="editStepId">
+            </div>
+            
+            <div class="form-group">
+                <label for="editTitle">Titel *</label>
+                <input type="text" id="editTitle" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="editText">Beskrivning *</label>
+                <textarea id="editText" rows="4" required></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editImageUrl">Bild-URL</label>
+                    <input type="text" id="editImageUrl">
+                </div>
+                <div class="form-group form-group-small">
+                    <label>&nbsp;</label>
+                    <button type="button" class="btn btn-secondary" id="uploadEditImageBtn">📷 Ladda upp</button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="editAltText">Alt-text för bild</label>
+                <input type="text" id="editAltText">
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelEditBtn">Avbryt</button>
+                <button class="btn btn-success" id="saveEditBtn">Spara ändringar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="admin.js"></script>
+    <script src="../scripts/loadNavbar.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(function (registration) {
+                        console.log('[PWA] Service Worker registered:', registration.scope);
+
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('[PWA] New Service Worker found');
+
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[PWA] Update available');
+                                    if (confirm('En ny version är tillgänglig! Vill du uppdatera nu?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(function (err) {
+                        console.error('[PWA] Service Worker registration failed:', err);
+                    });
+
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        refreshing = true;
+                        console.log('[PWA] New Service Worker activated, reloading...');
+                        window.location.reload();
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>
