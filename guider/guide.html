@@ -1,306 +1,108 @@
-<!-- Template file -->
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Fredrik Söderberg">
     <title>Guide</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="../manifest.json" />
+    <meta name="theme-color" content="#ff6600" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Järnhandel" />
+    <link rel="apple-touch-icon" href="../logo.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Järnhandel" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
+
     <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/navbar.css">
+    <link rel="stylesheet" href="../styles/link-app.css">
     <link rel="stylesheet" href="guide_styles.css">
-    <link rel="stylesheet" href="../styles/products.css"> <!-- Återanvänder stilar för modal -->
-    <link rel="stylesheet" href="../styles/navbar.css" />
-    
-    <!-- Google Analytics -->
-    <script type="module" src="../scripts/analytics.js"></script>
-    
-     <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
-        import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js";
-        import { firebaseConfig } from '../scripts/firebase-config.js';
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const database = getDatabase(app);
-
-        let currentGuide = null;
-        let guideId = null;
-
-        // Function to check if a user is logged in or not
-        function checkAuthState() {
-            onAuthStateChanged(auth, (user) => {
-                if (!user) {
-                    window.location.href = "../index/login.html";
-                } else {
-                    loadGuideSteps();
-                }
-            });
-        }
-
-        function getUrlParameter(name) {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        }
-
-        // Load guide data from Firebase
-        async function loadGuideSteps() {
-            guideId = getUrlParameter('guide');
-            const stepsContainer = document.getElementById("stepsContainer");
-            const pageTitle = document.getElementById("pageTitle");
-
-            if (!guideId) {
-                stepsContainer.innerHTML = '<p>Ingen guide specificerad.</p>';
-                return;
-            }
-
-            try {
-                const guideRef = ref(database, `guider/${guideId}`);
-                const snapshot = await get(guideRef);
-
-                if (snapshot.exists()) {
-                    currentGuide = snapshot.val();
-                    const displayName = currentGuide.displayName || guideId.replace(/([A-Z])/g, ' $1').trim();
-                    pageTitle.textContent = displayName.toUpperCase();
-                    document.title = displayName;
-
-                    renderGuideSteps();
-                } else {
-                    stepsContainer.innerHTML = `<p>Ingen guide hittades för "${guideId}".</p>`;
-                }
-            } catch (error) {
-                console.error("Error loading guide:", error);
-                stepsContainer.innerHTML = `<p>Fel vid laddning av guide.</p>`;
-            }
-        }
-
-        // Render guide steps on the main page
-        function renderGuideSteps() {
-            const stepsContainer = document.getElementById("stepsContainer");
-            stepsContainer.innerHTML = "";
-
-            if (currentGuide && currentGuide.steps) {
-                // Konvertera steps från objekt till array om det behövs
-                let stepsArray = [];
-                if (Array.isArray(currentGuide.steps)) {
-                    stepsArray = currentGuide.steps;
-                } else {
-                    // Gamla guider har steps som ett objekt, sortera dem naturligt
-                    const keys = Object.keys(currentGuide.steps).sort((a, b) => {
-                        const numA = parseInt(a.match(/\d+/));
-                        const numB = parseInt(b.match(/\d+/));
-                        return numA - numB;
-                    });
-                    stepsArray = keys.map(key => currentGuide.steps[key]);
-                }
-
-                if (stepsArray.length > 0) {
-                    stepsArray.forEach((step, index) => {
-                        const section = document.createElement("section");
-                        section.className = "guide-step";
-                        
-                        // Stöd både 'title' och inget titel-fält
-                        if (step.title) {
-                            let sectionContent = `<h2>Steg ${index + 1}: ${step.title}</h2>`;
-                        }
-                        
-                        // Använd 'text' (gammalt fält) eller 'content' (nytt fält)
-                        const textContent = step.text || step.content || '';
-                        const formattedContent = textContent.replace(/\n/g, '<br>');
-                        section.innerHTML = `<p style="white-space: pre-wrap;">${formattedContent}</p>`;
-                        
-                        if (step.imageUrl) {
-                            section.innerHTML += `<img src="${step.imageUrl}" alt="${step.altText || step.title || ''}" loading="lazy">`;
-                        }
-                        
-                        section.innerHTML += `<p>------------------------------------------------------------------------------------------</p>`;
-                        
-                        stepsContainer.appendChild(section);
-                    });
-                } else {
-                    stepsContainer.innerHTML = '<p>Denna guide har inga steg än.</p>';
-                }
-            } else {
-                stepsContainer.innerHTML = '<p>Denna guide har inga steg än.</p>';
-            }
-        }
-
-        // --- MODAL LOGIC ---
-
-        window.openEditModal = () => {
-            if (!currentGuide) return;
-            
-            document.getElementById('editModalTitle').textContent = `Redigera: ${currentGuide.displayName}`;
-            renderModalSteps();
-            document.getElementById('editGuideModal').classList.add('active');
-        };
-
-        window.closeEditModal = () => {
-            document.getElementById('editGuideModal').classList.remove('active');
-        };
-
-        function renderModalSteps() {
-            const container = document.getElementById('steps-editor-container');
-            container.innerHTML = '';
-
-            // Konvertera steps från objekt till array om det behövs
-            if (!currentGuide.steps) {
-                currentGuide.steps = [];
-            } else if (!Array.isArray(currentGuide.steps)) {
-                // Gamla guider har steps som ett objekt, konvertera till array
-                const keys = Object.keys(currentGuide.steps).sort((a, b) => {
-                    const numA = parseInt(a.match(/\d+/));
-                    const numB = parseInt(b.match(/\d+/));
-                    return numA - numB;
-                });
-                currentGuide.steps = keys.map(key => currentGuide.steps[key]);
-            }
-
-            currentGuide.steps.forEach((step, index) => {
-                const stepElement = document.createElement('div');
-                stepElement.className = 'step-editor';
-                stepElement.dataset.index = index;
-
-                // Använd 'text' eller 'content' beroende på vad som finns
-                const textContent = step.text || step.content || '';
-                
-                stepElement.innerHTML = `
-                    <div class="step-header">
-                        <h4>Steg ${index + 1}</h4>
-                        <div class="step-controls">
-                            <button onclick="moveStep(${index}, -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
-                            <button onclick="moveStep(${index}, 1)" ${index === currentGuide.steps.length - 1 ? 'disabled' : ''}>▼</button>
-                            <button class="delete-step-btn" onclick="deleteStep(${index})">Ta bort</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Titel (valfritt)</label>
-                        <input type="text" value="${step.title || ''}" oninput="updateStep(${index}, 'title', this.value)">
-                    </div>
-                    <div class="form-group">
-                        <label>Innehåll</label>
-                        <textarea rows="6" oninput="updateStep(${index}, 'text', this.value)">${textContent}</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Bild-URL</label>
-                        <input type="text" value="${step.imageUrl || ''}" oninput="updateStep(${index}, 'imageUrl', this.value)">
-                    </div>
-                    <div class="form-group">
-                        <label>Alt-text för bild (valfritt)</label>
-                        <input type="text" value="${step.altText || ''}" oninput="updateStep(${index}, 'altText', this.value)">
-                    </div>
-                `;
-                container.appendChild(stepElement);
-            });
-        }
-
-        window.updateStep = (index, field, value) => {
-            currentGuide.steps[index][field] = value;
-        };
-
-        window.addStep = () => {
-            // Se till att steps är en array
-            if (!Array.isArray(currentGuide.steps)) {
-                currentGuide.steps = [];
-            }
-            currentGuide.steps.push({ title: '', text: '', imageUrl: '', altText: '' });
-            renderModalSteps();
-        };
-
-        window.deleteStep = (index) => {
-            if (confirm('Är du säker på att du vill ta bort detta steg?')) {
-                currentGuide.steps.splice(index, 1);
-                renderModalSteps();
-            }
-        };
-
-        window.moveStep = (index, direction) => {
-            const newIndex = index + direction;
-            if (newIndex < 0 || newIndex >= currentGuide.steps.length) return;
-
-            const [movedStep] = currentGuide.steps.splice(index, 1);
-            currentGuide.steps.splice(newIndex, 0, movedStep);
-            renderModalSteps();
-        };
-
-        window.saveGuideChanges = async () => {
-            try {
-                const guideRef = ref(database, `guider/${guideId}`);
-                await set(guideRef, currentGuide);
-                showStatus('Guiden har sparats!', 'success');
-                closeEditModal();
-                renderGuideSteps(); // Uppdatera huvudsidan
-            } catch (error) {
-                console.error('Error saving guide:', error);
-                showStatus('Kunde inte spara guiden.', 'error');
-            }
-        };
-
-        function showStatus(message, type = 'success') {
-            const statusDiv = document.createElement('div');
-            statusDiv.className = `status-message ${type}`;
-            statusDiv.textContent = message;
-            document.body.appendChild(statusDiv);
-            setTimeout(() => statusDiv.remove(), 3000);
-        }
-
-        // Initial load
-        window.onload = checkAuthState;
-    </script>
+    <!-- Cloudinary Upload Widget -->
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 </head>
 
+<!-- Google Analytics -->
+<script type="module" src="../scripts/analytics.js" async></script>
+
 <body>
-
-    <div id="navbar"></div>
-
-    <main>
-        <section class="center-bg">
-
-            <h1 id="pageTitle">GUIDE</h1>
-
-            <div class="guide-actions">
-                <button onclick="window.location.href='guider.html'" class="btn btn-secondary">
-                    ← Tillbaka till Guider
-                </button>
-                <button onclick="openEditModal()" class="btn btn-primary">
-                    ✏️ Redigera Guide
-                </button>
-            </div>
-
-            <div id="stepsContainer">
-                <!-- Dynamiskt innehåll laddas här -->
-            </div>
-
-        </section>
-    </main>
-
-    <!-- Edit Guide Modal -->
-    <div class="modal" id="editGuideModal">
-        <div class="modal-content" style="max-width: 800px;">
-            <div class="modal-header">
-                <h2 id="editModalTitle">Redigera Guide</h2>
-                <button class="close-btn" onclick="closeEditModal()">&times;</button>
-            </div>
-            <div id="steps-editor-container">
-                <!-- Redigerbara steg renderas här -->
-            </div>
-            <div class="modal-actions" style="justify-content: space-between;">
-                <button class="btn btn-success" onclick="addStep()">➕ Lägg till steg</button>
-                <div>
-                    <button class="btn btn-secondary" onclick="closeEditModal()">Avbryt</button>
-                    <button class="btn btn-success" onclick="saveGuideChanges()">Spara ändringar</button>
-                </div>
-            </div>
-        </div>
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" role="alert" aria-live="polite">
+        <div class="spinner"></div>
+        <p>Laddar guide...</p>
     </div>
 
+    <div id="navbar" role="navigation" aria-label="Huvudnavigering"></div>
+
+    <main role="main">
+        <!-- Breadcrumb / action bar -->
+        <div class="action-bar guide-view-action-bar">
+            <a href="guider.html" class="back-link">
+                ← Tillbaka till Guider
+            </a>
+            <button class="add-link-btn" id="addStepBtn" title="Lägg till nytt steg">
+                ➕ <span>Lägg till steg</span>
+            </button>
+        </div>
+
+        <!-- Guide header -->
+        <div class="guide-header">
+            <h1 id="pageTitle">Guide</h1>
+        </div>
+
+        <!-- Steps container -->
+        <div id="stepsContainer" class="guide-steps-container" role="list" aria-label="Guidesteg">
+            <!-- Dynamic content loaded here -->
+        </div>
+    </main>
+
+    <script type="module" src="guide-view.js"></script>
     <script src="../scripts/loadNavbar.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(function (registration) {
+                        console.log('[PWA] Service Worker registered:', registration.scope);
+
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('[PWA] New Service Worker found');
+
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[PWA] Update available');
+                                    if (confirm('En ny version är tillgänglig! Vill du uppdatera nu?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(function (err) {
+                        console.error('[PWA] Service Worker registration failed:', err);
+                    });
+
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        refreshing = true;
+                        console.log('[PWA] New Service Worker activated, reloading...');
+                        window.location.reload();
+                    }
+                });
+            });
+        }
+    </script>
 
 </body>
 
