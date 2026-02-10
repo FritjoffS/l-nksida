@@ -1,9 +1,10 @@
+
 {
   "name": "Sollebrunns Järnhandel",
   "short_name": "Järnhandel",
   "description": "Länksida för Sollebrunns Järnhandel - Verkstad, Kontor, Guider och mer",
-  "version": "2.1.4",
-  "version_name": "2.1.4",
+  "version": "2.1.5",
+  "version_name": "2.1.5",
   "start_url": "/l-nksida/index/index.html",
   "scope": "/l-nksida/",
   "display": "standalone",
