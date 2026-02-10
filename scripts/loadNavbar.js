@@ -17,7 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
         navbarContainer.innerHTML = html;
         buildNavbar();
         setupDropdownListeners();
-        checkForAdminPage();
         console.log("Navbar loaded successfully.");
       })
       .catch(error => {
@@ -47,12 +46,7 @@ function buildNavbar() {
     menu.appendChild(createDropdown(category));
   });
 
-  // Lägg till admin-placeholder och logout
-  const adminPlaceholder = document.createElement('li');
-  adminPlaceholder.id = 'admin-link-placeholder';
-  adminPlaceholder.setAttribute('role', 'none');
-  menu.appendChild(adminPlaceholder);
-
+  // Lägg till logout-knapp
   const logoutLi = document.createElement('li');
   logoutLi.setAttribute('role', 'none');
   logoutLi.innerHTML = `
@@ -146,32 +140,3 @@ function setupDropdownListeners() {
   });
 }
 
-/**
- * Kontrollerar om admin.html finns och lägger till länk
- */
-function checkForAdminPage() {
-  const currentPath = window.location.pathname;
-  const adminPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/admin.html';
-
-  fetch(adminPath, { method: 'HEAD' })
-    .then(response => {
-      if (response.ok) {
-        const adminLink = document.createElement('li');
-        adminLink.setAttribute('role', 'none');
-        adminLink.innerHTML = `
-          <a href="${adminPath}" role="menuitem" aria-label="Gå till Admin">
-            <img src="https://res.cloudinary.com/dmtfxmepd/image/upload/v1770640786/office_bs0iwl.png" alt="" 
-              style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
-            <br>Admin
-          </a>
-        `;
-        const placeholder = document.getElementById('admin-link-placeholder');
-        if (placeholder) {
-          placeholder.replaceWith(adminLink);
-        }
-      }
-    })
-    .catch(error => {
-      console.error('Error checking for admin.html:', error);
-    });
-}
