@@ -3,25 +3,31 @@ nav {
     position: fixed;
     top: 0;
     width: 100%;
-    z-index: 1000;
+    z-index: 9999;
   }
   
   .navbar {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow: visible;
     display: flex; /* Grundläggande flexbox */
     flex-wrap: wrap;
+    align-items: stretch; /* Säkerställ att alla barn har samma höjd */
   }
   
   .navbar li {
-    display: block; /* Flexbox-kompatibel */
+    display: flex; /* Flexbox för att centrera innehåll */
+    align-items: center;
   }
   
-    li {
-      margin: 10px 0;
-    }
+  .navbar > li > a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
   
   .navbar a {
     display: block;
@@ -133,6 +139,130 @@ nav {
   .navbar a {
     padding: 1.5rem 2rem;
     font-size: 1.2em;
+  }
+}
+
+/* ========================================
+   DROPDOWN MENYER
+   ======================================== */
+
+/* Dropdown container */
+.nav-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Dropdown-knapp */
+.nav-dropdown > .dropdown-toggle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  padding: 1rem 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  font-size: inherit;
+  height: 100%;
+}
+
+.nav-dropdown > .dropdown-toggle:hover {
+  background-color: #555;
+}
+
+/* Dropdown-pil */
+.dropdown-arrow {
+  font-size: 0.7em;
+  margin-left: 4px;
+}
+
+/* Dropdown-innehåll (dolt som standard) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #222;
+  min-width: 180px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.4);
+  z-index: 10000;
+  border-radius: 0 0 4px 4px;
+  left: 0;
+  top: 100%;
+}
+
+/* Länkar i dropdown */
+.dropdown-content a {
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.dropdown-content a:hover {
+  background-color: #444;
+}
+
+.dropdown-content a img {
+  width: 16px;
+  height: 16px;
+  filter: invert(1);
+}
+
+/* Visa dropdown vid hover (desktop) */
+@media (hover: hover) {
+  .nav-dropdown:hover .dropdown-content {
+    display: block;
+  }
+}
+
+/* Visa dropdown när den är aktiv (mobil/touch) */
+.nav-dropdown.active .dropdown-content {
+  display: block;
+}
+
+/* Navbar-länk stil för enkelhet */
+.navbar a,
+.navbar .dropdown-toggle {
+  color: white;
+}
+
+.navbar li img {
+  width: 16px;
+  height: 16px;
+  filter: invert(1);
+}
+
+/* ========================================
+   RESPONSIV DROPDOWN
+   ======================================== */
+
+/* Mobil dropdown */
+@media screen and (max-width: 767px) {
+  .dropdown-content {
+    position: static;
+    box-shadow: none;
+    background-color: #333;
+    width: 100%;
+  }
+  
+  .dropdown-content a {
+    padding: 10px 20px;
+    font-size: 0.85em;
+  }
+  
+  .nav-dropdown {
+    width: 100%;
+  }
+  
+  .nav-dropdown > .dropdown-toggle {
+    width: 100%;
+    text-align: center;
   }
 }
 
