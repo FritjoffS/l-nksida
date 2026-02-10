@@ -2,6 +2,15 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.2.0] 26-02-10
+
+### Nya funktionaliteter i Guider
+
+## Nya funktioner
+
+# Adminsidan borttagen
+# Redigera / skapa guider i visningsläget
+
 ## [2.1.6] - 26-02-10
 
 # En gemensam JavaScript-modul (scripts/link-app.js) med all logik
