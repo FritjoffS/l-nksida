@@ -2,6 +2,12 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.1.6] - 26-02-10
+
+# En gemensam JavaScript-modul (scripts/link-app.js) med all logik
+# En gemensam CSS-fil (styles/link-app.css)
+# Minimala sidor som bara konfigurerar namn och databasreferens
+
 ## [2.1.5] - 26-02-10
 
 ### Arbetsbeskrivningar-appen har nu samma intuitiva funktionalitet som aviseringar-appen:
