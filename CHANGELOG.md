@@ -2,6 +2,23 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.1.4] - 26-02-10
+
+### Aviseringar-appen har nu samma intuitiva funktionalitet som kontor-appen:
+
+## Nya funktioner:
+
+# Loading overlay med spinner vid laddning
+# Toast-notifikationer för feedback (kopierat, sparat, raderat, fel)
+# Action bar med "Lägg till avisering"-knapp
+# Modal för att lägga till/redigera/radera aviseringar
+# Redigeringsknapp (✏️) som visas vid hover på varje knapp
+# Empty state när inga aviseringar finns
+# Modern stil med animationer och responsiv design
+# Tangentbordsnavigering (Escape stänger modalen)
+# Alfabetisk sortering av aviseringar
+# PWA-stöd med Service Worker-registrering
+
 ## [2.1.3] Ändrat caching-strategi för CSS/JS till "Network First"
 
 ## [2.1.1] - 25-10-28
