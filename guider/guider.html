@@ -3,59 +3,78 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Fredrik Söderberg">
     <title>Guider</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="../manifest.json" />
+    <meta name="theme-color" content="#ff6600" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Järnhandel" />
+    <link rel="apple-touch-icon" href="../logo.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Järnhandel" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
+
     <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/navbar.css">
+    <link rel="stylesheet" href="../styles/link-app.css">
     <link rel="stylesheet" href="guide_styles.css">
-    <link rel="stylesheet" href="../styles/products.css"> <!-- Återanvänder produktstilar -->
-
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
-    <script src="../scripts/firebase-config.js"></script>
-
 </head>
 
+<!-- Google Analytics -->
+<script type="module" src="../scripts/analytics.js" async></script>
+
 <body>
-
-    <div id="navbar"></div>
-
-    <div class="filter-section">
-        <input type="text" id="searchInput" placeholder="Sök efter guide...">
-        <button class="add-product-btn" onclick="openAddGuideModal()" title="Lägg till ny guide">
-            ➕ Lägg till guide
-        </button>
-    </div>
-
-    <div id="guideContainer" class="product-grid"></div>
-
-    <div id="loadingIndicator" style="text-align: center; padding: 20px;">
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" role="alert" aria-live="polite">
+        <div class="spinner"></div>
         <p>Laddar guider...</p>
     </div>
 
+    <div id="navbar" role="navigation" aria-label="Huvudnavigering"></div>
+
+    <main role="main">
+        <!-- Action bar with search and add button -->
+        <div class="action-bar guider-action-bar">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Sök efter guide..." aria-label="Sök guide">
+            </div>
+            <button class="add-link-btn" id="addGuideBtn" title="Lägg till ny guide">
+                ➕ <span>Lägg till guide</span>
+            </button>
+        </div>
+
+        <div id="guideContainer" class="guide-grid" role="list" aria-label="Guider"></div>
+    </main>
+
     <!-- Add/Edit Guide Modal -->
-    <div class="modal" id="guideModal">
+    <div class="modal" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modalTitle">Lägg till ny guide</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+                <button class="close-btn" id="closeModalBtn" aria-label="Stäng">&times;</button>
             </div>
-            <form id="guideForm" onsubmit="saveGuide(event)">
+            <form id="guideForm">
                 <input type="hidden" id="guideId">
                 <div class="form-group">
                     <label for="guideName">Namn *</label>
-                    <input type="text" id="guideName" required>
+                    <input type="text" id="guideName" required placeholder="T.ex. Kassaguide">
                 </div>
                 <div class="form-group">
                     <label for="guideDescription">Beskrivning</label>
-                    <textarea id="guideDescription"></textarea>
+                    <textarea id="guideDescription" placeholder="Kort beskrivning av guiden"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="guideCategory">Kategori</label>
                     <input type="text" id="guideCategory" placeholder="T.ex. Verkstad, Kassa">
                 </div>
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Avbryt</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Avbryt</button>
+                    <button type="button" class="btn btn-danger" id="deleteBtn" style="display: none;">Radera</button>
                     <button type="submit" class="btn btn-success">Spara</button>
                 </div>
             </form>
@@ -64,6 +83,47 @@
 
     <script type="module" src="guider.js"></script>
     <script src="../scripts/loadNavbar.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(function (registration) {
+                        console.log('[PWA] Service Worker registered:', registration.scope);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('[PWA] New Service Worker found');
+
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[PWA] Update available');
+                                    if (confirm('En ny version är tillgänglig! Vill du uppdatera nu?')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(function (err) {
+                        console.error('[PWA] Service Worker registration failed:', err);
+                    });
+
+                // Reload page when new service worker takes control
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        refreshing = true;
+                        console.log('[PWA] New Service Worker activated, reloading...');
+                        window.location.reload();
+                    }
+                });
+            });
+        }
+    </script>
 </body>
 
 </html>
