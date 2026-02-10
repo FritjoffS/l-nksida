@@ -4,50 +4,117 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta author="Name" content="Fredrik Söderberg" />
+  <meta name="author" content="Fredrik Söderberg" />
   <title>Aviseringar</title>
+
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#ff6600" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Järnhandel" />
+  <link rel="apple-touch-icon" href="../logo.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Järnhandel" />
+  <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
+
   <link rel="stylesheet" href="../styles/global.css" />
   <link rel="stylesheet" href="../styles/navbar.css" />
-  <link rel="stylesheet" href="../styles/generic-buttons.css" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Google Analytics -->
+  <script type="module" src="../scripts/analytics.js" async></script>
 </head>
 
 <body>
-  <div id="navbar"></div> <!-- Placeholder for the navbar -->
-  
-  <div class="container">
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" role="alert" aria-live="polite">
+    <div class="spinner"></div>
+    <p>Laddar aviseringar...</p>
   </div>
 
-  <script type="module">
-    import { auth, onAuthStateChanged, signOut } from '../scripts/firebase-config.js';
-    import '../aviseringar/aviseringar.js';
+  <div id="navbar" role="navigation" aria-label="Huvudnavigering"></div>
 
-    // Function to check if a user is logged in or not
-    function checkAuthState() {
-      onAuthStateChanged(auth, function (user) {
-        if (!user) {
-          // User is not signed in, redirect to the login page
-          window.location.href = "../index/login.html";
-        }
-      });
-    }
+  <main role="main">
+    <!-- Action bar -->
+    <div class="action-bar">
+      <button class="add-btn" id="addBtn" title="Lägg till ny avisering">
+        ➕ <span>Lägg till avisering</span>
+      </button>
+    </div>
 
-    // Function to log out the user
-    window.logout = function logout() {
-      signOut(auth).then(function () {
-        // Sign-out successful, redirect to login page
-        window.location.href = "../index/login.html";
-      }).catch(function (error) {
-        // Handle errors here
-        console.error("Logout error:", error);
-      });
-    };
+    <div class="container" id="buttonContainer" role="list" aria-label="Aviseringar">
+      <!-- Dynamic buttons will be loaded here -->
+    </div>
+  </main>
 
-    // Load on page load
-    checkAuthState();
-    window.loadButtons();
-  </script>
+  <!-- Add/Edit Modal -->
+  <div class="modal" id="aviseringModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Lägg till avisering</h2>
+        <button class="close-btn" id="closeModalBtn" aria-label="Stäng">&times;</button>
+      </div>
+      <form id="aviseringForm">
+        <div class="form-group">
+          <label for="aviseringName">Benämning *</label>
+          <input type="text" id="aviseringName" required placeholder="T.ex. Standardavisering">
+        </div>
+        <div class="form-group">
+          <label for="aviseringText">Text att kopiera *</label>
+          <textarea id="aviseringText" required placeholder="Skriv texten som ska kopieras..." rows="5"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelBtn">Avbryt</button>
+          <button type="button" class="btn btn-danger" id="deleteBtn" style="display: none;">Radera</button>
+          <button type="submit" class="btn btn-success">Spara</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="aviseringar.js"></script>
   <script src="../scripts/loadNavbar.js"></script>
 
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('../sw.js')
+          .then(function (registration) {
+            console.log('[PWA] Service Worker registered:', registration.scope);
+
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              console.log('[PWA] New Service Worker found');
+
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('[PWA] Update available');
+                  if (confirm('En ny version är tillgänglig! Vill du uppdatera nu?')) {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                  }
+                }
+              });
+            });
+          })
+          .catch(function (err) {
+            console.error('[PWA] Service Worker registration failed:', err);
+          });
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log('[PWA] New Service Worker activated, reloading...');
+            window.location.reload();
+          }
+        });
+      });
+    }
+  </script>
 </body>
 
 </html>
