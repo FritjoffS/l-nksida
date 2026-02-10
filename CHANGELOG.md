@@ -2,6 +2,24 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.1.5] - 26-02-10
+
+### Arbetsbeskrivningar-appen har nu samma intuitiva funktionalitet som aviseringar-appen:
+
+## Nya funktioner:
+
+# Loading overlay med spinner vid laddning
+# Toast-notifikationer för feedback (kopierat, sparat, raderat, fel)
+# Action bar med "Lägg till arbetsbeskrivning"-knapp
+# Modal för att lägga till/redigera/radera arbetsbeskrivningar
+# Redigeringsknapp (✏️) som visas vid hover på varje knapp
+# Empty state när inga arbetsbeskrivningar finns
+# Modern stil med grön gradient på knapparna och animationer
+# Tangentbordsnavigering (Escape stänger modalen)
+# Alfabetisk sortering av arbetsbeskrivningar
+# PWA-stöd med Service Worker-registrering
+# Responsiv design för mobila enheter
+
 ## [2.1.4] - 26-02-10
 
 ### Aviseringar-appen har nu samma intuitiva funktionalitet som kontor-appen:
