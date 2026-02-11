@@ -2,6 +2,13 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.2.0.1] 26-02-11
+
+## Nya sidor
+
+# Ny sida Hushåll
+# Ny sida Färg & Bygg
+
 ## [2.2.0] 26-02-10
 
 ### Nya funktionaliteter i Guider
