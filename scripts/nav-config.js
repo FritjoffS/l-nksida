@@ -122,8 +122,8 @@ const NAV_CONFIG = {
       ]
     },
     {
-      id: 'verktyg',
-      label: 'Verktyg',
+      id: 'appar',
+      label: 'Appar',
       icon: 'https://res.cloudinary.com/dmtfxmepd/image/upload/v1770640797/skylt_anthbc.png',
       links: [
         {
