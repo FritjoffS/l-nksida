@@ -34,6 +34,12 @@ const NAV_CONFIG = {
           icon: 'https://res.cloudinary.com/dmtfxmepd/image/upload/v1770641642/store_8771944_laxxci.png'
         },
         {
+          id: 'fargBygg',
+          label: 'Färg & Bygg',
+          href: '../fargBygg/fargBygg.html',
+          icon: 'https://res.cloudinary.com/dmtfxmepd/image/upload/v1770641642/store_8771944_laxxci.png'
+        },
+        {
           id: 'presentkort',
           label: 'Presentkort',
           href: '../presentkort/presentkort.html',
