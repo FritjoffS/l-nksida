@@ -28,6 +28,12 @@ const NAV_CONFIG = {
           icon: 'https://res.cloudinary.com/dmtfxmepd/image/upload/v1770641642/store_8771944_laxxci.png'
         },
         {
+          id: 'hushall',
+          label: 'Hushåll',
+          href: '../hushall/hushall.html',
+          icon: 'https://res.cloudinary.com/dmtfxmepd/image/upload/v1770641642/store_8771944_laxxci.png'
+        },
+        {
           id: 'presentkort',
           label: 'Presentkort',
           href: '../presentkort/presentkort.html',
