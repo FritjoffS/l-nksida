@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="Fredrik Söderberg" />
+  <title>Hushåll</title>
+
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#ff6600" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Järnhandel" />
+  <link rel="apple-touch-icon" href="../logo.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Järnhandel" />
+  <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
+
+  <link rel="stylesheet" href="../styles/global.css" />
+  <link rel="stylesheet" href="../styles/navbar.css" />
+  <link rel="stylesheet" href="../styles/link-app.css" />
+
+  <!-- Google Analytics -->
+  <script type="module" src="../scripts/analytics.js" async></script>
+</head>
+
+<body>
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" role="alert" aria-live="polite">
+    <div class="spinner"></div>
+    <p>Laddar Hushåll...</p>
+  </div>
+
+  <div id="navbar" role="navigation" aria-label="Huvudnavigering"></div>
+
+  <main role="main">
+    <!-- Action bar -->
+    <div class="action-bar">
+      <button class="add-link-btn" id="addLinkBtn" title="Lägg till ny länk">
+        ➕ <span>Lägg till länk</span>
+      </button>
+    </div>
+
+    <div class="container" id="buttonContainer" role="list" aria-label="Hushåll">
+      <!-- Dynamic buttons will be loaded here -->
+    </div>
+  </main>
+
+  <!-- Add/Edit Link Modal -->
+  <div class="modal" id="linkModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Lägg till länk</h2>
+        <button class="close-btn" id="closeModalBtn" aria-label="Stäng">&times;</button>
+      </div>
+      <form id="linkForm">
+        <div class="form-group">
+          <label for="linkName">Benämning *</label>
+          <input type="text" id="linkName" required placeholder="T.ex. Fortnox">
+        </div>
+        <div class="form-group">
+          <label for="linkUrl">URL *</label>
+          <input type="url" id="linkUrl" required placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label for="linkImage">Bild-URL</label>
+          <input type="text" id="linkImage" placeholder="https://... eller data:image/...  (valfritt)">
+          <small class="form-hint">Lämna tomt för att visa benämningen som text</small>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelBtn">Avbryt</button>
+          <button type="button" class="btn btn-danger" id="deleteBtn" style="display: none;">Radera</button>
+          <button type="submit" class="btn btn-success">Spara</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="hushall.js"></script>
+  <script src="../scripts/loadNavbar.js"></script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('../sw.js')
+          .then(function (registration) {
+            console.log('[PWA] Service Worker registered:', registration.scope);
+
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              console.log('[PWA] New Service Worker found');
+
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('[PWA] Update available');
+                  if (confirm('En ny version är tillgänglig! Vill du uppdatera nu?')) {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                  }
+                }
+              });
+            });
+          })
+          .catch(function (err) {
+            console.error('[PWA] Service Worker registration failed:', err);
+          });
+
+        // Reload page when new service worker takes control
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log('[PWA] New Service Worker activated, reloading...');
+            window.location.reload();
+          }
+        });
+      });
+    }
+  </script>
+</body>
+
+</html>
