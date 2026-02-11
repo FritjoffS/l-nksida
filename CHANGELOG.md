@@ -2,6 +2,12 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.2.0.11] 26-02-11
+
+## Ny sida
+
+# Verktyg
+
 ## [2.2.0.1] 26-02-11
 
 ## Nya sidor
