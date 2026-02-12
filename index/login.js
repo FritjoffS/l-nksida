@@ -256,8 +256,10 @@ togglePasswordButton.addEventListener('click', () => {
 function checkAuthState() {
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      // User is signed in, redirect to homepage
-      window.location.href = 'index.html';
+      // User is signed in, redirect to saved URL or homepage
+      const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+      sessionStorage.removeItem('redirectAfterLogin');
+      window.location.href = redirectUrl || 'index.html';
     }
   });
 }
@@ -331,8 +333,10 @@ async function login() {
       });
     }
     
-    // Redirect handled by onAuthStateChanged
-    window.location.href = 'index.html';
+    // Redirect to saved URL or homepage
+    const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+    sessionStorage.removeItem('redirectAfterLogin');
+    window.location.href = redirectUrl || 'index.html';
   } catch (error) {
     setLoading(false);
     
