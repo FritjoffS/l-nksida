@@ -1,48 +1,131 @@
 /**
  * Dynamisk navbar-laddare med dropdown-stöd
- * Använder konfiguration från nav-config.js
+ * Försöker först ladda från Firebase, annars från nav-config.js
  */
 
-document.addEventListener("DOMContentLoaded", function () {
+// Global navbar config
+let NAV_CONFIG = null;
+
+document.addEventListener("DOMContentLoaded", async function () {
   const navbarContainer = document.getElementById("navbar");
 
-  // Ladda först konfigurationen
-  const configScript = document.createElement('script');
-  configScript.src = '../scripts/nav-config.js';
-  configScript.onload = function() {
-    // Ladda sedan navbar HTML
-    fetch("../navbar/navbar.html")
-      .then(response => response.text())
-      .then(html => {
-        navbarContainer.innerHTML = html;
-        buildNavbar();
-        setupDropdownListeners();
-        console.log("Navbar loaded successfully.");
-      })
-      .catch(error => {
-        console.error("Error loading navbar:", error);
-      });
-  };
-  document.head.appendChild(configScript);
+  // Ladda navbar HTML först
+  try {
+    const response = await fetch("../navbar/navbar.html");
+    const html = await response.text();
+    navbarContainer.innerHTML = html;
+  } catch (error) {
+    console.error("Error loading navbar HTML:", error);
+    return;
+  }
+
+  // Försök ladda config från Firebase
+  let configLoaded = await tryLoadFirebaseConfig();
+  
+  // Om Firebase misslyckades, använd lokal config
+  if (!configLoaded) {
+    await loadLocalConfig();
+  }
+  
+  // Bygg navbaren
+  if (NAV_CONFIG) {
+    buildNavbar();
+    setupDropdownListeners();
+    console.log("Navbar loaded successfully.");
+  }
 });
+
+/**
+ * Försök ladda navbar-config från Firebase
+ */
+async function tryLoadFirebaseConfig() {
+  try {
+    // Dynamisk import av Firebase
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js");
+    const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js");
+    const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js");
+    
+    // Ladda firebase config - använd absolut sökväg relativt till scripts/
+    const configModule = await import("../scripts/firebase-config.js");
+    const app = initializeApp(configModule.firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    
+    // Vänta på auth state
+    const user = await new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        unsubscribe();
+        resolve(user);
+      });
+      // Timeout efter 2 sekunder
+      setTimeout(() => resolve(null), 2000);
+    });
+    
+    if (!user) {
+      console.log("No user logged in, using local nav config");
+      return false;
+    }
+    
+    // Hämta config från Firebase
+    const configRef = ref(db, 'navbar-config');
+    const snapshot = await get(configRef);
+    
+    if (snapshot.exists()) {
+      NAV_CONFIG = snapshot.val();
+      console.log("Navbar config loaded from Firebase");
+      return true;
+    } else {
+      console.log("No Firebase navbar config found, using local");
+      return false;
+    }
+  } catch (error) {
+    console.log("Could not load Firebase navbar config:", error.message);
+    return false;
+  }
+}
+
+/**
+ * Ladda lokal config från nav-config.js
+ */
+function loadLocalConfig() {
+  return new Promise((resolve) => {
+    const configScript = document.createElement('script');
+    configScript.src = '../scripts/nav-config.js';
+    configScript.onload = function() {
+      if (typeof window.NAV_CONFIG !== 'undefined') {
+        NAV_CONFIG = window.NAV_CONFIG;
+      }
+      resolve();
+    };
+    configScript.onerror = function() {
+      console.error("Could not load local nav-config.js");
+      resolve();
+    };
+    document.head.appendChild(configScript);
+  });
+}
 
 /**
  * Bygger navbar-menyn baserat på konfigurationen
  */
 function buildNavbar() {
   const menu = document.getElementById('navbar-menu');
-  if (!menu || typeof NAV_CONFIG === 'undefined') {
+  if (!menu || !NAV_CONFIG) {
     console.error('Kunde inte bygga navbar - element eller konfiguration saknas');
     return;
   }
 
+  // Säkerställ att arrays finns
+  const mainLinks = NAV_CONFIG.mainLinks || [];
+  const categories = NAV_CONFIG.categories || [];
+
   // Lägg till huvudlänkar
-  NAV_CONFIG.mainLinks.forEach(link => {
+  mainLinks.forEach(link => {
     menu.appendChild(createNavLink(link));
   });
 
   // Lägg till dropdown-kategorier
-  NAV_CONFIG.categories.forEach(category => {
+  categories.forEach(category => {
     menu.appendChild(createDropdown(category));
   });
 
@@ -62,9 +145,14 @@ function buildNavbar() {
 function createNavLink(link) {
   const li = document.createElement('li');
   li.setAttribute('role', 'none');
+  
+  const iconHtml = link.icon 
+    ? `<img src="${link.icon}" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">`
+    : '';
+  
   li.innerHTML = `
     <a href="${link.href}" role="menuitem" aria-label="Gå till ${link.label}">
-      <img src="${link.icon}" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
+      ${iconHtml}
       <br>${link.label}
     </a>
   `;
@@ -79,16 +167,21 @@ function createDropdown(category) {
   li.setAttribute('role', 'none');
   li.className = 'nav-dropdown';
   
-  const linksHtml = category.links.map(link => `
+  const links = category.links || [];
+  const linksHtml = links.map(link => `
     <a href="${link.href}" role="menuitem" aria-label="Gå till ${link.label}">
-      <img src="${link.icon}" alt="" aria-hidden="true">
+      ${link.icon ? `<img src="${link.icon}" alt="" aria-hidden="true">` : ''}
       ${link.label}
     </a>
   `).join('');
 
+  const iconHtml = category.icon 
+    ? `<img src="${category.icon}" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">`
+    : '';
+
   li.innerHTML = `
     <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
-      <img src="${category.icon}" alt="" style="width:16px;height:16px;filter: invert(1);" aria-hidden="true">
+      ${iconHtml}
       <br>${category.label}
       <span class="dropdown-arrow">▼</span>
     </button>
