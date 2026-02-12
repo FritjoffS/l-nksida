@@ -11,7 +11,16 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const db = firebase.database();
+
+// Auth check - redirect to login if not authenticated
+auth.onAuthStateChanged((user) => {
+  if (!user) {
+    sessionStorage.setItem('redirectAfterLogin', window.location.href);
+    window.location.href = '../index/login.html';
+  }
+});
 
 function showPage(page) {
     document.querySelectorAll('section').forEach(sec => {
