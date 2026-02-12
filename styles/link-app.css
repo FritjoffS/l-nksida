@@ -475,3 +475,47 @@ button {
     font-size: 14px;
   }
 }
+
+/* Error state */
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 20px;
+}
+
+.error-content {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 40px;
+  border-radius: 12px;
+  max-width: 500px;
+}
+
+.error-content h1 {
+  font-size: 32px;
+  margin-bottom: 16px;
+  color: #f44336;
+}
+
+.error-content p {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 24px;
+}
+
+.error-content .btn-primary {
+  background: #ff6600;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.error-content .btn-primary:hover {
+  background: #e55a00;
+  transform: translateY(-2px);
+}
