@@ -26,6 +26,23 @@
   <!-- pdf-lib for PDF manipulation -->
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 
+  <!-- Firebase Auth Check -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js';
+    import { firebaseConfig } from '../scripts/firebase-config.js';
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        sessionStorage.setItem('redirectAfterLogin', window.location.href);
+        window.location.href = '../index/login.html';
+      }
+    });
+  </script>
+
   <!-- Google Analytics -->
   <script type="module" src="../scripts/analytics.js" async></script>
 </head>
