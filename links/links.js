@@ -173,25 +173,6 @@ function updatePageWithConfig() {
   if (buttonContainer) buttonContainer.setAttribute('aria-label', config.description);
 }
 
-// Auth check
-function checkAuthState() {
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = "../index/login.html";
-    } else {
-      console.log("User is logged in:", user.email);
-      loadButtons();
-    }
-  }, (error) => {
-    console.error("Auth error:", error);
-    hideLoading();
-    showToast('Autentiseringsfel. Omdirigerar till login...', 'error');
-    setTimeout(() => {
-      window.location.href = "../index/login.html";
-    }, 2000);
-  });
-}
-
 // Logout
 async function logout() {
   try {
@@ -466,6 +447,25 @@ function setupEventListeners() {
 // Initialize app
 async function init() {
   initDOMElements();
+  showLoading('Kontrollerar inloggning...');
+  
+  // Check authentication FIRST before loading anything
+  const user = await new Promise((resolve) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+      resolve(user);
+    });
+  });
+  
+  if (!user) {
+    // Save current URL for redirect after login
+    const currentUrl = window.location.href;
+    sessionStorage.setItem('redirectAfterLogin', currentUrl);
+    window.location.href = "../index/login.html";
+    return;
+  }
+  
+  console.log("User is logged in:", user.email);
   
   const appName = getAppFromUrl();
   
@@ -489,7 +489,8 @@ async function init() {
   // Expose logout
   window.logout = logout;
   
-  checkAuthState();
+  // Load buttons directly since we already verified auth
+  loadButtons();
 }
 
 // Start when DOM is ready
