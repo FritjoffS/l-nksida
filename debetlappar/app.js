@@ -5,6 +5,7 @@ const lastNumberRef = ref(database, 'debetlappar/lastNumber'); // Firebase refer
 let lastNumber = 0;
 let pdfDoc = null;
 let lastGeneratedPdfUrl = null; // Store the URL of the last generated PDF
+const MAX_COPIES = 100;
 
 // Set the worker source for PDF.js (ensure the version matches the library version)
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
@@ -15,6 +16,7 @@ async function fetchLastNumber() {
         const snapshot = await get(lastNumberRef);
         lastNumber = snapshot.exists() ? snapshot.val() : 0;
         console.log('Fetched lastNumber from Firebase:', lastNumber);
+        updateCurrentNumberDisplay();
     } catch (error) {
         if (error.code === 'PERMISSION_DENIED') {
             console.error('Permission denied when accessing Firebase. Check your database rules.');
@@ -22,7 +24,14 @@ async function fetchLastNumber() {
         } else {
             console.error('Error fetching lastNumber from Firebase:', error);
         }
+        document.getElementById('currentNumber').textContent = 'Kunde inte ladda serienummer';
     }
+}
+
+// Update the display showing current number
+function updateCurrentNumberDisplay() {
+    const currentNumberEl = document.getElementById('currentNumber');
+    currentNumberEl.textContent = `Nästa nummer: B ${lastNumber + 1}`;
 }
 
 // Update lastNumber in Firebase
@@ -67,6 +76,11 @@ document.getElementById('processButton').addEventListener('click', async () => {
         alert('Vänligen ange ett giltigt antal kopior.');
         return;
     }
+    
+    if (copies > MAX_COPIES) {
+        alert(`Maximalt antal kopior är ${MAX_COPIES}.`);
+        return;
+    }
 
     const status = document.getElementById('status');
     status.textContent = 'Bearbetar...';
@@ -108,9 +122,20 @@ document.getElementById('processButton').addEventListener('click', async () => {
         }
 
         const pdfBlob = outputPdf.output('blob');
+        
+        // Frigör tidigare URL för att undvika memory leak
+        if (lastGeneratedPdfUrl) {
+            URL.revokeObjectURL(lastGeneratedPdfUrl);
+        }
+        
         lastGeneratedPdfUrl = URL.createObjectURL(pdfBlob); // Save the blob URL
         outputPdf.save('numbered_document.pdf');
         await updateLastNumberInFirebase(lastNumber + copies); // Update Firebase
+        updateCurrentNumberDisplay(); // Uppdatera visningen
+        
+        // Aktivera knappen för att öppna PDF
+        document.getElementById('openLastPdfButton').disabled = false;
+        
         status.textContent = 'Klar! PDF har laddats ner.';
         
     } catch (error) {
