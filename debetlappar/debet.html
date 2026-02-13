@@ -16,11 +16,12 @@
 
         <div class="debet_container">
             <h1>Skriv Ut Debetlappar</h1>
+            <div id="currentNumber" class="current-number">Laddar serienummer...</div>
             <h2>Välj antal:</h2>
-            <input type="number" id="copies" min="1" value="1">
+            <input type="number" id="copies" min="1" max="100" value="1">
             <div class="button-group">
                 <button class="processButton" id="processButton">Bearbeta och Ladda ner</button>
-                <button id="openLastPdfButton">Öppna för att skriva ut</button>
+                <button id="openLastPdfButton" disabled>Öppna för att skriva ut</button>
             </div>
             <div id="status"></div>
         </div>
