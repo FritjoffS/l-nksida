@@ -109,7 +109,7 @@ document.getElementById('processButton').addEventListener('click', async () => {
             await page.render({ canvasContext: context, viewport: viewport }).promise;
 
             // Lägg till numrering
-            context.font = '24px Arial';
+            context.font = '36px Arial';
             context.fillStyle = 'black';
             context.fillText(`B  ${lastNumber + i + 1}`, 480 * scale, 50 * scale);
 
