@@ -18,8 +18,9 @@ button {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 50vh;
-    width: 50vh;
+    min-height: 50vh;
+    width: 100%;
+    max-width: 500px;
     background-color: white;
     padding: 2rem;
     border-radius: 8px;
@@ -66,4 +67,35 @@ button:hover {
 #status {
     margin-top: 1rem;
     font-style: italic;
+}
+
+.current-number {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    background-color: #e8f5e9;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+}
+
+#openLastPdfButton {
+    background-color: #2196F3;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+}
+
+#openLastPdfButton:hover:not(:disabled) {
+    background-color: #1976D2;
+}
+
+#openLastPdfButton:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.processButton {
+    border-radius: 4px;
 }
