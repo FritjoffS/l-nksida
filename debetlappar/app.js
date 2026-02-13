@@ -52,7 +52,7 @@ window.addEventListener('load', async () => {
 });
 
 async function loadPdf() {
-    const pdfUrl = 'doc.pdf';
+    const pdfUrl = 'doc_ny.pdf';
     try {
         const loadingTask = pdfjsLib.getDocument(pdfUrl);
         pdfDoc = await loadingTask.promise;
