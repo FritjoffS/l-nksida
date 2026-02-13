@@ -8,6 +8,11 @@
     background-color: #f0f0f0;
 } */
 
+button {
+  all: unset;
+  cursor: pointer;
+}
+
 .debet_container {
     display: flex;
     flex-direction: column;
