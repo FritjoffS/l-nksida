@@ -2,9 +2,14 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.2.1] 26-02-17
+
+### Ny funktionalitet för länksidor, dynamiska sidor från Firebase
+
+
 ## [2.2.0.11] 26-02-11
 
-## Ny sida
+###  Ny sida
 
 # Verktyg
 
