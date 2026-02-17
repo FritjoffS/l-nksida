@@ -326,6 +326,7 @@ async function loadButtons() {
         const button = document.createElement("button");
         button.className = "linkButton";
         button.setAttribute('aria-label', `Öppna ${buttonId}`);
+        button.title = buttonId;
 
         if (imageUrl && isValidImageUrl(imageUrl)) {
           button.style.backgroundImage = "url('" + imageUrl + "')";
