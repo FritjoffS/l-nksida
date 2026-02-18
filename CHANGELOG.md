@@ -2,14 +2,28 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.3.0] 260218
+
+### Tillagt
+
+ - Lagt till flytta upp/ner-funktionalitet för:
+
+Huvudlänkar - ▲/▼ knappar bredvid varje huvudlänk
+Kategorier - ▲/▼ knappar i kategori-headern
+Länkar inom kategorier - ▲/▼ knappar för varje länk i en kategori
+
 ## [2.2.1] 26-02-17
 
-### Ny funktionalitet för länksidor, dynamiska sidor från Firebase
+### Tillagt
+
+ - Ny funktionalitet för länksidor, dynamiska sidor från Firebase
 
 
 ## [2.2.0.11] 26-02-11
 
-###  Ny sida
+### Tillagt
+
+ - Ny sida
 
 # Verktyg
 
