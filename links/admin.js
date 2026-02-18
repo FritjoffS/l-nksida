@@ -404,8 +404,13 @@ function renderMainLinks() {
         return;
     }
     
+    const total = navbarData.mainLinks.length;
     mainLinksContainer.innerHTML = navbarData.mainLinks.map((link, index) => `
         <div class="nav-item" data-id="${escapeHtml(link.id)}">
+            <div class="move-buttons">
+                <button class="btn btn-move" onclick="window.moveMainLink('${escapeHtml(link.id)}', -1)" ${index === 0 ? 'disabled' : ''} title="Flytta upp">▲</button>
+                <button class="btn btn-move" onclick="window.moveMainLink('${escapeHtml(link.id)}', 1)" ${index === total - 1 ? 'disabled' : ''} title="Flytta ner">▼</button>
+            </div>
             ${link.icon ? `<img src="${escapeHtml(link.icon)}" alt="" class="nav-item-icon">` : '<span class="nav-item-icon">🔗</span>'}
             <div class="nav-item-info">
                 <div class="nav-item-label">${escapeHtml(link.label)}</div>
@@ -428,9 +433,16 @@ function renderCategories() {
         return;
     }
     
-    categoriesContainer.innerHTML = navbarData.categories.map(cat => `
+    const totalCats = navbarData.categories.length;
+    categoriesContainer.innerHTML = navbarData.categories.map((cat, catIndex) => {
+        const totalLinks = (cat.links || []).length;
+        return `
         <div class="category-card" data-id="${escapeHtml(cat.id)}">
             <div class="category-header">
+                <div class="move-buttons">
+                    <button class="btn btn-move" onclick="window.moveCategory('${escapeHtml(cat.id)}', -1)" ${catIndex === 0 ? 'disabled' : ''} title="Flytta upp">▲</button>
+                    <button class="btn btn-move" onclick="window.moveCategory('${escapeHtml(cat.id)}', 1)" ${catIndex === totalCats - 1 ? 'disabled' : ''} title="Flytta ner">▼</button>
+                </div>
                 ${cat.icon ? `<img src="${escapeHtml(cat.icon)}" alt="">` : ''}
                 <div class="category-header-info">
                     <h4>${escapeHtml(cat.label)}</h4>
@@ -441,8 +453,12 @@ function renderCategories() {
                 </div>
             </div>
             <div class="category-links">
-                ${(cat.links || []).map(link => `
+                ${(cat.links || []).map((link, linkIndex) => `
                     <div class="nav-item" data-id="${escapeHtml(link.id)}">
+                        <div class="move-buttons">
+                            <button class="btn btn-move" onclick="window.moveCategoryLink('${escapeHtml(cat.id)}', '${escapeHtml(link.id)}', -1)" ${linkIndex === 0 ? 'disabled' : ''} title="Flytta upp">▲</button>
+                            <button class="btn btn-move" onclick="window.moveCategoryLink('${escapeHtml(cat.id)}', '${escapeHtml(link.id)}', 1)" ${linkIndex === totalLinks - 1 ? 'disabled' : ''} title="Flytta ner">▼</button>
+                        </div>
                         ${link.icon ? `<img src="${escapeHtml(link.icon)}" alt="" class="nav-item-icon">` : '<span class="nav-item-icon">🔗</span>'}
                         <div class="nav-item-info">
                             <div class="nav-item-label">${escapeHtml(link.label)}</div>
@@ -459,7 +475,7 @@ function renderCategories() {
                 <button class="btn btn-secondary" onclick="window.addLinkToCategory('${escapeHtml(cat.id)}')">➕ Lägg till länk</button>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // Open nav link modal
@@ -707,9 +723,63 @@ async function saveNavbarToFirebase() {
     await set(configRef, navbarData);
 }
 
+// Move main link up or down
+async function moveMainLink(id, direction) {
+    const index = navbarData.mainLinks.findIndex(l => l.id === id);
+    if (index === -1) return;
+    
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= navbarData.mainLinks.length) return;
+    
+    // Swap positions
+    [navbarData.mainLinks[index], navbarData.mainLinks[newIndex]] = 
+    [navbarData.mainLinks[newIndex], navbarData.mainLinks[index]];
+    
+    await saveNavbarToFirebase();
+    renderNavbarConfig();
+}
+
+// Move category up or down
+async function moveCategory(id, direction) {
+    const index = navbarData.categories.findIndex(c => c.id === id);
+    if (index === -1) return;
+    
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= navbarData.categories.length) return;
+    
+    // Swap positions
+    [navbarData.categories[index], navbarData.categories[newIndex]] = 
+    [navbarData.categories[newIndex], navbarData.categories[index]];
+    
+    await saveNavbarToFirebase();
+    renderNavbarConfig();
+}
+
+// Move category link up or down
+async function moveCategoryLink(categoryId, linkId, direction) {
+    const cat = navbarData.categories.find(c => c.id === categoryId);
+    if (!cat || !cat.links) return;
+    
+    const index = cat.links.findIndex(l => l.id === linkId);
+    if (index === -1) return;
+    
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= cat.links.length) return;
+    
+    // Swap positions
+    [cat.links[index], cat.links[newIndex]] = 
+    [cat.links[newIndex], cat.links[index]];
+    
+    await saveNavbarToFirebase();
+    renderNavbarConfig();
+}
+
 // Window functions for navbar
 window.editMainLink = (id) => openNavLinkModal('main', null, id);
 window.deleteMainLink = deleteMainLink;
+window.moveMainLink = moveMainLink;
+window.moveCategory = moveCategory;
+window.moveCategoryLink = moveCategoryLink;
 window.addLinkToCategory = (categoryId) => openNavLinkModal('category', categoryId, null);
 window.editCategoryLink = (categoryId, linkId) => openNavLinkModal('category', categoryId, linkId);
 window.deleteCategoryLink = deleteCategoryLink;
