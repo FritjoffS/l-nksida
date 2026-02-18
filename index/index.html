@@ -103,12 +103,10 @@
 
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New service worker available, show update notification
-                  console.log('[PWA] Update available');
-                  if (confirm('En ny version är tillgänglig! Vill du uppdatera nu?')) {
-                    newWorker.postMessage({ type: 'SKIP_WAITING' });
-                    window.location.reload();
-                  }
+                  // New service worker available, auto-update
+                  console.log('[PWA] Update available, auto-updating...');
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  window.location.reload();
                 }
               });
             });

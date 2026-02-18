@@ -161,11 +161,9 @@ echo               console.log('[PWA] New Service Worker found'^);
 echo.
 echo               newWorker.addEventListener('statechange', (^) =^> {
 echo                 if (newWorker.state === 'installed' ^&^& navigator.serviceWorker.controller^) {
-echo                   console.log('[PWA] Update available'^);
-echo                   if (confirm('En ny version är tillgänglig! Vill du uppdatera nu?'^)^) {
-echo                     newWorker.postMessage({ type: 'SKIP_WAITING' }^);
-echo                     window.location.reload(^);
-echo                   }
+echo                   console.log('[PWA] Update available, auto-updating...'^);
+echo                   newWorker.postMessage({ type: 'SKIP_WAITING' }^);
+echo                   window.location.reload(^);
 echo                 }
 echo               }^);
 echo             }^);

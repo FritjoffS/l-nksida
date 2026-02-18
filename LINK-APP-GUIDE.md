@@ -139,11 +139,9 @@ Skapa `lager/lager.html` och använd mallen nedan. Ersätt:
 
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  console.log('[PWA] Update available');
-                  if (confirm('En ny version är tillgänglig! Vill du uppdatera nu?')) {
-                    newWorker.postMessage({ type: 'SKIP_WAITING' });
-                    window.location.reload();
-                  }
+                  console.log('[PWA] Update available, auto-updating...');
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                  window.location.reload();
                 }
               });
             });
