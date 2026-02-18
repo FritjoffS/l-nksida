@@ -524,6 +524,38 @@
             }
         }
 
+        /* Move buttons */
+        .btn-move {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 6px 10px;
+            font-size: 14px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .btn-move:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .btn-move:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .move-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-right: 8px;
+        }
+
+        .move-buttons .btn-move {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
         @media (max-width: 600px) {
             .admin-header {
                 padding: 20px;
