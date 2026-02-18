@@ -42,24 +42,36 @@ nav {
     color: white;
   }
 
-.logout-button {
-  background-color: transparent;
-  border: none;
-  color: white;
-  font-size: 12px; /* Reduced from 24px to 12px */
-  text-align: center;
-  cursor: pointer;
-  padding: 2.5px; /* Reduced from 5px to 2.5px */
+/* Höger container för logout och version */
+.navbar-right-container {
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 5%; /* Adjusted to half size */
-  height: 5%; /* Maintain aspect ratio */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.logout-button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+  padding: 2.5px;
 }
 
 .logout-button:hover {
   text-decoration: underline;
+}
+
+.app-version {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 10px;
+  text-align: center;
 }
 
 /* ========================================

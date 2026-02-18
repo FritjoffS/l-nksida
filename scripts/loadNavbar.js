@@ -129,14 +129,43 @@ function buildNavbar() {
     menu.appendChild(createDropdown(category));
   });
 
-  // Lägg till logout-knapp
-  const logoutLi = document.createElement('li');
-  logoutLi.setAttribute('role', 'none');
-  logoutLi.innerHTML = `
+  // Lägg till logout-knapp och version container
+  const rightContainer = document.createElement('div');
+  rightContainer.className = 'navbar-right-container';
+  rightContainer.innerHTML = `
     <button class="logout-button" onclick="logout()" role="menuitem" 
       aria-label="Logga ut från applikationen">Logga ut</button>
+    <div id="appVersion" class="app-version" role="contentinfo" aria-label="Applikationsversion">Laddar...</div>
   `;
-  menu.appendChild(logoutLi);
+  
+  // Lägg till containern i nav-elementet (inte i ul)
+  const navElement = menu.closest('nav');
+  if (navElement) {
+    navElement.appendChild(rightContainer);
+  }
+  
+  // Ladda och visa version
+  loadAppVersion();
+}
+
+/**
+ * Laddar och visar appversionen från manifest.json
+ */
+async function loadAppVersion() {
+  try {
+    const response = await fetch('../manifest.json');
+    const manifest = await response.json();
+    const versionElement = document.getElementById('appVersion');
+    if (versionElement && manifest.version) {
+      versionElement.textContent = `v${manifest.version}`;
+    }
+  } catch (error) {
+    console.error('Error loading app version:', error);
+    const versionElement = document.getElementById('appVersion');
+    if (versionElement) {
+      versionElement.textContent = '';
+    }
+  }
 }
 
 /**

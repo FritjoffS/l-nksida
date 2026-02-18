@@ -81,25 +81,6 @@ async function logout() {
 // Make logout function available globally for navbar
 window.logout = logout;
 
-// Load and display app version from manifest.json
-async function loadAppVersion() {
-  try {
-    const response = await fetch('../manifest.json');
-    const manifest = await response.json();
-    const versionElement = document.getElementById('appVersion');
-    if (versionElement && manifest.version) {
-      versionElement.textContent = `v${manifest.version}`;
-    }
-  } catch (error) {
-    console.error('Error loading app version:', error);
-    // Fallback to default if manifest can't be loaded
-    const versionElement = document.getElementById('appVersion');
-    if (versionElement) {
-      versionElement.textContent = 'v2.1.1';
-    }
-  }
-}
-
 // Show toast notification
 function showToast(message, type = 'info') {
   const toast = document.createElement('div');
@@ -218,5 +199,4 @@ window.addEventListener('appinstalled', () => {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
   checkAuthState();
-  loadAppVersion();
 });
