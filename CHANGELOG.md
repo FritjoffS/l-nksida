@@ -2,6 +2,13 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.3.1] 260218
+
+### Bottaget
+
+ - hårdkodade bilder bottagna
+ - mappen img flyttad till old
+
 ## [2.3.0] 260218
 
 ### Tillagt
