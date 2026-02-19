@@ -2,6 +2,12 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.3.2] 260219
+
+### Tillagt
+
+ - copy.png återställt
+
 ## [2.3.1] 260218
 
 ### Bottaget
