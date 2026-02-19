@@ -27,8 +27,8 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 // Firebase paths
-/* const DATA_PATH = 'link-apps-data/'; */
-const DATA_PATH = '/';
+const DATA_PATH = 'link-apps-data/';
+/* const DATA_PATH = '/'; */
 const CONFIG_PATH = 'link-apps-config/';
 
 // Configuration (loaded from Firebase)
