@@ -19,11 +19,10 @@
     justify-content: space-evenly;
   }
 
-  button {
+/*   button {
     display: inline-block;
     width: 200px;
     height: 133px;
-    background-image: url("../images/b-m-back.jpg");
     background-size: cover;
     border: 2px solid black;
     border-radius: 10px;
@@ -40,7 +39,7 @@
     transform: scale(1.1);
     opacity: 0.8;
     filter: grayscale(100%);
-  }
+  } */
 
 /* ========================================
    RESPONSIVE DESIGN - MEDIA QUERIES
@@ -88,7 +87,7 @@
   
   body {
     background-size: 35%;
-    background-position: 50% 10%;
+    background-position: 50% 20%;
     padding-top: 120px;
   }
 }
@@ -106,7 +105,7 @@
   }
   
   body {
-    background-size: 30%;
+    background-size: 50%;
     padding-top: 140px;
   }
 }
