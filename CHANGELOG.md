@@ -2,6 +2,12 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.3.3] 260219
+
+### Ändrat
+
+ - sökväg för länkar ändrat från / till /link-app-data
+
 ## [2.3.2] 260219
 
 ### Tillagt
