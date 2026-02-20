@@ -43,6 +43,16 @@ button {
   transform: translateY(0);
 }
 
+/* Container for buttons */
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  margin: 0 auto;
+}
+
 /* Link button wrapper */
 .link-button-wrapper {
   position: relative;
@@ -379,22 +389,22 @@ button {
 
 /* Button improvements */
 .linkButton {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 200px;
-  height: 133px;
+  height: 100px;
   background-color: white;
-  border: 2px solid black;
+  border: none;
   border-radius: 10px;
   cursor: pointer;
-  margin: 10px 10px;
   color: white;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
-  vertical-align: top;
-  position: relative;
-  transition: all 0.3s ease;
-  overflow: hidden;
   text-align: center;
+  padding: 15px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .linkButton:focus {
