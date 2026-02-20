@@ -407,6 +407,15 @@ button {
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
+.linkButton:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.linkButton:active {
+  transform: scale(0.95);
+}
+
 .linkButton:focus {
   outline: 3px solid #ff6600;
   outline-offset: 3px;
@@ -431,10 +440,6 @@ button {
 
 .linkButton:hover::after {
   background: rgba(255, 102, 0, 0.2);
-}
-
-.linkButton:active {
-  transform: scale(0.95);
 }
 
 /* Responsive adjustments */
