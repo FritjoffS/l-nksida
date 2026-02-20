@@ -80,82 +80,244 @@ nav {
 }
 
 /* ========================================
-   RESPONSIVE NAVBAR
+   RESPONSIVE DESIGN - MEDIA QUERIES
    ======================================== */
 
-/* Mobil navbar - Portrait (stående läge) */
-@media screen and (max-width: 767px) {
+/* Smooth transitions för alla navbar-element */
+.navbar a,
+.navbar .dropdown-toggle,
+.navbar li,
+.navbar-right-container {
+  transition: padding 0.2s ease, font-size 0.2s ease;
+}
+
+/* ----------------------------------------
+   MOBIL - Små skärmar (< 576px)
+   ---------------------------------------- */
+@media screen and (max-width: 575px) {
+  nav {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
   .navbar {
     flex-direction: row;
-    display: flex; /* Alltid synlig på mobil */
+    display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    gap: 2px;
+    padding: 4px;
   }
   
   .navbar li {
     float: none;
-    flex: 1;
-    min-width: 80px;
+    flex: 1 1 auto;
+    min-width: 56px;
+    max-width: 80px;
   }
   
-  .navbar a {
-    padding: 8px 4px;
-    font-size: 0.9em;
-    text-align: center;
+  .navbar a,
+  .navbar .dropdown-toggle {
+    padding: 10px 6px;
+    font-size: 0.75em;
+    min-height: 44px; /* Touch-friendly */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
   
-  /* Göm hamburger-knapp eftersom vi alltid visar menyn */
+  .navbar li img {
+    width: 14px;
+    height: 14px;
+  }
+  
+  /* Navbar right container på mobil */
+  .navbar-right-container {
+    position: static;
+    transform: none;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    gap: 15px;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.3);
+    order: -1; /* Placera överst */
+  }
+  
+  .logout-button {
+    font-size: 11px;
+    padding: 6px 12px;
+    min-height: 32px;
+  }
+  
+  .app-version {
+    font-size: 9px;
+  }
+  
   .menu-toggle {
     display: none;
   }
 }
 
-/* Extra små mobilskärmar */
-@media screen and (max-width: 480px) {
-  .navbar a {
-    padding: 6px 2px;
-    font-size: 0.8em;
+/* ----------------------------------------
+   MOBIL LANDSCAPE - Liggande läge
+   ---------------------------------------- */
+@media screen and (max-width: 767px) and (orientation: landscape) {
+  .navbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .navbar::-webkit-scrollbar {
+    display: none;
   }
   
   .navbar li {
-    min-width: 60px;
+    flex: 0 0 auto;
+    min-width: 70px;
   }
-}
-
-/* Mobil landscape läge */
-@media screen and (max-height: 500px) and (orientation: landscape) {
-  .navbar a {
-    padding: 4px 8px;
+  
+  .navbar a,
+  .navbar .dropdown-toggle {
+    padding: 6px 10px;
     font-size: 0.8em;
+    min-height: 36px;
+  }
+  
+  .navbar-right-container {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+    width: auto;
+    gap: 4px;
+    padding: 0;
+    background: transparent;
+    order: unset;
   }
 }
 
-/* Tablet och Desktop navbar */
-@media screen and (min-width: 768px) {
+/* ----------------------------------------
+   MOBIL STOR - Stora telefoner (576px - 767px)
+   ---------------------------------------- */
+@media screen and (min-width: 576px) and (max-width: 767px) {
   .navbar {
-    display: flex !important;
+    flex-direction: row;
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
+    gap: 4px;
+    padding: 6px;
   }
   
   .navbar li {
     float: none;
+    flex: 1 1 auto;
+    min-width: 70px;
+    max-width: 100px;
   }
   
-  .navbar a {
-    padding: 1.2rem 1.5rem;
+  .navbar a,
+  .navbar .dropdown-toggle {
+    padding: 10px 8px;
+    font-size: 0.85em;
+    min-height: 44px;
+  }
+  
+  .navbar-right-container {
+    position: static;
+    transform: none;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    gap: 20px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    order: -1;
+  }
+  
+  .menu-toggle {
+    display: none;
+  }
+}
+
+/* ----------------------------------------
+   TABLET - Medium skärmar (768px - 1023px)
+   ---------------------------------------- */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  .navbar {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .navbar li {
+    float: none;
+    flex: 0 1 auto;
+  }
+  
+  .navbar a,
+  .navbar .dropdown-toggle {
+    padding: 1rem 1.2rem;
+    font-size: 1em;
+    min-height: 48px;
+  }
+  
+  .navbar-right-container {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    gap: 20px;
+  }
+  
+  .menu-toggle {
+    display: none;
+  }
+}
+
+/* ----------------------------------------
+   DESKTOP - Stora skärmar (1024px - 1439px)
+   ---------------------------------------- */
+@media screen and (min-width: 1024px) and (max-width: 1439px) {
+  .navbar {
+    justify-content: center;
+  }
+  
+  .navbar a,
+  .navbar .dropdown-toggle {
+    padding: 1.2rem 1.8rem;
     font-size: 1.1em;
   }
   
-  .menu-toggle {
-    display: none;
+  .navbar-right-container {
+    right: 15px;
   }
 }
 
-/* Desktop navbar */
-@media screen and (min-width: 1024px) {
-  .navbar a {
-    padding: 1.5rem 2rem;
+/* ----------------------------------------
+   DESKTOP STOR - Extra stora skärmar (≥ 1440px)
+   ---------------------------------------- */
+@media screen and (min-width: 1440px) {
+  .navbar {
+    justify-content: center;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  
+  .navbar a,
+  .navbar .dropdown-toggle {
+    padding: 1.5rem 2.2rem;
     font-size: 1.2em;
+  }
+  
+  .navbar-right-container {
+    right: 20px;
   }
 }
 
@@ -264,27 +426,89 @@ nav {
    RESPONSIV DROPDOWN
    ======================================== */
 
-/* Mobil dropdown */
+/* Mobil dropdown (< 768px) */
 @media screen and (max-width: 767px) {
   .dropdown-content {
-    position: static;
-    box-shadow: none;
-    background-color: #333;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+    background-color: #222;
     width: 100%;
+    max-height: 60vh;
+    overflow-y: auto;
+    border-radius: 12px 12px 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .nav-dropdown.active .dropdown-content {
+    transform: translateY(0);
   }
   
   .dropdown-content a {
-    padding: 10px 20px;
-    font-size: 0.85em;
+    padding: 14px 20px;
+    font-size: 1em;
+    min-height: 48px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  
+  .dropdown-content a:last-child {
+    border-bottom: none;
+  }
+  
+  .dropdown-content a:active {
+    background-color: #555;
   }
   
   .nav-dropdown {
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 56px;
   }
   
   .nav-dropdown > .dropdown-toggle {
     width: 100%;
     text-align: center;
+    min-height: 44px;
+  }
+  
+  /* Overlay för att stänga dropdown */
+  .nav-dropdown.active::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: -1;
+  }
+}
+
+/* Tablet dropdown (768px - 1023px) */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  .dropdown-content {
+    min-width: 200px;
+  }
+  
+  .dropdown-content a {
+    padding: 14px 18px;
+    font-size: 0.95em;
+  }
+}
+
+/* Desktop dropdown (≥ 1024px) */
+@media screen and (min-width: 1024px) {
+  .dropdown-content {
+    min-width: 220px;
+  }
+  
+  .dropdown-content a {
+    padding: 14px 20px;
+    transition: background-color 0.15s ease;
   }
 }
 
