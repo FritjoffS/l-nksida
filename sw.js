@@ -2,7 +2,7 @@
 const CACHE_NAME = 'jarnhandel-v2.4.0';
 const CACHE_VERSION = '2.4.0';
 
-// Core files that should always be cached
+// Core files that should always be cached for offline access
 const CORE_CACHE = [
   '/l-nksida/',
   '/l-nksida/index/index.html',
