@@ -59,6 +59,50 @@ nav {
   gap: 30px;
 }
 
+/* Vänster container för klocka och datum */
+.navbar-left-container {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Navbar-specifika stilar med hög specificitet */
+#navbar-clock,
+.navbar-clock {
+  font-family: 'Times New Roman', Times, serif !important;
+  font-size: 1.1rem !important;
+  color: white !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  font-weight: bold !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+#navbar-date,
+.navbar-date {
+  background-color: rgba(51, 51, 51, 0.8) !important;
+  border-radius: 6px !important;
+  font-size: 0.65rem !important;
+  color: white !important;
+  text-align: center !important;
+  padding: 3px 6px !important;
+  white-space: pre-line !important;
+  line-height: 1.2 !important;
+  max-width: 80px !important;
+  margin: 0 !important;
+  width: auto !important;
+}
+
 .logout-button {
   background-color: transparent;
   border: none;
@@ -87,7 +131,8 @@ nav {
 .navbar a,
 .navbar .dropdown-toggle,
 .navbar li,
-.navbar-right-container {
+.navbar-right-container,
+.navbar-left-container {
   transition: padding 0.2s ease, font-size 0.2s ease;
 }
 
@@ -142,6 +187,11 @@ nav {
     padding: 6px;
     background: rgba(0, 0, 0, 0.3);
     order: -1; /* Placera överst */
+  }
+  
+  /* Navbar left container på mobil - dölj för att spara utrymme */
+  .navbar-left-container {
+    display: none;
   }
   
   .logout-button {
@@ -199,6 +249,11 @@ nav {
     background: transparent;
     order: unset;
   }
+  
+  /* Navbar left container på mobil landscape - dölj för att spara utrymme */
+  .navbar-left-container {
+    display: none;
+  }
 }
 
 /* ----------------------------------------
@@ -240,6 +295,11 @@ nav {
     order: -1;
   }
   
+  /* Navbar left container på mobil stor - dölj för att spara utrymme */
+  .navbar-left-container {
+    display: none;
+  }
+  
   .menu-toggle {
     display: none;
   }
@@ -276,6 +336,25 @@ nav {
     gap: 20px;
   }
   
+  .navbar-left-container {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    gap: 6px;
+  }
+  
+  #navbar-clock,
+  .navbar-clock {
+    font-size: 0.95rem !important;
+  }
+  
+  #navbar-date,
+  .navbar-date {
+    font-size: 0.6rem !important;
+    padding: 2px 5px !important;
+  }
+  
   .menu-toggle {
     display: none;
   }
@@ -298,6 +377,21 @@ nav {
   .navbar-right-container {
     right: 15px;
   }
+  
+  .navbar-left-container {
+    left: 15px;
+  }
+  
+  #navbar-clock,
+  .navbar-clock {
+    font-size: 1.15rem !important;
+  }
+  
+  #navbar-date,
+  .navbar-date {
+    font-size: 0.68rem !important;
+    padding: 3px 7px !important;
+  }
 }
 
 /* ----------------------------------------
@@ -318,6 +412,21 @@ nav {
   
   .navbar-right-container {
     right: 20px;
+  }
+  
+  .navbar-left-container {
+    left: 20px;
+  }
+  
+  #navbar-clock,
+  .navbar-clock {
+    font-size: 1.2rem !important;
+  }
+  
+  #navbar-date,
+  .navbar-date {
+    font-size: 0.7rem !important;
+    padding: 3px 7px !important;
   }
 }
 

@@ -4,7 +4,7 @@ function updateClock() {
     const minutes = now.getMinutes().toString().padStart(2, '0');
     const seconds = now.getSeconds().toString().padStart(2, '0');
 
-    const clockElement = document.getElementById('clock');
+    const clockElement = document.getElementById('navbar_clock') || document.getElementById('clock');
     clockElement.textContent = `${hours}:${minutes}:${seconds}`;
 }
 

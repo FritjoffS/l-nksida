@@ -14,6 +14,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     const response = await fetch("../navbar/navbar.html");
     const html = await response.text();
     navbarContainer.innerHTML = html;
+    
+    // Ladda navbar clock script
+    const clockScript = document.createElement('script');
+    clockScript.src = '../scripts/navbar-clock.js';
+    document.head.appendChild(clockScript);
   } catch (error) {
     console.error("Error loading navbar HTML:", error);
     return;

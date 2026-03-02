@@ -100,6 +100,10 @@
   #clock {
     font-size: 16rem; /* Original desktop-storlek */
   }
+
+  #navbar_clock {
+    font-size: 1.6rem; /* Original desktop-storlek */
+  }
   
   #date {
     font-size: 3rem;
