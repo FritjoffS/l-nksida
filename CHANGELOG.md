@@ -2,6 +2,12 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.4.0] 260302
+
+## Tillagt
+
+ - Klocka och datum i navbar
+
 ## [2.3.3] 260219
 
 ### Ändrat
