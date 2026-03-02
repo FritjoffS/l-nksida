@@ -1,6 +1,6 @@
 // Service Worker för Sollebrunns Järnhandel PWA
-const CACHE_NAME = 'jarnhandel-v2.4.0';
 const CACHE_VERSION = '2.4.0';
+const CACHE_NAME = `jarnhandel-v${CACHE_VERSION}`;
 
 // Core files that should always be cached for offline access
 const CORE_CACHE = [
