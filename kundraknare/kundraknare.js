@@ -284,16 +284,24 @@ function calculateStatistics(entries) {
     const totalDays = dailyStats.length;
     const avgPerDay = totalDays > 0 ? (totalCount / totalDays).toFixed(1) : 0;
     
-    // Beräkna genomsnittlig öppettid
-    const totalHours = dailyStats.reduce((sum, day) => sum + day.hoursOpen, 0);
-    const avgHours = totalDays > 0 ? totalHours / totalDays : 0;
-    const avgPerHour = avgHours > 0 ? (totalCount / totalHours).toFixed(1) : 0;
+    // Beräkna antal kunder senaste timmen (från senaste registreringen)
+    let customersLastHour = 0;
+    if (entries.length > 0) {
+        const lastEntry = entries[entries.length - 1];
+        const lastTime = new Date(lastEntry.timestamp);
+        const oneHourAgo = new Date(lastTime.getTime() - 60 * 60 * 1000);
+        
+        customersLastHour = entries.filter(entry => {
+            const entryTime = new Date(entry.timestamp);
+            return entryTime >= oneHourAgo && entryTime <= lastTime;
+        }).length;
+    }
     
     return {
         totalCount,
         totalDays,
         avgPerDay,
-        avgPerHour,
+        avgPerHour: customersLastHour,
         dailyStats,
         hourlyStats
     };
