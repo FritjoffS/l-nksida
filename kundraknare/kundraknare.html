@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kundräknare - Statistik</title>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/navbar.css">
+    <link rel="stylesheet" href="kundraknare.css">
+</head>
+<body>
+    <div id="navbar-container"></div>
+
+    <main class="container">
+        <header class="page-header">
+            <h1>📊 Kundräknare</h1>
+            <p class="subtitle">Statistik över kundflöde i butiken</p>
+        </header>
+
+        <!-- Kontrollpanel -->
+        <section class="control-panel">
+            <div class="date-controls">
+                <div class="date-input-group">
+                    <label for="startDate">Från datum:</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="date-input-group">
+                    <label for="endDate">Till datum:</label>
+                    <input type="date" id="endDate">
+                </div>
+                <button id="loadDataBtn" class="btn btn-primary">Hämta data</button>
+                <button id="todayBtn" class="btn btn-secondary">Idag</button>
+                <button id="weekBtn" class="btn btn-secondary">Denna vecka</button>
+                <button id="monthBtn" class="btn btn-secondary">Denna månad</button>
+            </div>
+        </section>
+
+        <!-- Sammanfattning -->
+        <section class="summary-section">
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="card-icon">👥</div>
+                    <div class="card-content">
+                        <h3>Totalt antal</h3>
+                        <p class="card-value" id="totalCount">-</p>
+                        <p class="card-label">kunder</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon">📅</div>
+                    <div class="card-content">
+                        <h3>Antal dagar</h3>
+                        <p class="card-value" id="totalDays">-</p>
+                        <p class="card-label">dagar</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon">📈</div>
+                    <div class="card-content">
+                        <h3>Genomsnitt/dag</h3>
+                        <p class="card-value" id="avgPerDay">-</p>
+                        <p class="card-label">kunder</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon">⏰</div>
+                    <div class="card-content">
+                        <h3>Genomsnitt/timme</h3>
+                        <p class="card-value" id="avgPerHour">-</p>
+                        <p class="card-label">kunder</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistik per dag -->
+        <section class="daily-stats">
+            <h2>Statistik per dag</h2>
+            <div class="stats-table-container">
+                <table id="dailyStatsTable" class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Antal kunder</th>
+                            <th>Första registrering</th>
+                            <th>Sista registrering</th>
+                            <th>Öppettid (h)</th>
+                            <th>Kunder/timme</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dailyStatsBody">
+                        <tr>
+                            <td colspan="6" class="no-data">Välj en period och klicka på "Hämta data"</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Statistik per timme -->
+        <section class="hourly-stats">
+            <h2>Fördelning per timme (genomsnitt)</h2>
+            <div class="hourly-chart" id="hourlyChart">
+                <p class="no-data">Ingen data att visa</p>
+            </div>
+        </section>
+
+        <!-- Detaljer -->
+        <section class="details-section">
+            <h2>Detaljerad logg</h2>
+            <div class="filter-controls">
+                <label>
+                    <input type="checkbox" id="showDetailsToggle"> Visa detaljerad logg
+                </label>
+            </div>
+            <div id="detailsContainer" class="details-container" style="display: none;">
+                <table id="detailsTable" class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Tidsstämpel</th>
+                            <th>Enhet</th>
+                            <th>Antal (ack.)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailsBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Loading och meddelanden -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <p>Hämtar data...</p>
+        </div>
+
+        <div id="messageBox" class="message-box" style="display: none;"></div>
+    </main>
+
+    <script src="../scripts/loadNavbar.js"></script>
+    <script type="module" src="kundraknare.js"></script>
+</body>
+</html>
