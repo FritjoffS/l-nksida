@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeElements();
     attachEventListeners();
     setTodayAsDefault();
+    loadData(); // Hämta data automatiskt när sidan laddas
 });
 
 function initializeElements() {
