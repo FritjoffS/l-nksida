@@ -237,13 +237,16 @@ function calculateStatistics(entries) {
         const lastTime = new Date(lastEntry.timestamp);
         const hoursOpen = (lastTime - firstTime) / (1000 * 60 * 60);
         
+        // Räkna antalet poster = antalet kunder
+        const customerCount = dayEntries.length;
+        
         return {
             date: day.date,
-            count: lastEntry.count, // Sista ackumulerade värdet
+            count: customerCount, // Antal poster/registreringar
             firstTime: firstEntry.timestamp,
             lastTime: lastEntry.timestamp,
             hoursOpen: hoursOpen > 0 ? hoursOpen : 0,
-            customersPerHour: hoursOpen > 0 ? (lastEntry.count / hoursOpen).toFixed(1) : 0,
+            customersPerHour: hoursOpen > 0 ? (customerCount / hoursOpen).toFixed(1) : 0,
             entries: dayEntries
         };
     });
