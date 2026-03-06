@@ -1,4 +1,4 @@
-import { database, ref, get } from '../scripts/firebase-config.js';
+import { database, ref, get, onValue } from '../scripts/firebase-config.js';
 
 // DOM-element
 let startDateInput, endDateInput, loadDataBtn, todayBtn, weekBtn, monthBtn;
@@ -8,13 +8,15 @@ let loadingOverlay, messageBox;
 
 // Data cache
 let currentData = null;
+let activeListener = null;
+let isLiveMode = false;
 
 // Initialisera sidan
 document.addEventListener('DOMContentLoaded', () => {
     initializeElements();
     attachEventListeners();
     setTodayAsDefault();
-    loadData(); // Hämta data automatiskt när sidan laddas
+    setupLiveUpdates(); // Starta live-uppdateringar för idag
 });
 
 function initializeElements() {
@@ -62,7 +64,7 @@ function setTodayAsDefault() {
 
 function setTodayPeriod() {
     setTodayAsDefault();
-    loadData();
+    setupLiveUpdates();
 }
 
 function setWeekPeriod() {
@@ -72,6 +74,7 @@ function setWeekPeriod() {
     
     startDateInput.value = weekAgo.toISOString().split('T')[0];
     endDateInput.value = today.toISOString().split('T')[0];
+    stopLiveUpdates();
     loadData();
 }
 
@@ -82,6 +85,7 @@ function setMonthPeriod() {
     
     startDateInput.value = monthAgo.toISOString().split('T')[0];
     endDateInput.value = today.toISOString().split('T')[0];
+    stopLiveUpdates();
     loadData();
 }
 
@@ -108,6 +112,12 @@ async function loadData() {
     if (new Date(startDate) > new Date(endDate)) {
         showMessage('Startdatum kan inte vara efter slutdatum', 'error');
         return;
+    }
+    
+    // Stäng av live-läge om annat än idag
+    const today = new Date().toISOString().split('T')[0];
+    if (startDate !== today || endDate !== today) {
+        stopLiveUpdates();
     }
     
     showLoading(true);
@@ -444,4 +454,53 @@ function showMessage(message, type = 'info') {
     setTimeout(() => {
         messageBox.style.display = 'none';
     }, 4000);
+}
+
+// Live-uppdateringar
+function setupLiveUpdates() {
+    stopLiveUpdates(); // Stäng av eventuell tidigare listener
+    
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    
+    const todayPath = `customers/${year}/${month}/${day}`;
+    const todayRef = ref(database, todayPath);
+    
+    isLiveMode = true;
+    updateLiveIndicator(true);
+    
+    // Lyssna på ändringar i dagens data
+    activeListener = onValue(todayRef, (snapshot) => {
+        if (snapshot.exists()) {
+            // Hämta all data för vald period (för att inkludera historik om det finns)
+            loadData();
+        } else {
+            // Ingen data ännu idag
+            loadData();
+        }
+    }, (error) => {
+        console.error('Fel vid lyssning på data:', error);
+        showMessage('Live-uppdatering misslyckades', 'error');
+    });
+}
+
+function stopLiveUpdates() {
+    if (activeListener) {
+        // Firebase onValue returnerar en unsubscribe-funktion
+        activeListener();
+        activeListener = null;
+    }
+    isLiveMode = false;
+    updateLiveIndicator(false);
+}
+
+function updateLiveIndicator(isLive) {
+    const subtitle = document.querySelector('.subtitle');
+    if (isLive) {
+        subtitle.innerHTML = 'Statistik över kundflöde i butiken <span style="color: #2ecc71; font-weight: 600;">● LIVE</span>';
+    } else {
+        subtitle.textContent = 'Statistik över kundflöde i butiken';
+    }
 }
