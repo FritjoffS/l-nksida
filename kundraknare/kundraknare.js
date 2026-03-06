@@ -328,7 +328,7 @@ function displayDailyStats(dailyStats) {
     dailyStatsBody.innerHTML = '';
     
     if (dailyStats.length === 0) {
-        dailyStatsBody.innerHTML = '<tr><td colspan="6" class="no-data">Ingen data</td></tr>';
+        dailyStatsBody.innerHTML = '<tr><td colspan="5" class="no-data">Ingen data</td></tr>';
         return;
     }
     
@@ -359,7 +359,6 @@ function displayDailyStats(dailyStats) {
             <td class="number">${day.count}</td>
             <td>${firstTime}</td>
             <td>${lastTime}</td>
-            <td class="number">${day.hoursOpen.toFixed(1)}</td>
             <td class="number">${day.customersPerHour}</td>
         `;
         
@@ -437,7 +436,7 @@ function resetDisplay() {
     avgPerDayEl.textContent = '-';
     avgPerHourEl.textContent = '-';
     
-    dailyStatsBody.innerHTML = '<tr><td colspan="6" class="no-data">Ingen data för vald period</td></tr>';
+    dailyStatsBody.innerHTML = '<tr><td colspan="5" class="no-data">Ingen data för vald period</td></tr>';
     hourlyChartEl.innerHTML = '<p class="no-data">Ingen data att visa</p>';
     detailsBody.innerHTML = '';
 }
