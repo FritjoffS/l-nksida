@@ -1,21 +1,26 @@
-import { database, ref, get, onValue } from '../scripts/firebase-config.js';
+import { database, ref, get, onValue, set, update } from '../scripts/firebase-config.js';
 
 // DOM-element
 let startDateInput, endDateInput, loadDataBtn, todayBtn, weekBtn, monthBtn;
+let deviceFilterSelect, manageDevicesBtn, deviceModal, closeModalBtn, devicesListEl;
 let totalCountEl, totalDaysEl, avgPerDayEl, avgPerHourEl;
 let dailyStatsBody, hourlyChartEl, detailsBody, detailsContainer, showDetailsToggle;
+let deviceStatsContainer;
 let loadingOverlay, messageBox;
 
 // Data cache
 let currentData = null;
 let activeListener = null;
 let isLiveMode = false;
+let allDevices = {};
+let selectedDeviceId = 'all';
 
 // Initialisera sidan
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initializeElements();
     attachEventListeners();
     setTodayAsDefault();
+    await loadDevices(); // Vänta på att enheter laddas först
     setupLiveUpdates(); // Starta live-uppdateringar för idag
 });
 
@@ -29,6 +34,15 @@ function initializeElements() {
     todayBtn = document.getElementById('todayBtn');
     weekBtn = document.getElementById('weekBtn');
     monthBtn = document.getElementById('monthBtn');
+    manageDevicesBtn = document.getElementById('manageDevicesBtn');
+    
+    // Device filter
+    deviceFilterSelect = document.getElementById('deviceFilter');
+    
+    // Modal
+    deviceModal = document.getElementById('deviceModal');
+    closeModalBtn = document.getElementById('closeModal');
+    devicesListEl = document.getElementById('devicesList');
     
     // Sammanfattning
     totalCountEl = document.getElementById('totalCount');
@@ -39,6 +53,7 @@ function initializeElements() {
     // Tabeller och diagram
     dailyStatsBody = document.getElementById('dailyStatsBody');
     hourlyChartEl = document.getElementById('hourlyChart');
+    deviceStatsContainer = document.getElementById('deviceStatsContainer');
     detailsBody = document.getElementById('detailsBody');
     detailsContainer = document.getElementById('detailsContainer');
     showDetailsToggle = document.getElementById('showDetailsToggle');
@@ -54,6 +69,16 @@ function attachEventListeners() {
     weekBtn.addEventListener('click', setWeekPeriod);
     monthBtn.addEventListener('click', setMonthPeriod);
     showDetailsToggle.addEventListener('change', toggleDetails);
+    manageDevicesBtn.addEventListener('click', openDeviceModal);
+    closeModalBtn.addEventListener('click', closeDeviceModal);
+    deviceFilterSelect.addEventListener('change', handleDeviceFilter);
+    
+    // Stäng modal vid klick utanför
+    deviceModal.addEventListener('click', (e) => {
+        if (e.target === deviceModal) {
+            closeDeviceModal();
+        }
+    });
 }
 
 function setTodayAsDefault() {
@@ -97,6 +122,262 @@ function toggleDetails() {
         }
     } else {
         detailsContainer.style.display = 'none';
+    }
+}
+
+// =================================
+// Device Management
+// =================================
+
+async function loadDevices() {
+    try {
+        const devicesRef = ref(database, 'devices');
+        const snapshot = await get(devicesRef);
+        
+        if (snapshot.exists()) {
+            allDevices = snapshot.val();
+        } else {
+            allDevices = {};
+        }
+        
+        updateDeviceFilter();
+        
+        // Lyssna på ändringar i devices
+        onValue(devicesRef, (snapshot) => {
+            if (snapshot.exists()) {
+                allDevices = snapshot.val();
+                updateDeviceFilter();
+                
+                // Uppdatera data om en enhet har ändrats
+                if (currentData) {
+                    displayDeviceStats(currentData);
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Fel vid laddning av enheter:', error);
+    }
+}
+
+function updateDeviceFilter() {
+    const currentSelection = deviceFilterSelect.value;
+    deviceFilterSelect.innerHTML = '<option value="all">Alla enheter</option>';
+    
+    Object.keys(allDevices).forEach(deviceId => {
+        const device = allDevices[deviceId];
+        const option = document.createElement('option');
+        option.value = deviceId;
+        option.textContent = device.name || `Device-${deviceId}`;
+        deviceFilterSelect.appendChild(option);
+    });
+    
+    // Återställ valet om det fortfarande finns
+    if (currentSelection && (currentSelection === 'all' || allDevices[currentSelection])) {
+        deviceFilterSelect.value = currentSelection;
+    }
+}
+
+function handleDeviceFilter() {
+    selectedDeviceId = deviceFilterSelect.value;
+    
+    if (currentData) {
+        // Filtrera och visa data igen
+        const filteredData = filterDataByDevice(currentData, selectedDeviceId);
+        displayData(filteredData);
+    }
+}
+
+function filterDataByDevice(data, deviceId) {
+    if (deviceId === 'all') {
+        return data;
+    }
+    
+    const filteredEntries = data.entries.filter(entry => entry.device_id === deviceId);
+    
+    return {
+        ...data,
+        entries: filteredEntries
+    };
+}
+
+function openDeviceModal() {
+    deviceModal.style.display = 'flex';
+    renderDevicesList();
+}
+
+function closeDeviceModal() {
+    deviceModal.style.display = 'none';
+}
+
+async function renderDevicesList() {
+    devicesListEl.innerHTML = '<p class="no-data">Laddar enheter...</p>';
+    
+    try {
+        const devicesRef = ref(database, 'devices');
+        const snapshot = await get(devicesRef);
+        
+        if (snapshot.exists()) {
+            const devices = snapshot.val();
+            devicesListEl.innerHTML = '';
+            
+            // Sortera efter device_id
+            const sortedDeviceIds = Object.keys(devices).sort();
+            
+            sortedDeviceIds.forEach(deviceId => {
+                const device = devices[deviceId];
+                const deviceItem = createDeviceItem(deviceId, device);
+                devicesListEl.appendChild(deviceItem);
+            });
+        } else {
+            devicesListEl.innerHTML = '<p class="no-data">Inga enheter hittades. Enheter kommer automatiskt att upptäckas när de loggar data.</p>';
+        }
+    } catch (error) {
+        console.error('Fel vid hämtning av enheter:', error);
+        devicesListEl.innerHTML = '<p class="no-data">Kunde inte ladda enheter</p>';
+    }
+}
+
+function createDeviceItem(deviceId, device) {
+    const item = document.createElement('div');
+    item.className = 'device-item';
+    
+    const isNew = device.first_seen && isRecentlyAdded(device.first_seen);
+    const statusClass = device.active !== false ? 'active' : 'inactive';
+    const statusText = device.active !== false ? 'Aktiv' : 'Inaktiv';
+    
+    item.innerHTML = `
+        <div class="device-item-header">
+            <div class="device-item-info">
+                <div class="device-item-name">
+                    ${device.name || `Device-${deviceId}`}
+                    ${isNew ? '<span class="new-device-badge">NY</span>' : ''}
+                </div>
+                <div class="device-item-id">ID: ${deviceId}</div>
+            </div>
+            <div class="device-status ${statusClass}">${statusText}</div>
+        </div>
+        <div class="device-item-details">
+            <div><strong>MAC:</strong> ${device.mac_address || '-'}</div>
+            <div><strong>Först sedd:</strong> ${device.first_seen || '-'}</div>
+            <div><strong>Senast sedd:</strong> ${device.last_seen || '-'}</div>
+        </div>
+        <div class="device-item-actions">
+            <input type="text" 
+                   id="name-${deviceId}" 
+                   placeholder="Ange namn..." 
+                   value="${device.name || ''}"
+                   data-device-id="${deviceId}">
+            <button class="btn btn-small btn-success" onclick="saveDeviceName('${deviceId}')">
+                💾 Spara namn
+            </button>
+            <button class="btn btn-small ${device.active !== false ? 'btn-danger' : 'btn-success'}" 
+                    onclick="toggleDeviceActive('${deviceId}', ${device.active !== false})">
+                ${device.active !== false ? '🚫 Inaktivera' : '✅ Aktivera'}
+            </button>
+        </div>
+    `;
+    
+    return item;
+}
+
+function isRecentlyAdded(timestamp) {
+    const now = new Date();
+    const added = new Date(timestamp);
+    const hoursDiff = (now - added) / (1000 * 60 * 60);
+    return hoursDiff < 24; // Ny om mindre än 24 timmar
+}
+
+// Globala funktioner för att anropas från HTML
+window.saveDeviceName = async function(deviceId) {
+    const nameInput = document.getElementById(`name-${deviceId}`);
+    const newName = nameInput.value.trim();
+    
+    if (!newName) {
+        showMessage('Ange ett namn för enheten', 'warning');
+        return;
+    }
+    
+    try {
+        const deviceRef = ref(database, `devices/${deviceId}`);
+        await update(deviceRef, { name: newName });
+        
+        allDevices[deviceId].name = newName;
+        updateDeviceFilter();
+        showMessage('Enhetsnamn sparat', 'success');
+    } catch (error) {
+        console.error('Fel vid sparande av enhetsnamn:', error);
+        showMessage('Kunde inte spara enhetsnamn', 'error');
+    }
+};
+
+window.toggleDeviceActive = async function(deviceId, currentlyActive) {
+    try {
+        const deviceRef = ref(database, `devices/${deviceId}`);
+        const newActiveState = !currentlyActive;
+        
+        await update(deviceRef, { active: newActiveState });
+        
+        allDevices[deviceId].active = newActiveState;
+        renderDevicesList();
+        showMessage(`Enhet ${newActiveState ? 'aktiverad' : 'inaktiverad'}`, 'success');
+    } catch (error) {
+        console.error('Fel vid ändring av enhetsstatus:', error);
+        showMessage('Kunde inte ändra enhetsstatus', 'error');
+    }
+};
+
+async function detectAndRegisterDevice(entry) {
+    const deviceId = entry.device_id;
+    
+    if (!deviceId) {
+        return; // Ingen device_id
+    }
+    
+    // Kolla först i cache
+    if (allDevices[deviceId]) {
+        return; // Enheten finns redan
+    }
+    
+    // Dubbelkolla i Firebase för att undvika race conditions
+    try {
+        const deviceRef = ref(database, `devices/${deviceId}`);
+        const snapshot = await get(deviceRef);
+        
+        if (snapshot.exists()) {
+            // Enheten finns redan i Firebase, uppdatera bara cache
+            allDevices[deviceId] = snapshot.val();
+            updateDeviceFilter();
+            return;
+        }
+        
+        // Ny enhet - registrera den
+        const newDevice = {
+            device_id: deviceId,
+            name: entry.device_name || `Device-${deviceId}`,
+            mac_address: entry.mac_address || '',
+            first_seen: entry.timestamp,
+            last_seen: entry.timestamp,
+            active: true
+        };
+        
+        await set(deviceRef, newDevice);
+        allDevices[deviceId] = newDevice;
+        
+        updateDeviceFilter();
+        showMessage(`Ny enhet upptäckt: ${deviceId}`, 'info');
+    } catch (error) {
+        console.error('Fel vid registrering av ny enhet:', error);
+    }
+}
+
+async function updateDeviceLastSeen(deviceId, timestamp) {
+    if (!deviceId || !allDevices[deviceId]) return;
+    
+    try {
+        const deviceRef = ref(database, `devices/${deviceId}`);
+        await update(deviceRef, { last_seen: timestamp });
+    } catch (error) {
+        console.error('Fel vid uppdatering av last_seen:', error);
     }
 }
 
@@ -162,11 +443,18 @@ async function fetchCustomerData(startDate, endDate) {
                 const dayData = snapshot.val();
                 // Konvertera till array med datum
                 Object.keys(dayData).forEach(key => {
-                    allEntries.push({
+                    const entry = {
                         ...dayData[key],
                         id: key,
                         date: `${year}-${month}-${day}`
-                    });
+                    };
+                    allEntries.push(entry);
+                    
+                    // Upptäck och registrera nya enheter
+                    if (entry.device_id) {
+                        detectAndRegisterDevice(entry);
+                        updateDeviceLastSeen(entry.device_id, entry.timestamp);
+                    }
                 });
             }
         } catch (error) {
@@ -191,8 +479,12 @@ async function fetchCustomerData(startDate, endDate) {
 function displayData(data) {
     const { entries } = data;
     
+    // Filtrera enligt vald enhet
+    const filteredData = filterDataByDevice(data, selectedDeviceId);
+    const filteredEntries = filteredData.entries;
+    
     // Beräkna statistik
-    const stats = calculateStatistics(entries);
+    const stats = calculateStatistics(filteredEntries);
     
     // Uppdatera sammanfattning
     updateSummary(stats);
@@ -200,12 +492,15 @@ function displayData(data) {
     // Visa dagsstatistik
     displayDailyStats(stats.dailyStats);
     
+    // Visa device-statistik (använd original data, inte filtrerad)
+    displayDeviceStats(data);
+    
     // Visa timstatistik
     displayHourlyStats(stats.hourlyStats);
     
-    // Visa detaljer om toggle är på
+    // Visa detaljer om toggle är på (använd filtrerad data)
     if (showDetailsToggle.checked) {
-        displayDetails(data);
+        displayDetails(filteredData);
     }
 }
 
@@ -406,6 +701,62 @@ function displayHourlyStats(hourlyStats) {
     }
 }
 
+function displayDeviceStats(data) {
+    deviceStatsContainer.innerHTML = '';
+    
+    if (data.entries.length === 0) {
+        deviceStatsContainer.innerHTML = '<p class="no-data">Ingen data att visa</p>';
+        return;
+    }
+    
+    // Gruppera per device
+    const deviceData = {};
+    let totalCount = 0;
+    
+    data.entries.forEach(entry => {
+        const deviceId = entry.device_id || 'unknown';
+        
+        if (!deviceData[deviceId]) {
+            deviceData[deviceId] = {
+                deviceId,
+                count: 0,
+                name: entry.device_name || allDevices[deviceId]?.name || `Device-${deviceId}`
+            };
+        }
+        
+        deviceData[deviceId].count += (entry.count || 1);
+        totalCount += (entry.count || 1);
+    });
+    
+    // Sortera efter antal (högst först)
+    const sortedDevices = Object.values(deviceData).sort((a, b) => b.count - a.count);
+    
+    if (sortedDevices.length === 0) {
+        deviceStatsContainer.innerHTML = '<p class="no-data">Ingen device-data tillgänglig</p>';
+        return;
+    }
+    
+    // Skapa kort för varje device
+    sortedDevices.forEach(device => {
+        const percentage = totalCount > 0 ? ((device.count / totalCount) * 100).toFixed(1) : 0;
+        
+        const card = document.createElement('div');
+        card.className = 'device-stat-card';
+        
+        card.innerHTML = `
+            <div class="device-stat-header">
+                <div class="device-stat-name">${device.name}</div>
+                <div class="device-stat-id">#${device.deviceId}</div>
+            </div>
+            <div class="device-stat-count">${device.count}</div>
+            <div class="device-stat-label">kunder</div>
+            <div class="device-stat-percentage">${percentage}% av totalt</div>
+        `;
+        
+        deviceStatsContainer.appendChild(card);
+    });
+}
+
 function displayDetails(data) {
     detailsBody.innerHTML = '';
     
@@ -420,10 +771,14 @@ function displayDetails(data) {
     entriesToShow.reverse().forEach(entry => {
         const row = document.createElement('tr');
         
+        const deviceId = entry.device_id || '-';
+        const deviceName = allDevices[deviceId]?.name || entry.device_name || deviceId;
+        const displayDevice = deviceId !== '-' ? `${deviceName} (${deviceId})` : '-';
+        
         row.innerHTML = `
             <td>${entry.timestamp}</td>
-            <td>${entry.device || '-'}</td>
-            <td class="number">${entry.count}</td>
+            <td>${displayDevice}</td>
+            <td class="number">${entry.count || 1}</td>
         `;
         
         detailsBody.appendChild(row);
@@ -438,6 +793,7 @@ function resetDisplay() {
     
     dailyStatsBody.innerHTML = '<tr><td colspan="5" class="no-data">Ingen data för vald period</td></tr>';
     hourlyChartEl.innerHTML = '<p class="no-data">Ingen data att visa</p>';
+    deviceStatsContainer.innerHTML = '<p class="no-data">Ingen data att visa</p>';
     detailsBody.innerHTML = '';
 }
 
