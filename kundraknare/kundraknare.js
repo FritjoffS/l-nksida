@@ -408,7 +408,7 @@ function displayHourlyStats(hourlyStats, selectedDayDate) {
         });
         hourlySection.textContent = `Fördelning per timme - ${dateStr}`;
     } else {
-        hourlySection.textContent = 'Fördelning per timme';
+        hourlySection.textContent = 'Fördelning per timme i dag';
     }
     
     // Hitta max för skalning
