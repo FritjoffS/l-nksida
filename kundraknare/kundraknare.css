@@ -218,6 +218,24 @@
     background: #f8f9fa;
 }
 
+.stats-table tbody tr.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.stats-table tbody tr.clickable-row:hover {
+    background: #e3f2fd;
+}
+
+.stats-table tbody tr.selected-row {
+    background: #bbdefb !important;
+    font-weight: 600;
+}
+
+.stats-table tbody tr.selected-row:hover {
+    background: #90caf9 !important;
+}
+
 .stats-table .number {
     text-align: right;
     font-weight: 600;
