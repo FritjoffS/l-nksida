@@ -69,10 +69,15 @@ function setTodayPeriod() {
 
 function setWeekPeriod() {
     const today = new Date();
-    const weekAgo = new Date(today);
-    weekAgo.setDate(today.getDate() - 7);
+    const dayOfWeek = today.getDay(); // 0 = söndag, 1 = måndag, etc.
     
-    startDateInput.value = weekAgo.toISOString().split('T')[0];
+    // Beräkna antal dagar tillbaka till senaste måndag
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - daysToMonday);
+    
+    startDateInput.value = monday.toISOString().split('T')[0];
     endDateInput.value = today.toISOString().split('T')[0];
     stopLiveUpdates();
     loadData();
@@ -80,10 +85,9 @@ function setWeekPeriod() {
 
 function setMonthPeriod() {
     const today = new Date();
-    const monthAgo = new Date(today);
-    monthAgo.setMonth(today.getMonth() - 1);
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     
-    startDateInput.value = monthAgo.toISOString().split('T')[0];
+    startDateInput.value = firstDayOfMonth.toISOString().split('T')[0];
     endDateInput.value = today.toISOString().split('T')[0];
     stopLiveUpdates();
     loadData();
