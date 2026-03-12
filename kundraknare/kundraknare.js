@@ -10,6 +10,8 @@ let loadingOverlay, messageBox;
 let currentData = null;
 let activeListener = null;
 let isLiveMode = false;
+let currentDailyStats = null;
+let selectedDate = null;
 
 // Initialisera sidan
 document.addEventListener('DOMContentLoaded', () => {
@@ -198,14 +200,18 @@ function displayData(data) {
     // Beräkna statistik
     const stats = calculateStatistics(entries);
     
+    // Spara dagstatistik för senare användning
+    currentDailyStats = stats.dailyStats;
+    selectedDate = null;
+    
     // Uppdatera sammanfattning
     updateSummary(stats);
     
     // Visa dagsstatistik
     displayDailyStats(stats.dailyStats);
     
-    // Visa timstatistik
-    displayHourlyStats(stats.hourlyStats);
+    // Visa timstatistik (genomsnitt över alla dagar)
+    displayHourlyStats(stats.hourlyStats, null);
     
     // Visa detaljer om toggle är på
     if (showDetailsToggle.checked) {
@@ -338,6 +344,13 @@ function displayDailyStats(dailyStats) {
     
     dailyStats.forEach(day => {
         const row = document.createElement('tr');
+        row.classList.add('clickable-row');
+        row.dataset.date = day.date;
+        
+        // Markera vald rad
+        if (selectedDate === day.date) {
+            row.classList.add('selected-row');
+        }
         
         // Formatera datum
         const dateObj = new Date(day.date);
@@ -366,16 +379,36 @@ function displayDailyStats(dailyStats) {
             <td class="number">${day.customersPerHour}</td>
         `;
         
+        // Lägg till klickhändelse
+        row.addEventListener('click', () => {
+            showHourlyStatsForDay(day);
+        });
+        
         dailyStatsBody.appendChild(row);
     });
 }
 
-function displayHourlyStats(hourlyStats) {
+function displayHourlyStats(hourlyStats, selectedDayDate) {
     hourlyChartEl.innerHTML = '';
     
     if (Object.keys(hourlyStats).length === 0) {
         hourlyChartEl.innerHTML = '<p class="no-data">Ingen data att visa</p>';
         return;
+    }
+    
+    // Uppdatera rubrik baserat på om en dag är vald
+    const hourlySection = document.querySelector('.hourly-stats h2');
+    if (selectedDayDate) {
+        const dateObj = new Date(selectedDayDate);
+        const dateStr = dateObj.toLocaleDateString('sv-SE', { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+        hourlySection.textContent = `Fördelning per timme - ${dateStr}`;
+    } else {
+        hourlySection.textContent = 'Fördelning per timme';
     }
     
     // Hitta max för skalning
@@ -392,7 +425,12 @@ function displayHourlyStats(hourlyStats) {
         const bar = document.createElement('div');
         bar.className = 'hour-bar';
         bar.style.height = `${percentage}%`;
-        bar.title = `${hour}:00 - ${value.toFixed(1)} registreringar/dag`;
+        
+        if (selectedDayDate) {
+            bar.title = `${hour}:00 - ${Math.round(value)} registreringar`;
+        } else {
+            bar.title = `${hour}:00 - ${value.toFixed(1)} registreringar/dag`;
+        }
         
         const label = document.createElement('div');
         label.className = 'hour-label';
@@ -400,7 +438,11 @@ function displayHourlyStats(hourlyStats) {
         
         const valueLabel = document.createElement('div');
         valueLabel.className = 'hour-value';
-        valueLabel.textContent = value > 0 ? value.toFixed(1) : '';
+        if (selectedDayDate) {
+            valueLabel.textContent = value > 0 ? Math.round(value) : '';
+        } else {
+            valueLabel.textContent = value > 0 ? value.toFixed(1) : '';
+        }
         
         barContainer.appendChild(valueLabel);
         barContainer.appendChild(bar);
@@ -408,6 +450,30 @@ function displayHourlyStats(hourlyStats) {
         
         hourlyChartEl.appendChild(barContainer);
     }
+}
+
+function showHourlyStatsForDay(day) {
+    selectedDate = day.date;
+    
+    // Beräkna timstatistik för denna specifika dag
+    const hourlyStats = {};
+    
+    day.entries.forEach(entry => {
+        const hour = new Date(entry.timestamp).getHours();
+        
+        if (!hourlyStats[hour]) {
+            hourlyStats[hour] = 0;
+        }
+        
+        hourlyStats[hour] += 1;
+    });
+    
+    // Uppdatera displayen
+    displayDailyStats(currentDailyStats); // Uppdatera för att markera vald rad
+    displayHourlyStats(hourlyStats, day.date);
+    
+    // Scrolla till timdiagrammet
+    document.querySelector('.hourly-stats').scrollIntoView({ behavior: 'smooth' });
 }
 
 function displayDetails(data) {
