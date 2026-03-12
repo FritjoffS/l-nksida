@@ -28,10 +28,17 @@
                     <label for="endDate">Till datum:</label>
                     <input type="date" id="endDate">
                 </div>
+                <div class="date-input-group">
+                    <label for="deviceFilter">Filtrera enhet:</label>
+                    <select id="deviceFilter" class="device-select">
+                        <option value="all">Alla enheter</option>
+                    </select>
+                </div>
                 <button id="loadDataBtn" class="btn btn-primary">Hämta data</button>
                 <button id="todayBtn" class="btn btn-secondary">Idag (Live)</button>
                 <button id="weekBtn" class="btn btn-secondary">Denna vecka</button>
                 <button id="monthBtn" class="btn btn-secondary">Denna månad</button>
+                <button id="manageDevicesBtn" class="btn btn-manage">⚙️ Hantera enheter</button>
             </div>
         </section>
 
@@ -96,6 +103,14 @@
             </div>
         </section>
 
+        <!-- Statistik per enhet -->
+        <section class="device-stats">
+            <h2>Statistik per enhet</h2>
+            <div id="deviceStatsContainer" class="device-stats-grid">
+                <p class="no-data">Ingen data att visa</p>
+            </div>
+        </section>
+
         <!-- Statistik per timme -->
         <section class="hourly-stats">
             <h2>Fördelning per timme (genomsnitt)</h2>
@@ -118,7 +133,7 @@
                         <tr>
                             <th>Tidsstämpel</th>
                             <th>Enhet</th>
-                            <th>Antal (ack.)</th>
+                            <th>Antal kunder</th>
                         </tr>
                     </thead>
                     <tbody id="detailsBody">
@@ -135,6 +150,21 @@
 
         <div id="messageBox" class="message-box" style="display: none;"></div>
     </main>
+
+    <!-- Device Management Modal -->
+    <div id="deviceModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Hantera enheter</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="devices-list" id="devicesList">
+                    <p class="no-data">Laddar enheter...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="../scripts/loadNavbar.js"></script>
     <script type="module" src="kundraknare.js"></script>
