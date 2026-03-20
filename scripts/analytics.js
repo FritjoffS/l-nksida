@@ -1,7 +1,7 @@
 // Google Analytics Configuration
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+import { getAnalytics, logEvent, isSupported } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
 
 // Your web app's Firebase configuration for Analytics
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -16,21 +16,38 @@ const analyticsConfig = {
   measurementId: "G-2JNJPN33L9"
 };
 
-// Initialize Firebase Analytics (separate from the main Firebase app)
-const analyticsApp = initializeApp(analyticsConfig, "analytics");
-const analytics = getAnalytics(analyticsApp);
+// Initialize Firebase Analytics only if supported (checks for IndexedDB availability)
+let analytics = null;
 
-// Log page view
-logEvent(analytics, 'page_view', {
-  page_title: document.title,
-  page_location: window.location.href
+isSupported().then((supported) => {
+  if (supported) {
+    // Initialize Firebase Analytics (separate from the main Firebase app)
+    const analyticsApp = initializeApp(analyticsConfig, "analytics");
+    analytics = getAnalytics(analyticsApp);
+    
+    // Log page view
+    logEvent(analytics, 'page_view', {
+      page_title: document.title,
+      page_location: window.location.href
+    });
+    
+    // Export analytics for use in other scripts if needed
+    window.firebaseAnalytics = analytics;
+    
+    console.log('Google Analytics initialized for L-nksida');
+  } else {
+    console.log('Google Analytics not supported in this environment (IndexedDB unavailable)');
+  }
+}).catch((error) => {
+  console.error('Error checking Analytics support:', error);
 });
-
-// Export analytics for use in other scripts if needed
-window.firebaseAnalytics = analytics;
 
 // Helper function to log custom events
 window.logAnalyticsEvent = function(eventName, parameters = {}) {
+  if (!analytics) {
+    console.log('Analytics not available, skipping event:', eventName);
+    return;
+  }
   try {
     logEvent(analytics, eventName, parameters);
     console.log('Analytics event logged:', eventName, parameters);
@@ -61,5 +78,3 @@ window.logAdminAction = function(action, details = null) {
   
   window.logAnalyticsEvent('admin_action', eventData);
 };
-
-console.log('Google Analytics initialized for L-nksida');
