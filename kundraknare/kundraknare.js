@@ -724,8 +724,8 @@ function displayDeviceStats(data) {
             };
         }
         
-        deviceData[deviceId].count += (entry.count || 1);
-        totalCount += (entry.count || 1);
+        deviceData[deviceId].count += 1;
+        totalCount += 1;
     });
     
     // Sortera efter antal (högst först)
@@ -778,7 +778,7 @@ function displayDetails(data) {
         row.innerHTML = `
             <td>${entry.timestamp}</td>
             <td>${displayDevice}</td>
-            <td class="number">${entry.count || 1}</td>
+            <td class="number">1</td>
         `;
         
         detailsBody.appendChild(row);
