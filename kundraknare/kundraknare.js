@@ -1,4 +1,4 @@
-import { database, ref, get, onValue, set, update } from '../scripts/firebase-config.js';
+import { auth, database, ref, get, onValue, set, update, onAuthStateChanged, signOut } from '../scripts/firebase-config.js';
 
 // DOM-element
 let startDateInput, endDateInput, loadDataBtn, todayBtn, weekBtn, monthBtn;
@@ -14,15 +14,40 @@ let activeListener = null;
 let isLiveMode = false;
 let allDevices = {};
 let selectedDeviceId = 'all';
+let currentUser = null;
 
 // Initialisera sidan
 document.addEventListener('DOMContentLoaded', async () => {
+    // Check authentication first
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            // Not logged in, redirect to login page
+            window.location.href = '../index/login.html';
+        } else {
+            // User is logged in
+            currentUser = user;
+            await initializeApp();
+        }
+    });
+});
+
+// Initialize the app after authentication is confirmed
+async function initializeApp() {
     initializeElements();
     attachEventListeners();
     setTodayAsDefault();
     await loadDevices(); // Vänta på att enheter laddas först
     setupLiveUpdates(); // Starta live-uppdateringar för idag
-});
+}
+
+// Logout function (accessible from navbar)
+window.logout = () => {
+    signOut(auth).then(() => {
+        window.location.href = '../index/login.html';
+    }).catch((error) => {
+        console.error('Logout error:', error);
+    });
+};
 
 function initializeElements() {
     // Datuminmatning
