@@ -55,7 +55,7 @@
 
 <body>
 
-    <!-- <div id="navbar"></div> <!-- Placeholder for the navbar -->
+    <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
     <div id="container">
         <h1>Beräkna Fraktkostnad</h1>
@@ -90,7 +90,6 @@
         <div id="result"></div>
     </div>
 
-    <script src="../scripts/frakt.js"></script>
     <script src="../scripts/loadNavbar.js"></script>
 
 
@@ -135,6 +134,41 @@
             };
         }
 
+        // Geocode en adress till koordinater med Nominatim (gratis)
+        async function geocodeAddress(address) {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}, Sverige&limit=1`;
+            const response = await fetch(url, {
+                headers: {
+                    'User-Agent': 'FraktApp/1.0' // Nominatim kräver User-Agent
+                }
+            });
+            const data = await response.json();
+            if (data.length > 0) {
+                return {
+                    lat: parseFloat(data[0].lat),
+                    lon: parseFloat(data[0].lon),
+                    display_name: data[0].display_name
+                };
+            }
+            throw new Error('Adressen kunde inte hittas');
+        }
+
+        // Beräkna köravstånd med OSRM (gratis)
+        async function calculateRoute(fromLat, fromLon, toLat, toLon) {
+            const url = `https://router.project-osrm.org/route/v1/driving/${fromLon},${fromLat};${toLon},${toLat}?overview=false`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                const route = data.routes[0];
+                return {
+                    distance: route.distance, // meter
+                    duration: route.duration  // sekunder
+                };
+            }
+            throw new Error('Ingen rutt kunde beräknas');
+        }
+
         function roundToTwo(v) {
             return Math.round(v * 100) / 100;
         }
@@ -170,101 +204,69 @@
             }
 
             navigator.geolocation.getCurrentPosition(
-                successCallback,
-                errorCallback,
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
+                async (position) => {
+                    try {
+                        const userLat = position.coords.latitude;
+                        const userLon = position.coords.longitude;
 
-            function successCallback(position) {
-                const userLat = position.coords.latitude;
-                const userLon = position.coords.longitude;
-
-                if (typeof google === 'undefined' || !google.maps || !google.maps.DistanceMatrixService) {
-                    resultDiv.innerHTML = "Kart-API ej laddat. Försök ladda om sidan eller kontrollera API-nyckeln.";
-                    return;
-                }
-
-                const service = new google.maps.DistanceMatrixService();
-
-                service.getDistanceMatrix({
-                    origins: [{ lat: userLat, lng: userLon }],
-                    destinations: [destination],
-                    travelMode: 'DRIVING',
-                    unitSystem: google.maps.UnitSystem.METRIC
-                }, (response, status) => {
-                    if (status !== 'OK') {
-                        resultDiv.innerHTML = "Kunde inte hämta avstånd: " + status;
-                        return;
-                    }
-
-                    const element = response.rows[0].elements[0];
-                    if (element.status === "OK") {
-                        const distanceMeters = element.distance.value; // meter
-                        const distanceKm = distanceMeters / 1000;
-                        const durationText = element.duration ? element.duration.text : '';
-
+                        // Geocode destinationen
+                        const destCoords = await geocodeAddress(destination);
+                        
+                        // Beräkna rutten
+                        const route = await calculateRoute(userLat, userLon, destCoords.lat, destCoords.lon);
+                        
+                        const distanceKm = route.distance / 1000;
+                        const durationMinutes = Math.round(route.duration / 60);
                         const shipping = calculateShipping(distanceKm, baseFee, baseKm, perKmFee);
 
-                        resultDiv.innerHTML = `Avstånd: ${element.distance.text} <br> Tid: ${durationText} <br><br> Frakt: <strong>${shipping.total.toFixed(2)} SEK</strong><br> (${shipping.breakdown})`;
-                    } else {
-                        resultDiv.innerHTML = "Kunde inte hitta resmålet.";
+                        resultDiv.innerHTML = `Avstånd: ${distanceKm.toFixed(1)} km <br> Tid: ${durationMinutes} min <br><br> Frakt: <strong>${shipping.total.toFixed(2)} SEK</strong><br> (${shipping.breakdown})`;
+                    } catch (error) {
+                        console.error('Error:', error);
+                        resultDiv.innerHTML = "Kunde inte beräkna rutten: " + error.message + "<br><strong>Försök ange avsändaradress istället.</strong>";
                     }
-                });
-            }
-
-            // Felhantering vid platsdetektering
-            function errorCallback(error) {
-                let message = "";
-                switch (error.code) {
-                    case error.PERMISSION_DENIED:
-                        message = "Du nekade åtkomst till platsdata.";
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        message = "Platsinformation är inte tillgänglig.";
-                        break;
-                    case error.TIMEOUT:
-                        message = "Förfrågan tog för lång tid.";
-                        break;
-                    case error.UNKNOWN_ERROR:
-                    default:
-                        message = "Ett okänt fel inträffade vid hämtning av plats.";
-                        break;
-                }
-                resultDiv.innerHTML = message + " <br><strong>Fyll i avsändaradress ovan och försök igen.</strong>";
-            }
+                },
+                (error) => {
+                    let message = "";
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            message = "Du nekade åtkomst till platsdata.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message = "Platsinformation är inte tillgänglig.";
+                            break;
+                        case error.TIMEOUT:
+                            message = "Förfrågan tog för lång tid.";
+                            break;
+                        case error.UNKNOWN_ERROR:
+                        default:
+                            message = "Ett okänt fel inträffade vid hämtning av plats.";
+                            break;
+                    }
+                    resultDiv.innerHTML = message + " <br><strong>Fyll i avsändaradress ovan och försök igen.</strong>";
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
         }
 
         // Ny hjälpfunktion för att beräkna avstånd mellan två adresser
-        function calculateWithAddresses(origin, destination, baseFee, baseKm, perKmFee) {
+        async function calculateWithAddresses(origin, destination, baseFee, baseKm, perKmFee) {
             const resultDiv = document.getElementById("result");
 
-            if (typeof google === 'undefined' || !google.maps || !google.maps.DistanceMatrixService) {
-                resultDiv.innerHTML = "Kart-API ej laddat. Försök ladda om sidan eller kontrollera API-nyckeln.";
-                return;
-            }
+            try {
+                // Geocode båda adresserna
+                const originCoords = await geocodeAddress(origin);
+                const destCoords = await geocodeAddress(destination);
+                
+                // Beräkna rutten
+                const route = await calculateRoute(originCoords.lat, originCoords.lon, destCoords.lat, destCoords.lon);
+                
+                const distanceKm = route.distance / 1000;
+                const durationMinutes = Math.round(route.duration / 60);
+                const durationText = `${durationMinutes} min`;
 
-            const service = new google.maps.DistanceMatrixService();
-
-            service.getDistanceMatrix({
-                origins: [origin],
-                destinations: [destination],
-                travelMode: 'DRIVING',
-                unitSystem: google.maps.UnitSystem.METRIC
-            }, (response, status) => {
-                if (status !== 'OK') {
-                    resultDiv.innerHTML = "Kunde inte hämta avstånd: " + status + "<br>Kontrollera att adresserna är korrekta.";
-                    return;
-                }
-
-                const element = response.rows[0].elements[0];
-                if (element.status === "OK") {
-                    const distanceMeters = element.distance.value;
-                    const distanceKm = distanceMeters / 1000;
-                    const durationText = element.duration ? element.duration.text : '';
-
-                    const shipping = calculateShipping(distanceKm, baseFee, baseKm, perKmFee);
-                    
-                    let calculationDetails = '';
+                const shipping = calculateShipping(distanceKm, baseFee, baseKm, perKmFee);
+                
+                let calculationDetails = '';
                     if (shipping.details.withinBase) {
                         calculationDetails = `
                             <div style="background: #e8f5e9; padding: 10px; border-radius: 4px; margin: 8px 0; border-left: 4px solid #4caf50;">
@@ -311,11 +313,11 @@
                         `;
                     }
 
-                    const encodedOrigin = encodeURIComponent(origin);
-                    const encodedDestination = encodeURIComponent(destination);
-                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodedOrigin}&destination=${encodedDestination}&travelmode=driving`;
+                const encodedOrigin = encodeURIComponent(origin);
+                const encodedDestination = encodeURIComponent(destination);
+                const mapsUrl = `https://www.openstreetmap.org/directions?from=${encodedOrigin}&to=${encodedDestination}&engine=fossgis_osrm_car`;
 
-                    resultDiv.innerHTML = `
+                resultDiv.innerHTML = `
                         <div style="text-align: left; background: #f0f8ff; padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px solid #0078d7;">
                             <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
                                 <strong>📍 Från:</strong> ${origin}<br>
@@ -323,7 +325,7 @@
                             </div>
                             
                             <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                                <strong>🚗 Avstånd:</strong> ${element.distance.text}<br>
+                                <strong>🚗 Avstånd:</strong> ${distanceKm.toFixed(1)} km<br>
                                 <strong>⏱️ Beräknad tid:</strong> ${durationText}
                             </div>
                             
@@ -342,15 +344,19 @@
                             </div>
                         </div>
                     `;
-                } else {
-                    resultDiv.innerHTML = "Kunde inte hitta rutten mellan adresserna. Kontrollera att båda adresserna är korrekta.";
-                }
-            });
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <div style="background: #ffebee; padding: 15px; border-radius: 8px; text-align: left; margin-top: 15px; border-left: 4px solid #c62828;">
+                        <strong style="color: #c62828;">❌ Ett fel uppstod</strong><br>
+                        <p style="margin: 10px 0;">${error.message}</p>
+                        <p style="font-size: 14px; color: #666;">Kontrollera att adresserna är korrekta och försök igen.</p>
+                    </div>
+                `;
+            }
         }
     </script>
 
-    <script async
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1amhuBT0CsBMGwLOd5lmVS_8kfnub014&libraries=places">
-    </script>
+    <script src="../scripts/loadNavbar.js"></script>
 </body>
 </html>
