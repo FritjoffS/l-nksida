@@ -7,11 +7,24 @@
     <meta author="Name" content="Fredrik Söderberg">
     <title>Fraktkostnad</title>
 
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="../manifest.json" />
+    <meta name="theme-color" content="#ff6600" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Järnhandel" />
+    <link rel="apple-touch-icon" href="../logo.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Järnhandel" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
+
     <link rel="stylesheet" href="../styles/global.css">
     <link rel="stylesheet" href="../styles/navbar.css">
     <link rel="stylesheet" href="frakt.css">
 
-
+    <!-- Google Analytics -->
+    <script type="module" src="../scripts/analytics.js" async></script>
 </head>
 
 <body>
@@ -20,20 +33,21 @@
 
     <div id="container">
         <h1>Beräkna Fraktkostnad</h1>
-        
+
         <div style="margin: 15px 0; text-align: left; background: #e7f3ff; padding: 15px; border-radius: 8px;">
             <label><strong>Avsändaradress:</strong></label><br>
-            <input type="text" id="senderAddress" placeholder="T.ex. Gräfsnäsvägen 2, Sollebrunn" style="width: 95%; margin-top: 5px;">
+            <input type="text" id="senderAddress" placeholder="T.ex. Gräfsnäsvägen 2, Sollebrunn"
+                style="width: 95%; margin-top: 5px;">
             <small style="display: block; margin-top: 5px; color: #666;">Fyll i din avsändaradress här</small>
         </div>
-        
+
         <div style="margin: 15px 0; text-align: left;">
             <label><strong>Leveransadress:</strong></label><br>
             <input type="text" id="destination" placeholder="T.ex. Nossebro" style="width: 95%; margin-top: 5px;">
         </div>
 
         <h3>Fraktinställningar</h3>
-        
+
         <div style="margin: 10px 0; text-align: left;">
             <label><strong>Fast fraktavgift:</strong> <small>(gäller upp till basdistansen)</small></label><br>
             <input type="number" id="baseFee" value="595" step="0.5" min="0" style="width: 150px;"> SEK
@@ -53,5 +67,43 @@
 
     <script src="../scripts/loadNavbar.js"></script>
     <script src="frakt.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(function (registration) {
+                        console.log('[PWA] Service Worker registered:', registration.scope);
+
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('[PWA] New Service Worker found');
+
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[PWA] Update available, auto-updating...');
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                    window.location.reload();
+                                }
+                            });
+                        });
+                    })
+                    .catch(function (err) {
+                        console.error('[PWA] Service Worker registration failed:', err);
+                    });
+
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        refreshing = true;
+                        console.log('[PWA] New Service Worker activated, reloading...');
+                        window.location.reload();
+                    }
+                });
+            });
+        }
+    </script>
 </body>
+
 </html>
