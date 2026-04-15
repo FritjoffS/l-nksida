@@ -7,72 +7,47 @@
     <meta author="Name" content="Fredrik Söderberg">
     <title>Fraktkostnad</title>
 
-    <link rel="stylesheet" href="../styles/navbar.css">
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="../manifest.json" />
+    <meta name="theme-color" content="#ff6600" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Järnhandel" />
+    <link rel="apple-touch-icon" href="../logo.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Järnhandel" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../images/logo_rund.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="../logo.png" />
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 40px;
-            text-align: center;
-        }
-        #container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 12px rgba(0,0,0,0.1);
-        }
-        input {
-            width: 80%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-        button {
-            padding: 10px 18px;
-            margin-top: 8px;
-            font-size: 16px;
-            background-color: #0078d7;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #005fa3;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 18px;
-            color: #333;
-        }
-    </style>
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/navbar.css">
+    <link rel="stylesheet" href="frakt.css">
+
+    <!-- Google Analytics -->
+    <script type="module" src="../scripts/analytics.js" async></script>
 </head>
 
 <body>
 
-    <!-- <div id="navbar"></div> <!-- Placeholder for the navbar -->
+    <div id="navbar"></div> <!-- Placeholder for the navbar -->
 
     <div id="container">
         <h1>Beräkna Fraktkostnad</h1>
-        
+
         <div style="margin: 15px 0; text-align: left; background: #e7f3ff; padding: 15px; border-radius: 8px;">
             <label><strong>Avsändaradress:</strong></label><br>
-            <input type="text" id="senderAddress" placeholder="T.ex. Gräfsnäsvägen 2, Sollebrunn" style="width: 95%; margin-top: 5px;">
+            <input type="text" id="senderAddress" placeholder="T.ex. Gräfsnäsvägen 2, Sollebrunn"
+                style="width: 95%; margin-top: 5px;">
             <small style="display: block; margin-top: 5px; color: #666;">Fyll i din avsändaradress här</small>
         </div>
-        
+
         <div style="margin: 15px 0; text-align: left;">
             <label><strong>Leveransadress:</strong></label><br>
             <input type="text" id="destination" placeholder="T.ex. Nossebro" style="width: 95%; margin-top: 5px;">
         </div>
 
         <h3>Fraktinställningar</h3>
-        
+
         <div style="margin: 10px 0; text-align: left;">
             <label><strong>Fast fraktavgift:</strong> <small>(gäller upp till basdistansen)</small></label><br>
             <input type="number" id="baseFee" value="595" step="0.5" min="0" style="width: 150px;"> SEK
@@ -90,267 +65,45 @@
         <div id="result"></div>
     </div>
 
-    <script src="../scripts/frakt.js"></script>
     <script src="../scripts/loadNavbar.js"></script>
+    <script src="frakt.js"></script>
 
-
+    <!-- PWA Service Worker Registration -->
     <script>
-        // beräkna frakt baserat på distans (km)
-        function calculateShipping(distanceKm, baseFee, baseKm, perKmFee) {
-            // säkerställ numeriska värden
-            distanceKm = Number(distanceKm) || 0;
-            baseFee = Number(baseFee) || 0;
-            baseKm = Number(baseKm) || 0;
-            perKmFee = Number(perKmFee) || 0;
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(function (registration) {
+                        console.log('[PWA] Service Worker registered:', registration.scope);
 
-            if (distanceKm <= baseKm) {
-                return {
-                    total: roundToTwo(baseFee),
-                    breakdown: `Fast avgift (distans ${distanceKm.toFixed(1)} km ≤ ${baseKm} km)`,
-                    details: {
-                        withinBase: true,
-                        distance: distanceKm,
-                        baseFee: baseFee,
-                        baseKm: baseKm
-                    }
-                };
-            }
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('[PWA] New Service Worker found');
 
-            const extraKm = distanceKm - baseKm;
-            const extraCost = extraKm * perKmFee;
-            const total = baseFee + extraCost;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[PWA] Update available, auto-updating...');
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                    window.location.reload();
+                                }
+                            });
+                        });
+                    })
+                    .catch(function (err) {
+                        console.error('[PWA] Service Worker registration failed:', err);
+                    });
 
-            return {
-                total: roundToTwo(total),
-                breakdown: `Fast avgift + tillägg för extra km`,
-                details: {
-                    withinBase: false,
-                    distance: distanceKm,
-                    baseFee: baseFee,
-                    baseKm: baseKm,
-                    extraKm: extraKm,
-                    perKmFee: perKmFee,
-                    extraCost: extraCost
-                }
-            };
-        }
-
-        function roundToTwo(v) {
-            return Math.round(v * 100) / 100;
-        }
-
-        function calculateDistance() {
-            const senderAddress = document.getElementById("senderAddress").value.trim();
-            const destination = document.getElementById("destination").value.trim();
-            const resultDiv = document.getElementById("result");
-
-            // läs fraktparametrar
-            const baseFee = parseFloat(document.getElementById('baseFee').value);
-            const baseKm = parseFloat(document.getElementById('baseKm').value);
-            const perKmFee = parseFloat(document.getElementById('perKmFee').value);
-
-            if (!destination) {
-                alert("Ange en leveransadress!");
-                return;
-            }
-
-            // Om avsändaradress är angiven, använd den direkt
-            if (senderAddress) {
-                resultDiv.innerHTML = "Beräknar avstånd från avsändaradress...";
-                calculateWithAddresses(senderAddress, destination, baseFee, baseKm, perKmFee);
-                return;
-            }
-
-            // Annars försök använda geolocation
-            resultDiv.innerHTML = "Försöker hämta din plats...";
-
-            if (!navigator.geolocation) {
-                resultDiv.innerHTML = "Din webbläsare stöder inte platsdelning. Fyll i avsändaradress istället.";
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                successCallback,
-                errorCallback,
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-
-            function successCallback(position) {
-                const userLat = position.coords.latitude;
-                const userLon = position.coords.longitude;
-
-                if (typeof google === 'undefined' || !google.maps || !google.maps.DistanceMatrixService) {
-                    resultDiv.innerHTML = "Kart-API ej laddat. Försök ladda om sidan eller kontrollera API-nyckeln.";
-                    return;
-                }
-
-                const service = new google.maps.DistanceMatrixService();
-
-                service.getDistanceMatrix({
-                    origins: [{ lat: userLat, lng: userLon }],
-                    destinations: [destination],
-                    travelMode: 'DRIVING',
-                    unitSystem: google.maps.UnitSystem.METRIC
-                }, (response, status) => {
-                    if (status !== 'OK') {
-                        resultDiv.innerHTML = "Kunde inte hämta avstånd: " + status;
-                        return;
-                    }
-
-                    const element = response.rows[0].elements[0];
-                    if (element.status === "OK") {
-                        const distanceMeters = element.distance.value; // meter
-                        const distanceKm = distanceMeters / 1000;
-                        const durationText = element.duration ? element.duration.text : '';
-
-                        const shipping = calculateShipping(distanceKm, baseFee, baseKm, perKmFee);
-
-                        resultDiv.innerHTML = `Avstånd: ${element.distance.text} <br> Tid: ${durationText} <br><br> Frakt: <strong>${shipping.total.toFixed(2)} SEK</strong><br> (${shipping.breakdown})`;
-                    } else {
-                        resultDiv.innerHTML = "Kunde inte hitta resmålet.";
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        refreshing = true;
+                        console.log('[PWA] New Service Worker activated, reloading...');
+                        window.location.reload();
                     }
                 });
-            }
-
-            // Felhantering vid platsdetektering
-            function errorCallback(error) {
-                let message = "";
-                switch (error.code) {
-                    case error.PERMISSION_DENIED:
-                        message = "Du nekade åtkomst till platsdata.";
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        message = "Platsinformation är inte tillgänglig.";
-                        break;
-                    case error.TIMEOUT:
-                        message = "Förfrågan tog för lång tid.";
-                        break;
-                    case error.UNKNOWN_ERROR:
-                    default:
-                        message = "Ett okänt fel inträffade vid hämtning av plats.";
-                        break;
-                }
-                resultDiv.innerHTML = message + " <br><strong>Fyll i avsändaradress ovan och försök igen.</strong>";
-            }
-        }
-
-        // Ny hjälpfunktion för att beräkna avstånd mellan två adresser
-        function calculateWithAddresses(origin, destination, baseFee, baseKm, perKmFee) {
-            const resultDiv = document.getElementById("result");
-
-            if (typeof google === 'undefined' || !google.maps || !google.maps.DistanceMatrixService) {
-                resultDiv.innerHTML = "Kart-API ej laddat. Försök ladda om sidan eller kontrollera API-nyckeln.";
-                return;
-            }
-
-            const service = new google.maps.DistanceMatrixService();
-
-            service.getDistanceMatrix({
-                origins: [origin],
-                destinations: [destination],
-                travelMode: 'DRIVING',
-                unitSystem: google.maps.UnitSystem.METRIC
-            }, (response, status) => {
-                if (status !== 'OK') {
-                    resultDiv.innerHTML = "Kunde inte hämta avstånd: " + status + "<br>Kontrollera att adresserna är korrekta.";
-                    return;
-                }
-
-                const element = response.rows[0].elements[0];
-                if (element.status === "OK") {
-                    const distanceMeters = element.distance.value;
-                    const distanceKm = distanceMeters / 1000;
-                    const durationText = element.duration ? element.duration.text : '';
-
-                    const shipping = calculateShipping(distanceKm, baseFee, baseKm, perKmFee);
-                    
-                    let calculationDetails = '';
-                    if (shipping.details.withinBase) {
-                        calculationDetails = `
-                            <div style="background: #e8f5e9; padding: 10px; border-radius: 4px; margin: 8px 0; border-left: 4px solid #4caf50;">
-                                <div style="font-weight: bold; color: #2e7d32; margin-bottom: 5px;">✓ Inom basdistansen</div>
-                                <div style="color: #555; font-size: 14px;">
-                                    Distans: ${shipping.details.distance.toFixed(1)} km<br>
-                                    Basdistans: ${shipping.details.baseKm} km<br>
-                                    Fast avgift: ${shipping.details.baseFee.toFixed(2)} SEK
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        calculationDetails = `
-                            <div style="background: #fff3e0; padding: 10px; border-radius: 4px; margin: 8px 0; border-left: 4px solid #ff9800;">
-                                <div style="font-weight: bold; color: #e65100; margin-bottom: 8px;">📊 Specifikation:</div>
-                                <table style="width: 100%; font-size: 14px; color: #555;">
-                                    <tr>
-                                        <td>Total distans:</td>
-                                        <td style="text-align: right;"><strong>${shipping.details.distance.toFixed(1)} km</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Basdistans (ingår i Fast avgift):</td>
-                                        <td style="text-align: right;">${shipping.details.baseKm} km</td>
-                                    </tr>
-                                    <tr style="border-top: 1px solid #ddd;">
-                                        <td>Extra kilometer:</td>
-                                        <td style="text-align: right;"><strong>${shipping.details.extraKm.toFixed(1)} km</strong></td>
-                                    </tr>
-                                    <tr style="height: 8px;"></tr>
-                                    <tr>
-                                        <td>Fast avgift:</td>
-                                        <td style="text-align: right;">${shipping.details.baseFee.toFixed(2)} SEK</td>
-                                    </tr>
-                                    <tr>
-                                        <td>${shipping.details.extraKm.toFixed(1)} km × ${shipping.details.perKmFee.toFixed(2)} SEK/km:</td>
-                                        <td style="text-align: right;">+ ${shipping.details.extraCost.toFixed(2)} SEK</td>
-                                    </tr>
-                                    <tr style="border-top: 2px solid #ff9800; font-weight: bold;">
-                                        <td>Totalt tillägg:</td>
-                                        <td style="text-align: right;">${shipping.details.extraCost.toFixed(2)} SEK</td>
-                                    </tr>
-                                </table>
-                            </div>
-                        `;
-                    }
-
-                    const encodedOrigin = encodeURIComponent(origin);
-                    const encodedDestination = encodeURIComponent(destination);
-                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodedOrigin}&destination=${encodedDestination}&travelmode=driving`;
-
-                    resultDiv.innerHTML = `
-                        <div style="text-align: left; background: #f0f8ff; padding: 15px; border-radius: 8px; margin-top: 15px; border: 2px solid #0078d7;">
-                            <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                                <strong>📍 Från:</strong> ${origin}<br>
-                                <strong>📍 Till:</strong> ${destination}<br>
-                            </div>
-                            
-                            <div style="background: white; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-                                <strong>🚗 Avstånd:</strong> ${element.distance.text}<br>
-                                <strong>⏱️ Beräknad tid:</strong> ${durationText}
-                            </div>
-                            
-                            ${calculationDetails}
-                            
-                            <div style="background: #0078d7; color: white; padding: 15px; border-radius: 6px; margin-top: 10px; text-align: center;">
-                                <div style="font-size: 16px; margin-bottom: 5px;">💰 FRAKTKOSTNAD</div>
-                                <div style="font-size: 28px; font-weight: bold;">${shipping.total.toFixed(2)} SEK</div>
-                                <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">(enkel väg)</div>
-                            </div>
-                            
-                            <div style="text-align: center; margin-top: 10px;">
-                                <a href="${mapsUrl}" target="_blank" style="display: inline-block; background: #34a853; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
-                                    🗺️ Visa resväg på karta
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    resultDiv.innerHTML = "Kunde inte hitta rutten mellan adresserna. Kontrollera att båda adresserna är korrekta.";
-                }
             });
         }
     </script>
-
-    <script async
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA1amhuBT0CsBMGwLOd5lmVS_8kfnub014&libraries=places">
-    </script>
 </body>
+
 </html>
