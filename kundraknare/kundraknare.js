@@ -8,6 +8,13 @@ let dailyStatsBody, hourlyChartEl, detailsBody, detailsContainer, showDetailsTog
 let deviceStatsContainer;
 let loadingOverlay, messageBox;
 
+// Authentication
+let currentUser = null;
+
+// Device management
+let allDevices = {};
+let selectedDeviceId = 'all';
+
 // Data cache
 let currentData = null;
 let activeListener = null;
