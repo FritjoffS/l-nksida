@@ -95,7 +95,7 @@
 /* Stor desktop (större än 1440px) */
 @media screen and (min-width: 1441px) {
   .container {
-    max-width: 1400px;
+    max-width: 1500px;
   }
   
   button {
