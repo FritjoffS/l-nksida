@@ -137,6 +137,12 @@ const NAV_CONFIG = {
           label: 'Guider',
           href: '../guider/guider.html',
           icon: 'https://res.cloudinary.com/dmtfxmepd/image/upload/v1770640786/guide_vofmkk.png'
+        },
+        {
+          id: 'motion',
+          label: 'Motion Sensor',
+          href: '../motion/motion.html',
+          icon: 'https://res.cloudinary.com/dmtfxmepd/image/upload/v1770640791/tools_ujccpd.png'
         }
       ]
     }

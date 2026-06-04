@@ -1,33 +1,65 @@
 # Motion Sensor Dashboard
 
-En enkel webbapp för att visualisera data från Motion Sensor Logger.
+En webbapp för att visualisera data från Motion Sensor Logger, integrerad i l-nksida-projektet.
 
 ## 🚀 Snabbstart
 
-1. **Öppna `index.html` i webbläsaren**
-   - Dubbelklicka på filen, eller
-   - Högerklicka → Öppna med → Webbläsare
+1. **Öppna `motion.html` i webbläsaren**
+   - Navigera via projektets huvudmeny, eller
+   - Öppna direkt: `motion/motion.html`
 
-2. **Konfigurera anslutning**
-   - Fyll i din Firebase Database URL (utan `https://`)
-   - Exempel: `your-project.europe-west1.firebasedatabase.app`
-   - Ange Device ID (samma som i ESP8266-koden)
+2. **Logga in**
+   - Appen kräver autentisering via Firebase Authentication
+   - Används automatiskt samma inloggning som resten av projektet
+
+3. **Konfigurera anslutning**
+   - Ange Device ID (samma som i ESP8266-koden, standard: 0001)
    - Klicka "Spara konfiguration"
 
-3. **Visa data**
+4. **Visa data**
    - Klicka "Ladda data"
-   - Dashboarden visar statistik och sessioner
+   - Dashboarden visar statistik och sessioner automatiskt
 
 ## 📊 Funktioner
 
+- ✅ **Integrerad autentisering** - Samma inloggning som resten av projektet
+- ✅ **Gemensam navigation** - Navbar med tillgång till alla funktioner
 - ✅ **Realtidsöversikt** - Status, dagens, veckans och total driftstid
 - ✅ **Sessionslista** - Alla sessioner med start/stopp-tid och varaktighet
 - ✅ **Filtrera data** - Idag, vecka, månad eller alla sessioner
 - ✅ **Automatisk konfiguration** - Sparar inställningar i localStorage
 - ✅ **Responsiv design** - Fungerar på mobil, tablet och desktop
-- ✅ **Ingen backend krävs** - Direkt anslutning till Firebase
+- ✅ **PWA-stöd** - Kan installeras som app
+- ✅ **Firebase-integration** - Använder projektets centrala Firebase-konfiguration
 
-## 🔧 Konfiguration
+## 🔧 Teknisk information
+
+### Filer
+
+- `motion.html` - Huvudsida (integrerad med projektets struktur)
+- `motion.js` - JavaScript-logik med Firebase-integration och autentisering
+- `motion.css` - Specifika stilar för motion sensor dashboard
+- `index.html` - Gammal fristående version (kan tas bort)
+
+### Firebase-struktur
+
+Data läses från följande struktur i Firebase Realtime Database:
+
+```
+motion/
+  {deviceId}/
+    status/
+      device_online: boolean
+      started_at: timestamp
+    events/
+      {year}/
+        {month}/
+          {day}/
+            {sessionId}/
+              timestamp_start: timestamp
+              timestamp_stop: timestamp
+              duration_ms: number
+```
 
 ### Firebase Security Rules
 
@@ -38,7 +70,7 @@ För att webappen ska kunna läsa data:
   "rules": {
     "motion": {
       "$deviceId": {
-        ".read": true,
+        ".read": "auth != null",
         ".write": true
       }
     }
@@ -46,7 +78,7 @@ För att webappen ska kunna läsa data:
 }
 ```
 
-⚠️ Detta tillåter publik läsning. För produktion, använd Firebase Authentication.
+⚠️ Skrivrättigheter är öppna för ESP8266. Läsrättigheter kräver autentisering.
 
 ## 🌐 Publicera online
 
