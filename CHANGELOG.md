@@ -2,6 +2,12 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.5.0] 260604
+
+## Tillagt
+
+ - Lagt till appen Motion
+
 ## [2.4.0] 260302
 
 ## Tillagt
