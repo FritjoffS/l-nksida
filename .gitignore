@@ -9,7 +9,7 @@ firebase-debug.log
 .firebase/
 firebase.rules.json
 firebase-init.js
-firebase-config.js
+scriptsfirebase-config.js
 firebase-*.json
 
 # Build outputs
