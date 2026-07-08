@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+import { getDatabase, ref, get, onValue, off } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 import { firebaseConfig } from "../scripts/firebase-config.js";
 
 // Initialize Firebase
@@ -11,15 +11,23 @@ const db = getDatabase(app);
 // DOM Elements
 const loadingOverlay = document.getElementById('loadingOverlay');
 const deviceIdInput = document.getElementById('device-id');
-const loadDataBtn = document.getElementById('loadDataBtn');
+const firebaseUrlInput = document.getElementById('firebase-url');
+const realtimeToggle = document.getElementById('realtime-toggle');
+const connectBtn = document.getElementById('connectBtn');
+const disconnectBtn = document.getElementById('disconnectBtn');
 const saveConfigBtn = document.getElementById('saveConfigBtn');
 const messageDiv = document.getElementById('message');
 const statsDiv = document.getElementById('stats');
 const sessionsList = document.getElementById('sessions-list');
+const connectionBadge = document.getElementById('connection-badge');
+const updateIndicator = document.getElementById('update-indicator');
 
 // State
 let allSessions = [];
 let currentFilter = 'all';
+let statusUnsubscribe = null;
+let eventsUnsubscribe = null;
+let isConnected = false;
 
 // Show/hide loading overlay
 function showLoading() {
@@ -101,46 +109,131 @@ function checkAuthState() {
 
 // Load saved configuration
 function loadSavedConfig() {
+  const savedUrl = localStorage.getItem('firebase-url');
   const savedDeviceId = localStorage.getItem('motion-device-id');
+  const realtimeEnabled = localStorage.getItem('realtime-enabled');
   
-  if (savedDeviceId) {
+  if (savedUrl && firebaseUrlInput) {
+    firebaseUrlInput.value = savedUrl;
+  }
+  if (savedDeviceId && deviceIdInput) {
     deviceIdInput.value = savedDeviceId;
-    // Auto-load data if config exists
-    loadData();
+  }
+  if (realtimeEnabled !== null && realtimeToggle) {
+    realtimeToggle.checked = realtimeEnabled === 'true';
+  }
+  
+  // Auto-connect if config exists
+  if (savedUrl && savedDeviceId) {
+    connectFirebase();
   }
 }
 
 // Save configuration
 function saveConfig() {
-  const deviceId = deviceIdInput.value.trim();
+  const url = firebaseUrlInput ? firebaseUrlInput.value.trim() : '';
+  const deviceId = deviceIdInput ? deviceIdInput.value.trim() : '';
+  const realtimeEnabled = realtimeToggle ? realtimeToggle.checked : true;
   
   if (!deviceId) {
     showToast('Ange ett Device ID!', 'error');
     return;
   }
   
+  localStorage.setItem('firebase-url', url);
   localStorage.setItem('motion-device-id', deviceId);
+  localStorage.setItem('realtime-enabled', realtimeEnabled);
+  
   showToast('Konfiguration sparad!', 'success');
 }
 
-// Load data from Firebase
-async function loadData() {
-  const deviceId = deviceIdInput.value.trim();
+// Connect to Firebase
+function connectFirebase() {
+  const deviceId = deviceIdInput ? deviceIdInput.value.trim() : '';
+  const realtimeEnabled = realtimeToggle ? realtimeToggle.checked : true;
   
   if (!deviceId) {
     showToast('Ange ett Device ID först!', 'error');
     return;
   }
-  
-  showMessage('Laddar data...', 'loading');
+
+  // Disconnect any existing listeners
+  disconnectFirebase();
+
+  updateConnectionBadge('connecting');
+  showMessage('Ansluter...', 'loading');
+
+  try {
+    if (realtimeEnabled) {
+      setupRealtimeListeners(deviceId);
+    } else {
+      loadDataOnce(deviceId);
+    }
+
+    isConnected = true;
+    updateConnectionBadge('connected');
+    clearMessage();
+    if (statsDiv) statsDiv.style.display = 'block';
+
+  } catch (error) {
+    console.error('Connection error:', error);
+    showMessage('Fel vid anslutning: ' + error.message, 'error');
+    updateConnectionBadge('disconnected');
+  }
+}
+
+// Disconnect from Firebase
+function disconnectFirebase() {
+  if (statusUnsubscribe) {
+    statusUnsubscribe();
+    statusUnsubscribe = null;
+  }
+  if (eventsUnsubscribe) {
+    eventsUnsubscribe();
+    eventsUnsubscribe = null;
+  }
+  isConnected = false;
+  updateConnectionBadge('disconnected');
+  showToast('Frånkopplad', 'info');
+}
+
+// Setup realtime listeners
+function setupRealtimeListeners(deviceId) {
+  const statusRef = ref(db, `motion/${deviceId}/status`);
+  const eventsRef = ref(db, `motion/${deviceId}/events`);
+
+  // Listen to status changes
+  statusUnsubscribe = onValue(statusRef, (snapshot) => {
+    const statusData = snapshot.val();
+    updateStatus(statusData);
+    showUpdateIndicator();
+  }, (error) => {
+    console.error('Status listener error:', error);
+  });
+
+  // Listen to events changes
+  eventsUnsubscribe = onValue(eventsRef, (snapshot) => {
+    const eventsData = snapshot.val();
+    if (eventsData) {
+      processEvents(eventsData);
+      showUpdateIndicator();
+    }
+  }, (error) => {
+    console.error('Events listener error:', error);
+  });
+
+  console.log('✅ Realtime listeners activated');
+}
+
+// Load data once (no realtime updates)
+async function loadDataOnce(deviceId) {
+  showMessage('Hämtar data...', 'loading');
   
   try {
-    // Get status
     const statusRef = ref(db, `motion/${deviceId}/status`);
     const statusSnapshot = await get(statusRef);
     const statusData = statusSnapshot.val();
     
-    // Get events
     const eventsRef = ref(db, `motion/${deviceId}/events`);
     const eventsSnapshot = await get(eventsRef);
     const eventsData = eventsSnapshot.val();
@@ -150,11 +243,10 @@ async function loadData() {
       return;
     }
     
-    // Process data
-    processData(statusData, eventsData);
-    statsDiv.style.display = 'block';
+    updateStatus(statusData);
+    processEvents(eventsData);
     clearMessage();
-    showToast('Data uppdaterad!', 'success');
+    showToast('Data hämtad!', 'success');
     
   } catch (error) {
     console.error('Error loading data:', error);
@@ -162,8 +254,9 @@ async function loadData() {
   }
 }
 
-// Process data from Firebase
-function processData(status, events) {
+// Process events from Firebase
+function processEvents(events) {
+  const previousCount = allSessions.length;
   allSessions = [];
   
   // Extract all sessions
@@ -189,14 +282,11 @@ function processData(status, events) {
     return new Date(b.timestamp_start) - new Date(a.timestamp_start);
   });
   
-  // Update status
-  updateStatus(status);
-  
   // Calculate statistics
   calculateStats();
   
-  // Display sessions
-  displaySessions();
+  // Display sessions (mark new if count increased)
+  displaySessions(allSessions.length > previousCount);
 }
 
 // Update device status
@@ -269,7 +359,7 @@ function filterSessions(filter) {
 }
 
 // Display sessions
-function displaySessions() {
+function displaySessions(markNew = false) {
   if (!sessionsList) return;
   
   sessionsList.innerHTML = '';
@@ -305,19 +395,25 @@ function displaySessions() {
   if (filteredSessions.length === 0) {
     sessionsList.innerHTML = `
       <div class="empty-state">
-        <p>Inga sessioner hittades för vald period.</p>
+        <p style="font-size: 1.2em;">Inga sessioner hittades</p>
+        <p>Väntar på data från sensorn...</p>
       </div>
     `;
     return;
   }
   
-  filteredSessions.forEach(session => {
+  filteredSessions.forEach((session, index) => {
     const sessionItem = document.createElement('div');
     sessionItem.className = 'session-item';
     
+    // Mark the first session as new if markNew is true
+    if (markNew && index === 0) {
+      sessionItem.classList.add('new');
+    }
+    
     const startTime = formatTimestamp(session.timestamp_start);
     const endTime = session.timestamp_stop ? formatTimestamp(session.timestamp_stop) : 'Pågår';
-    const duration = formatDuration(session.duration_ms || 0);
+    const duration = session.motion_time || formatDuration(session.duration_ms || 0);
     
     sessionItem.innerHTML = `
       <div class="session-header">
@@ -325,8 +421,8 @@ function displaySessions() {
         <div class="session-duration">${duration}</div>
       </div>
       <div class="session-times">
-        Start: ${new Date(session.timestamp_start).toLocaleString('sv-SE')} | 
-        Stopp: ${session.timestamp_stop ? new Date(session.timestamp_stop).toLocaleString('sv-SE') : 'Pågår'}
+        Start: ${new Date(session.timestamp_start).toLocaleString('sv-SE')}
+        ${session.timestamp_stop ? ` • Stopp: ${new Date(session.timestamp_stop).toLocaleString('sv-SE')}` : ' • Pågående'}
       </div>
     `;
     
@@ -360,15 +456,59 @@ function formatTimestamp(timestamp) {
   });
 }
 
+// Update connection badge
+function updateConnectionBadge(status) {
+  if (!connectionBadge) return;
+  
+  connectionBadge.className = 'connection-badge';
+  
+  if (status === 'connected') {
+    connectionBadge.classList.add('connection-connected');
+    const realtimeEnabled = realtimeToggle && realtimeToggle.checked;
+    connectionBadge.textContent = realtimeEnabled ? '🟢 Ansluten (Realtid)' : '🟢 Ansluten';
+  } else if (status === 'connecting') {
+    connectionBadge.classList.add('connection-connecting');
+    connectionBadge.textContent = '🟡 Ansluter...';
+  } else {
+    connectionBadge.classList.add('connection-disconnected');
+    connectionBadge.textContent = '🔴 Frånkopplad';
+  }
+}
+
+// Show update indicator
+function showUpdateIndicator() {
+  if (!updateIndicator) return;
+  
+  updateIndicator.classList.add('show');
+  
+  setTimeout(() => {
+    updateIndicator.classList.remove('show');
+  }, 2000);
+}
+
 // Event listeners
-loadDataBtn.addEventListener('click', loadData);
-saveConfigBtn.addEventListener('click', saveConfig);
+if (connectBtn) {
+  connectBtn.addEventListener('click', connectFirebase);
+}
+
+if (disconnectBtn) {
+  disconnectBtn.addEventListener('click', disconnectFirebase);
+}
+
+if (saveConfigBtn) {
+  saveConfigBtn.addEventListener('click', saveConfig);
+}
 
 // Filter buttons
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     filterSessions(btn.dataset.filter);
   });
+});
+
+// Disconnect when page closes
+window.addEventListener('beforeunload', () => {
+  disconnectFirebase();
 });
 
 // Initialize on page load

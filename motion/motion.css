@@ -249,6 +249,162 @@ button:disabled {
 }
 
 .message.loading {
+  background: #667eea;
+  color: white;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 1.1em;
+}
+
+/* Connection Badge */
+.connection-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 600;
+  margin-left: 15px;
+}
+
+.connection-connected {
+  background: #51cf66;
+  color: white;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+.connection-disconnected {
+  background: #ff6b6b;
+  color: white;
+}
+
+.connection-connecting {
+  background: #ffd43b;
+  color: #333;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(81, 207, 102, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(81, 207, 102, 0);
+  }
+}
+
+/* Update Indicator */
+.update-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #667eea;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s;
+  z-index: 1000;
+}
+
+.update-indicator.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* New Session Animation */
+.session-item.new {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Realtime Toggle */
+.realtime-toggle {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  gap: 10px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 30px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #667eea;
+}
+
+input:checked + .slider:before {
+  transform: translateX(30px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.8em;
+  }
+
+  .session-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .connection-badge {
+    display: block;
+    margin: 10px 0 0 0;
+    text-align: center;
+  }
+}
+
+.message.loading {
   background: #339af0;
   color: white;
 }

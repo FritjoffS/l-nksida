@@ -23,6 +23,10 @@
   <link rel="stylesheet" href="../styles/navbar.css" />
   <link rel="stylesheet" href="motion.css" />
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
   <!-- Google Analytics -->
   <script type="module" src="../scripts/analytics.js" async></script>
 </head>
@@ -39,20 +43,37 @@
   <main role="main">
     <div class="container">
       <header>
-        <h1>Motion Sensor Dashboard</h1>
+        <h1>🤖 Motion Sensor Dashboard
+          <span id="connection-badge" class="connection-badge connection-disconnected">Frånkopplad</span>
+        </h1>
         <p>Övervakning av robotgräsklipparens driftstid</p>
         
         <div class="config-section">
-          <h3>Konfiguration</h3>
+          <h3>Firebase-konfiguration</h3>
+          <div class="input-group">
+            <label for="firebase-url">Firebase Database URL</label>
+            <input type="text" id="firebase-url" placeholder="your-project.europe-west1.firebasedatabase.app">
+          </div>
           <div class="input-group">
             <label for="device-id">Device ID</label>
             <input type="text" id="device-id" placeholder="0001" value="0001">
           </div>
-          <button id="loadDataBtn">Ladda data</button>
+          <div class="realtime-toggle">
+            <label class="switch">
+              <input type="checkbox" id="realtime-toggle" checked>
+              <span class="slider"></span>
+            </label>
+            <label for="realtime-toggle" style="cursor: pointer;">
+              Aktivera realtidsuppdatering
+            </label>
+          </div>
+          <button id="connectBtn">Anslut</button>
           <button id="saveConfigBtn">Spara konfiguration</button>
+          <button id="disconnectBtn">Koppla från</button>
         </div>
       </header>
 
+      <div id="update-indicator" class="update-indicator">Data uppdaterad!</div>
       <div id="message"></div>
 
       <div id="stats" style="display: none;">
