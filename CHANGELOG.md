@@ -2,6 +2,12 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.5.1] 260814
+
+## Tillagt
+
+ - funktion "radera session" i Motion
+ 
 ## [2.5.0] 260604
 
 ## Tillagt
