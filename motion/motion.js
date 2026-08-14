@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import { getDatabase, ref, get, onValue, off } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+import { getDatabase, ref, get, onValue, off, remove } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 import { firebaseConfig } from "../scripts/firebase-config.js";
 
 // Initialize Firebase
@@ -424,7 +424,17 @@ function displaySessions(markNew = false) {
         Start: ${new Date(session.timestamp_start).toLocaleString('sv-SE')}
         ${session.timestamp_stop ? ` • Stopp: ${new Date(session.timestamp_stop).toLocaleString('sv-SE')}` : ' • Pågående'}
       </div>
+      <button class="delete-session-btn" data-session-id="${session.id}" data-session-date="${session.date}" title="Radera session">🗑️</button>
     `;
+    
+    // Add delete button event listener
+    const deleteBtn = sessionItem.querySelector('.delete-session-btn');
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const sessionId = deleteBtn.getAttribute('data-session-id');
+      const sessionDate = deleteBtn.getAttribute('data-session-date');
+      deleteSession(sessionId, sessionDate);
+    });
     
     sessionsList.appendChild(sessionItem);
   });
@@ -454,6 +464,49 @@ function formatTimestamp(timestamp) {
     hour: '2-digit',
     minute: '2-digit'
   });
+}
+
+// Delete session
+async function deleteSession(sessionId, sessionDate) {
+  const deviceId = deviceIdInput ? deviceIdInput.value.trim() : '';
+  
+  if (!deviceId) {
+    showToast('Device ID saknas!', 'error');
+    return;
+  }
+  
+  // Confirm deletion
+  if (!confirm('Är du säker på att du vill radera denna session?')) {
+    return;
+  }
+  
+  try {
+    // Parse date string (format: "YYYY-MM-DD")
+    const [year, month, day] = sessionDate.split('-');
+    
+    // Construct Firebase path
+    const sessionPath = `motion/${deviceId}/events/${year}/${month}/${day}/${sessionId}`;
+    const sessionRef = ref(db, sessionPath);
+    
+    // Delete from Firebase
+    await remove(sessionRef);
+    
+    // Remove from local array
+    const sessionIndex = allSessions.findIndex(s => s.id === sessionId && s.date === sessionDate);
+    if (sessionIndex !== -1) {
+      allSessions.splice(sessionIndex, 1);
+    }
+    
+    // Recalculate stats and refresh display
+    calculateStats();
+    displaySessions();
+    
+    showToast('Session raderad!', 'success');
+    
+  } catch (error) {
+    console.error('Error deleting session:', error);
+    showToast('Fel vid radering: ' + error.message, 'error');
+  }
 }
 
 // Update connection badge
