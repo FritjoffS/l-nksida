@@ -2,6 +2,12 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.5.2] 260908
+
+## Tillagt
+
+ - admin modal i Kundräknare.
+
 ## [2.5.1] 260814
 
 ## Tillagt
