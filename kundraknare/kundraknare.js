@@ -8,6 +8,16 @@ let dailyStatsBody, hourlyChartEl, detailsBody, detailsContainer, showDetailsTog
 let deviceStatsContainer;
 let loadingOverlay, messageBox;
 
+// Admin modal elements
+let adminBtn, adminModal, closeAdminModalBtn;
+let adminDeleteDate, adminRangeDate, adminRangeStartTime, adminRangeEndTime, adminEntriesDate;
+let deleteDayBtn, previewRangeBtn, deleteRangeBtn, loadEntriesBtn, deleteSelectedBtn;
+let daysList, rangePreview, entriesContainer, entriesActions;
+let adminTabButtons;
+
+// Admin state
+let currentAdminEntries = null;
+
 // Authentication
 let currentUser = null;
 
@@ -66,6 +76,7 @@ function initializeElements() {
     weekBtn = document.getElementById('weekBtn');
     monthBtn = document.getElementById('monthBtn');
     manageDevicesBtn = document.getElementById('manageDevicesBtn');
+    adminBtn = document.getElementById('adminBtn');
     
     // Device filter
     deviceFilterSelect = document.getElementById('deviceFilter');
@@ -74,6 +85,25 @@ function initializeElements() {
     deviceModal = document.getElementById('deviceModal');
     closeModalBtn = document.getElementById('closeModal');
     devicesListEl = document.getElementById('devicesList');
+    
+    // Admin modal
+    adminModal = document.getElementById('adminModal');
+    closeAdminModalBtn = document.getElementById('closeAdminModal');
+    adminDeleteDate = document.getElementById('adminDeleteDate');
+    adminRangeDate = document.getElementById('adminRangeDate');
+    adminRangeStartTime = document.getElementById('adminRangeStartTime');
+    adminRangeEndTime = document.getElementById('adminRangeEndTime');
+    adminEntriesDate = document.getElementById('adminEntriesDate');
+    deleteDayBtn = document.getElementById('deleteDayBtn');
+    previewRangeBtn = document.getElementById('previewRangeBtn');
+    deleteRangeBtn = document.getElementById('deleteRangeBtn');
+    loadEntriesBtn = document.getElementById('loadEntriesBtn');
+    deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    daysList = document.getElementById('daysList');
+    rangePreview = document.getElementById('rangePreview');
+    entriesContainer = document.getElementById('entriesContainer');
+    entriesActions = document.getElementById('entriesActions');
+    adminTabButtons = document.querySelectorAll('.admin-tab-btn');
     
     // Sammanfattning
     totalCountEl = document.getElementById('totalCount');
@@ -108,6 +138,36 @@ function attachEventListeners() {
     deviceModal.addEventListener('click', (e) => {
         if (e.target === deviceModal) {
             closeDeviceModal();
+        }
+    });
+    
+    // Admin modal event listeners
+    adminBtn.addEventListener('click', openAdminModal);
+    closeAdminModalBtn.addEventListener('click', closeAdminModal);
+    deleteDayBtn.addEventListener('click', handleDeleteDay);
+    previewRangeBtn.addEventListener('click', handlePreviewRange);
+    deleteRangeBtn.addEventListener('click', handleDeleteRange);
+    loadEntriesBtn.addEventListener('click', handleLoadEntries);
+    deleteSelectedBtn.addEventListener('click', handleDeleteSelectedEntries);
+    
+    // Admin tabs
+    adminTabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            switchAdminTab(btn.dataset.tab);
+        });
+    });
+    
+    // Stäng admin modal vid klick utanför
+    adminModal.addEventListener('click', (e) => {
+        if (e.target === adminModal) {
+            closeAdminModal();
+        }
+    });
+    
+    // Datum-event listeners för admin
+    adminEntriesDate.addEventListener('change', () => {
+        if (adminEntriesDate.value) {
+            loadEntriesBtn.style.display = 'inline-block';
         }
     });
 }
@@ -898,4 +958,408 @@ function updateLiveIndicator(isLive) {
     } else {
         subtitle.textContent = 'Statistik över kundflöde i butiken';
     }
+}
+
+// =================================
+// Admin Management Functions
+// =================================
+
+function openAdminModal() {
+    adminModal.style.display = 'flex';
+    switchAdminTab('delete-day');
+    populateDaysList();
+    
+    // Sätt dagens datum som standard
+    const today = new Date().toISOString().split('T')[0];
+    adminDeleteDate.value = today;
+    adminRangeDate.value = today;
+    adminEntriesDate.value = today;
+}
+
+function closeAdminModal() {
+    adminModal.style.display = 'none';
+}
+
+function switchAdminTab(tabName) {
+    // Dölj alla tabs
+    document.querySelectorAll('.admin-tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Ta bort active från alla knappar
+    adminTabButtons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Visa vald tab
+    document.getElementById(tabName + '-tab').classList.add('active');
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+}
+
+async function populateDaysList() {
+    daysList.innerHTML = '<p class="no-data">Laddar dagar...</p>';
+    
+    try {
+        // Visa bara de senaste 30 dagarna
+        const endDate = new Date();
+        const startDate = new Date(endDate);
+        startDate.setDate(endDate.getDate() - 30);
+        
+        const days = [];
+        const currentDate = new Date(startDate);
+        
+        while (currentDate <= endDate) {
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+            const day = String(currentDate.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+            
+            const dayRef = ref(database, `customers/${year}/${month}/${day}`);
+            const snapshot = await get(dayRef);
+            
+            if (snapshot.exists()) {
+                const count = Object.keys(snapshot.val()).length;
+                days.push({ date: dateStr, count });
+            }
+            
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        
+        if (days.length === 0) {
+            daysList.innerHTML = '<p class="no-data">Inga dagar med data hittades</p>';
+            return;
+        }
+        
+        // Visa dagens i omvänd ordning (senaste först)
+        days.reverse();
+        daysList.innerHTML = '';
+        
+        days.forEach(day => {
+            const btn = document.createElement('button');
+            btn.className = 'day-btn';
+            btn.textContent = `${day.date} (${day.count} registreringar)`;
+            btn.addEventListener('click', () => {
+                adminDeleteDate.value = day.date;
+            });
+            daysList.appendChild(btn);
+        });
+    } catch (error) {
+        console.error('Fel vid hämtning av dagar:', error);
+        daysList.innerHTML = '<p class="no-data">Kunde inte hämta dagar</p>';
+    }
+}
+
+async function handleDeleteDay() {
+    const dateStr = adminDeleteDate.value;
+    
+    if (!dateStr) {
+        showMessage('Välj ett datum att radera', 'warning');
+        return;
+    }
+    
+    const confirmed = confirm(`Är du säker på att du vill radera ALLA registreringar för ${dateStr}?\n\nDenna åtgärd kan inte ångras!`);
+    if (!confirmed) return;
+    
+    showLoading(true);
+    
+    try {
+        const [year, month, day] = dateStr.split('-');
+        const dayRef = ref(database, `customers/${year}/${month}/${day}`);
+        
+        // Radera hela dagen
+        await set(dayRef, null);
+        
+        showMessage(`Dag ${dateStr} raderad (alla ${adminDeleteDate.dataset.count || 'okänt antal'} registreringar borta)`, 'success');
+        populateDaysList();
+        
+        // Uppdatera huvudvyn om dagen är inladdad
+        if (currentData) {
+            loadData();
+        }
+    } catch (error) {
+        console.error('Fel vid radering av dag:', error);
+        showMessage('Kunde inte radera dagen', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function handlePreviewRange() {
+    const dateStr = adminRangeDate.value;
+    const startTime = adminRangeStartTime.value;
+    const endTime = adminRangeEndTime.value;
+    
+    if (!dateStr || !startTime || !endTime) {
+        showMessage('Fyll i datum och tider', 'warning');
+        return;
+    }
+    
+    try {
+        const entries = await getEntriesForDate(dateStr);
+        const [year, month, day] = dateStr.split('-');
+        
+        // Konvertera till Date för jämförelse
+        const startDateTime = new Date(`${dateStr}T${startTime}:00`);
+        const endDateTime = new Date(`${dateStr}T${endTime}:00`);
+        
+        const matchingEntries = entries.filter(entry => {
+            const entryTime = new Date(entry.timestamp);
+            return entryTime >= startDateTime && entryTime <= endDateTime;
+        });
+        
+        rangePreview.innerHTML = `
+            <p><strong>Datum:</strong> ${dateStr}</p>
+            <p><strong>Tidsspan:</strong> ${startTime} - ${endTime}</p>
+            <p><strong>Antal registreringar att radera:</strong> ${matchingEntries.length}</p>
+            ${matchingEntries.length > 0 ? `<p class="help-text">Första: ${matchingEntries[0].timestamp}</p><p class="help-text">Sista: ${matchingEntries[matchingEntries.length - 1].timestamp}</p>` : '<p class="help-text">Inga registreringar i detta tidsspan</p>'}
+        `;
+    } catch (error) {
+        console.error('Fel vid förhandsgransk:', error);
+        showMessage('Kunde inte förhandsgranska', 'error');
+    }
+}
+
+async function handleDeleteRange() {
+    const dateStr = adminRangeDate.value;
+    const startTime = adminRangeStartTime.value;
+    const endTime = adminRangeEndTime.value;
+    
+    if (!dateStr || !startTime || !endTime) {
+        showMessage('Fyll i datum och tider', 'warning');
+        return;
+    }
+    
+    const confirmed = confirm(`Är du säker på att du vill radera registreringar från ${startTime} till ${endTime} på ${dateStr}?\n\nDenna åtgärd kan inte ångras!`);
+    if (!confirmed) return;
+    
+    showLoading(true);
+    
+    try {
+        const entries = await getEntriesForDate(dateStr);
+        const [year, month, day] = dateStr.split('-');
+        
+        // Konvertera till Date för jämförelse
+        const startDateTime = new Date(`${dateStr}T${startTime}:00`);
+        const endDateTime = new Date(`${dateStr}T${endTime}:00`);
+        
+        const dayRef = ref(database, `customers/${year}/${month}/${day}`);
+        const snapshot = await get(dayRef);
+        
+        if (!snapshot.exists()) {
+            showMessage('Ingen data för denna dag', 'warning');
+            return;
+        }
+        
+        const updatedData = {};
+        let deletedCount = 0;
+        
+        Object.keys(snapshot.val()).forEach(entryId => {
+            const entry = snapshot.val()[entryId];
+            const entryTime = new Date(entry.timestamp);
+            
+            if (entryTime >= startDateTime && entryTime <= endDateTime) {
+                // Radera denna entry (lägg inte till den i updatedData)
+                deletedCount++;
+            } else {
+                // Behåll denna entry
+                updatedData[entryId] = entry;
+            }
+        });
+        
+        // Uppdatera eller radera dagen
+        if (Object.keys(updatedData).length === 0) {
+            await set(dayRef, null);
+        } else {
+            await set(dayRef, updatedData);
+        }
+        
+        showMessage(`${deletedCount} registreringar raderade från ${startTime} till ${endTime}`, 'success');
+        rangePreview.innerHTML = '';
+        
+        // Uppdatera huvudvyn
+        if (currentData) {
+            loadData();
+        }
+    } catch (error) {
+        console.error('Fel vid radering av tidsspan:', error);
+        showMessage('Kunde inte radera tidsspan', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function handleLoadEntries() {
+    const dateStr = adminEntriesDate.value;
+    
+    if (!dateStr) {
+        showMessage('Välj ett datum', 'warning');
+        return;
+    }
+    
+    showLoading(true);
+    
+    try {
+        const entries = await getEntriesForDate(dateStr);
+        currentAdminEntries = entries;
+        
+        if (entries.length === 0) {
+            entriesContainer.innerHTML = '<p class="no-data">Ingen data för denna dag</p>';
+            entriesActions.style.display = 'none';
+            return;
+        }
+        
+        displayEntriesForSelection(entries, dateStr);
+        entriesActions.style.display = 'block';
+    } catch (error) {
+        console.error('Fel vid hämtning av poster:', error);
+        showMessage('Kunde inte hämta poster', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+function displayEntriesForSelection(entries, dateStr) {
+    entriesContainer.innerHTML = `<div class="entries-info">Totalt ${entries.length} registreringar på ${dateStr}</div>`;
+    
+    const table = document.createElement('table');
+    table.className = 'entries-selection-table';
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="selectAllEntries" title="Markera alla"></th>
+                <th>Tid</th>
+                <th>Enhet</th>
+            </tr>
+        </thead>
+        <tbody id="entriesTableBody">
+        </tbody>
+    `;
+    
+    const tbody = table.querySelector('#entriesTableBody');
+    
+    entries.forEach((entry, index) => {
+        const time = new Date(entry.timestamp).toLocaleTimeString('sv-SE', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        
+        const deviceName = allDevices[entry.device_id]?.name || entry.device_name || entry.device_id || 'Okänd';
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="checkbox" class="entry-checkbox" data-id="${index}" value="${entry.id}"></td>
+            <td>${time}</td>
+            <td>${deviceName}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+    
+    entriesContainer.appendChild(table);
+    
+    // Select all funktionalitet
+    const selectAllCheckbox = document.getElementById('selectAllEntries');
+    const entryCheckboxes = document.querySelectorAll('.entry-checkbox');
+    
+    selectAllCheckbox.addEventListener('change', () => {
+        entryCheckboxes.forEach(cb => {
+            cb.checked = selectAllCheckbox.checked;
+        });
+    });
+    
+    entryCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            selectAllCheckbox.checked = Array.from(entryCheckboxes).every(c => c.checked);
+        });
+    });
+}
+
+async function handleDeleteSelectedEntries() {
+    const selectedCheckboxes = document.querySelectorAll('.entry-checkbox:checked');
+    
+    if (selectedCheckboxes.length === 0) {
+        showMessage('Välj minst en post att radera', 'warning');
+        return;
+    }
+    
+    const confirmed = confirm(`Är du säker på att du vill radera ${selectedCheckboxes.length} registrering(ar)?\n\nDenna åtgärd kan inte ångras!`);
+    if (!confirmed) return;
+    
+    showLoading(true);
+    
+    try {
+        const dateStr = adminEntriesDate.value;
+        const [year, month, day] = dateStr.split('-');
+        const dayRef = ref(database, `customers/${year}/${month}/${day}`);
+        
+        const snapshot = await get(dayRef);
+        if (!snapshot.exists()) {
+            showMessage('Data för denna dag existerar inte längre', 'error');
+            return;
+        }
+        
+        const updatedData = { ...snapshot.val() };
+        const selectedIndices = new Set();
+        
+        selectedCheckboxes.forEach(cb => {
+            selectedIndices.add(parseInt(cb.dataset.id));
+        });
+        
+        let deletedCount = 0;
+        const entryIds = Object.keys(updatedData);
+        
+        entryIds.forEach((entryId, index) => {
+            if (selectedIndices.has(index)) {
+                delete updatedData[entryId];
+                deletedCount++;
+            }
+        });
+        
+        // Uppdatera eller radera dagen
+        if (Object.keys(updatedData).length === 0) {
+            await set(dayRef, null);
+        } else {
+            await set(dayRef, updatedData);
+        }
+        
+        showMessage(`${deletedCount} registrering(ar) raderad(e)`, 'success');
+        entriesContainer.innerHTML = '';
+        entriesActions.style.display = 'none';
+        
+        // Uppdatera huvudvyn
+        if (currentData) {
+            loadData();
+        }
+    } catch (error) {
+        console.error('Fel vid radering av poster:', error);
+        showMessage('Kunde inte radera poster', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function getEntriesForDate(dateStr) {
+    const [year, month, day] = dateStr.split('-');
+    const dayRef = ref(database, `customers/${year}/${month}/${day}`);
+    
+    const snapshot = await get(dayRef);
+    if (!snapshot.exists()) {
+        return [];
+    }
+    
+    const entries = [];
+    const dayData = snapshot.val();
+    
+    Object.keys(dayData).forEach(entryId => {
+        entries.push({
+            id: entryId,
+            ...dayData[entryId]
+        });
+    });
+    
+    // Sortera efter tidsstämpel
+    entries.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    
+    return entries;
 }

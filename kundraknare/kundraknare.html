@@ -39,6 +39,7 @@
                 <button id="weekBtn" class="btn btn-secondary">Denna vecka</button>
                 <button id="monthBtn" class="btn btn-secondary">Denna månad</button>
                 <button id="manageDevicesBtn" class="btn btn-manage">⚙️ Hantera enheter</button>
+                <button id="adminBtn" class="btn btn-danger">🗑️ Admin</button>
             </div>
         </section>
 
@@ -161,6 +162,85 @@
             <div class="modal-body">
                 <div class="devices-list" id="devicesList">
                     <p class="no-data">Laddar enheter...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div id="adminModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>🗑️ Administrera databas</h2>
+                <button class="modal-close" id="closeAdminModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Flikar -->
+                <div class="admin-tabs">
+                    <button class="admin-tab-btn active" data-tab="delete-day">Radera dag</button>
+                    <button class="admin-tab-btn" data-tab="delete-time-range">Radera tidsspan</button>
+                    <button class="admin-tab-btn" data-tab="delete-entries">Radera poster</button>
+                </div>
+
+                <!-- Radera dag -->
+                <div class="admin-tab-content active" id="delete-day-tab">
+                    <h3>Radera hela dagen</h3>
+                    <p class="help-text">Välj datum för dagen du vill radera helt. Alla registreringar denna dag kommer att tas bort.</p>
+                    <div class="form-group">
+                        <label for="adminDeleteDate">Datum att radera:</label>
+                        <input type="date" id="adminDeleteDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Eller välj från lista:</label>
+                        <div id="daysList" class="days-list"></div>
+                    </div>
+                    <div class="admin-actions">
+                        <button id="deleteDayBtn" class="btn btn-danger">🗑️ Radera dag</button>
+                    </div>
+                </div>
+
+                <!-- Radera tidsspan -->
+                <div class="admin-tab-content" id="delete-time-range-tab">
+                    <h3>Radera poster från tidsspan</h3>
+                    <p class="help-text">Välj datum och tidsintervall. Alla registreringar mellan dessa tider tas bort.</p>
+                    <div class="form-group">
+                        <label for="adminRangeDate">Datum:</label>
+                        <input type="date" id="adminRangeDate">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adminRangeStartTime">Från tid:</label>
+                            <input type="time" id="adminRangeStartTime">
+                        </div>
+                        <div class="form-group">
+                            <label for="adminRangeEndTime">Till tid:</label>
+                            <input type="time" id="adminRangeEndTime">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div id="rangePreview" class="preview-box"></div>
+                    </div>
+                    <div class="admin-actions">
+                        <button id="previewRangeBtn" class="btn btn-secondary">👁️ Förhandsgranska</button>
+                        <button id="deleteRangeBtn" class="btn btn-danger">🗑️ Radera tidsspan</button>
+                    </div>
+                </div>
+
+                <!-- Radera specifika poster -->
+                <div class="admin-tab-content" id="delete-entries-tab">
+                    <h3>Radera specifika poster</h3>
+                    <p class="help-text">Välj datum och markera vilka registreringar som ska raderas.</p>
+                    <div class="form-group">
+                        <label for="adminEntriesDate">Datum:</label>
+                        <input type="date" id="adminEntriesDate">
+                    </div>
+                    <div class="admin-actions">
+                        <button id="loadEntriesBtn" class="btn btn-secondary">📋 Hämta poster</button>
+                    </div>
+                    <div id="entriesContainer" class="entries-container"></div>
+                    <div class="admin-actions" id="entriesActions" style="display: none;">
+                        <button id="deleteSelectedBtn" class="btn btn-danger">🗑️ Radera markerade</button>
+                    </div>
                 </div>
             </div>
         </div>
