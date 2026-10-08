@@ -2,6 +2,12 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+###[2.5.3] 261008
+
+## Fixat
+
+ - Radera specifika poster fungerade inte - fixat
+
 ## [2.5.2] 260908
 
 ## Tillagt
