@@ -244,8 +244,8 @@ async function loadDevices() {
                 updateDeviceFilter();
                 
                 // Uppdatera data om en enhet har ändrats
-                if (currentData) {
-                    displayDeviceStats(currentData);
+                if (currentData && currentData.entries.length > 0) {
+                    displayData(currentData);
                 }
             }
         });
@@ -1300,18 +1300,11 @@ async function handleDeleteSelectedEntries() {
         }
         
         const updatedData = { ...snapshot.val() };
-        const selectedIndices = new Set();
+        let deletedCount = 0;
         
         selectedCheckboxes.forEach(cb => {
-            selectedIndices.add(parseInt(cb.dataset.id));
-        });
-        
-        let deletedCount = 0;
-        const entryIds = Object.keys(updatedData);
-        
-        entryIds.forEach((entryId, index) => {
-            if (selectedIndices.has(index)) {
-                delete updatedData[entryId];
+            if (cb.value in updatedData) {
+                delete updatedData[cb.value];
                 deletedCount++;
             }
         });
