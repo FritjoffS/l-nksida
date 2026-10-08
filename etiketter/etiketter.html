@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etikettskrivare</title>
+    <link rel="stylesheet" href="etiketter.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Etikettskrivare</h1>
+            <p>Skapa och skriv ut etiketter (81mm x 23mm)</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Formulär för produktinformation -->
+            <section class="form-section">
+                <h2>Produktinformation</h2>
+                <form id="etikett-form">
+                    <div class="form-group">
+                        <label for="benamning">Benämning (Produktens namn):</label>
+                        <input type="text" id="benamning" name="benamning" placeholder="T.ex. Skruv M8" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="leverantor">Leverantör:</label>
+                        <input type="text" id="leverantor" name="leverantor" placeholder="T.ex. ACME Industries">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="produktnummer">Produktnummer (vårt system):</label>
+                        <input type="text" id="produktnummer" name="produktnummer" placeholder="T.ex. 12345">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="artikelnummer">Artikelnummer (Leverantörens):</label>
+                        <input type="text" id="artikelnummer" name="artikelnummer" placeholder="T.ex. SKR-M8-50">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hyllplats">Hyllplats:</label>
+                        <input type="text" id="hyllplats" name="hyllplats" placeholder="T.ex. H-12-B3">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bestellningspunkt">Beställningspunkt/Beställningskvantitet:</label>
+                        <input type="text" id="bestellningspunkt" name="bestellningspunkt" placeholder="T.ex. 500 st.">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="visa-btn" class="btn btn-primary">Visa förhandsvisning</button>
+                        <button type="button" id="skriv-ut-btn" class="btn btn-success">Skriv ut etikett</button>
+                        <button type="reset" class="btn btn-secondary">Rensa</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Förhandsvisning av etikett -->
+            <section class="preview-section">
+                <h2>Förhandsvisning</h2>
+                <div class="preview-container">
+                    <div id="etikett-preview" class="etikett-preview">
+                        <div id="preview-content" class="etikett-content">
+                            <div class="preview-placeholder">Fyll i formuläret och klicka "Visa förhandsvisning"</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Skrivbar version (dold) -->
+        <div id="print-container" class="print-only">
+            <div id="print-etikett" class="etikett-print">
+                <div id="print-content" class="etikett-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="etiketter.js"></script>
+</body>
+</html>
