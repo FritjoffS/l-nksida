@@ -13,22 +13,33 @@
   <link rel="stylesheet" href="../styles/navbar.css">
   <link rel="stylesheet" href="lathund.css">
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
   <div id="navbar"></div> <!-- Placeholder for the navbar -->
-  <div id="sidenav">
-    <button class="sidenav" id="insertButton" title="Spara formuläret som en ny sida">Spara som ny sida</button>
-    <button class="sidenav" id="updateButton" title="Spara ändringar i den valda sidan">Spara ändringar</button>
-    <button class="sidenav" id="deleteButton" title="Radera den valda sidan permanent">Radera aktuell sida</button>
-    <button class="sidenav" id="printButton" title="Skriv ut sidan till PDF eller skrivare">Skriv ut sidan</button>
-    <button class="sidenav" id="clearButton" title="Rensa alla fält i formuläret">Rensa formuläret</button>
-    <button class="sidenav" id="exportButton" title="Exportera den valda sidan till Excel">Exportera data</button>
-    <button class="sidenav" id="importButton" title="Importera data från Excel-fil">Importera data</button>
-    <select id="savedTitlesDropdown" title="Välj en sparad sida att ladda"></select>
-
+  <div id="toolbar" role="toolbar" aria-label="Lathund-verktyg">
+    <div class="toolbar-picker">
+      <label for="pageSearch">Öppna lathund</label>
+      <input type="search" id="pageSearch" placeholder="Sök sida… (Enter öppnar första träffen)" autocomplete="off">
+      <select id="savedTitlesDropdown" title="Välj en sparad sida att ladda" aria-label="Sparade sidor"></select>
+      <span id="pageStatus" class="page-status" aria-live="polite"></span>
+    </div>
+    <div class="toolbar-actions">
+      <div class="btn-group">
+        <button class="btn btn-primary" id="saveButton" title="Spara sidan (Ctrl+S)">💾 Spara</button>
+        <button class="btn" id="insertButton" title="Spara formuläret som en ny sida">Spara som ny</button>
+        <button class="btn" id="clearButton" title="Börja på en ny, tom sida">➕ Ny tom sida</button>
+        <button class="btn btn-danger" id="deleteButton" title="Radera den valda sidan permanent">🗑 Radera</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn" id="printButton" title="Skriv ut sidan till PDF eller skrivare">🖨 Skriv ut</button>
+        <button class="btn" id="exportButton" title="Exportera den valda sidan till Excel">⬇ Exportera</button>
+        <button class="btn" id="importButton" title="Importera data från Excel-fil">⬆ Importera</button>
+      </div>
+    </div>
   </div>
+  <div id="toastContainer" aria-live="polite"></div>
 
   <div class="formcontainer">
 

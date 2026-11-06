@@ -38,30 +38,45 @@ const numberRows = 23; // Number of rows to generate
 
 const titleInput = document.querySelector("#titleInput");
 const insertButton = document.querySelector("#insertButton");
-const updateButton = document.querySelector("#updateButton");
+const saveButton = document.querySelector("#saveButton");
+const pageSearch = document.querySelector("#pageSearch");
+const pageStatus = document.querySelector("#pageStatus");
+const toastContainer = document.querySelector("#toastContainer");
+
+function showToast(message, type) {
+  if (!type) {
+    type = /fel uppstod|ogiltig/i.test(message) ? "error"
+      : /sparad|uppdaterad|borttagen|importerad/i.test(message) ? "success"
+      : "warning";
+  }
+  const toastEl = document.createElement("div");
+  toastEl.className = `toast ${type}`;
+  toastEl.setAttribute("role", type === "error" ? "alert" : "status");
+  toastEl.textContent = message;
+  toastContainer.appendChild(toastEl);
+  setTimeout(() => toastEl.remove(), type === "error" ? 6000 : 3500);
+}
+
+// Non-blocking toasts replace the blocking alert() dialogs.
+const alert = (message) => showToast(message);
 const deleteButton = document.querySelector("#deleteButton");
 const printButton = document.querySelector("#printButton");
 const clearButton = document.querySelector("#clearButton");
 const exportButton = document.querySelector("#exportButton");
 const importButton = document.querySelector("#importButton");
+const savedTitlesDropdown = document.querySelector("#savedTitlesDropdown");
+let activeRecordId = "";
+let savedFormSnapshot = "";
 
 // Security: Input sanitization and validation
 const MAX_TITLE_LENGTH = 100;
 const MAX_PRODUCT_LENGTH = 200;
 const MAX_PRODUCT_NUMBER_LENGTH = 50;
 
-// Sanitize string by removing potentially dangerous characters
+// Form values are inserted as input values or textContent, not parsed as HTML.
 function sanitizeInput(input) {
   if (typeof input !== 'string') return '';
-  
-  // Remove any HTML tags and script content
-  let sanitized = input.replace(/<[^>]*>/g, '');
-  
-  // Remove potentially dangerous characters while keeping Swedish characters
-  sanitized = sanitized.replace(/[<>"'`]/g, '');
-  
-  // Trim whitespace
-  return sanitized.trim();
+  return input.trim();
 }
 
 // Validate title input
@@ -99,7 +114,7 @@ function validateProductNumber(number) {
   }
   
   // Product numbers should typically be alphanumeric with some special chars
-  if (sanitized && !/^[a-zA-Z0-9åäöÅÄÖ\-_.\s]*$/.test(sanitized)) {
+  if (sanitized && !/^[a-zA-Z0-9åäöÅÄÖ\-_.\s'"`<>]*$/.test(sanitized)) {
     return { valid: false, message: "Produktnummer innehåller ogiltiga tecken", sanitized: '' };
   }
   
@@ -170,8 +185,10 @@ async function InsertData() {
     set(newPostRef, dataObject)
       .then(() => {
         alert("Sidan sparad som: " + sanitizedTitle);
-        titleInput.value = sanitizedTitle; // Update input with sanitized value
-        displaySavedTitles();
+        activeRecordId = newPostRef.key;
+        populateForm(dataObject);
+        markFormAsSaved();
+        displaySavedTitles(activeRecordId);
       })
       .catch((error) => {
         console.error("Save error:", error);
@@ -197,35 +214,29 @@ function FindData() {
     .then((snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        
-        // Sanitize data when loading from database
-        titleInput.value = sanitizeInput(data.title || "");
-
-        for (let i = 1; i <= numberRows; i++) {
-          const produktInput = document.querySelector("#produkt" + i);
-          const produktNummerInput = document.querySelector("#produktNummer" + i);
-
-          produktInput.value = sanitizeInput(data["produkt" + i] || "");
-          produktNummerInput.value = sanitizeInput(data["produktNummer" + i] || "");
-
-          // Trigger barcode generation manually
-          handleInputChange({ target: produktNummerInput });
-        }
+        populateForm(data);
+        activeRecordId = selectedIdentifier;
+        markFormAsSaved();
+        updateActionButtons();
       } else {
         alert("Sidan finns inte");
+        savedTitlesDropdown.value = activeRecordId;
+        updateActionButtons();
       }
     })
     .catch((error) => {
       console.error("Load error:", error);
       alert("Ett fel uppstod vid laddning. Försök igen.");
+      savedTitlesDropdown.value = activeRecordId;
+      updateActionButtons();
     });
 }
 
 // Function to update data based on the selected title
 async function UpdateData() {
-  const selectedIdentifier = document.getElementById('savedTitlesDropdown').value;
+  const selectedIdentifier = activeRecordId;
 
-  if (selectedIdentifier === "") {
+  if (!selectedIdentifier || savedTitlesDropdown.value !== selectedIdentifier) {
     alert("Välj en sida att uppdatera");
     return;
   }
@@ -285,8 +296,10 @@ async function UpdateData() {
   update(ref(db, "lathund/products/" + selectedIdentifier), dataObject)
     .then(() => {
       alert("Sidan uppdaterad");
-      titleInput.value = sanitizedTitle; // Update input with sanitized value
-      displaySavedTitles();
+      activeRecordId = selectedIdentifier;
+      populateForm(dataObject);
+      markFormAsSaved();
+      displaySavedTitles(activeRecordId);
     })
     .catch((error) => {
       console.error("Update error:", error);
@@ -296,9 +309,9 @@ async function UpdateData() {
 
 // Function to delete data based on the selected title
 function DeleteData() {
-  const selectedIdentifier = document.getElementById('savedTitlesDropdown').value;
+  const selectedIdentifier = activeRecordId;
 
-  if (selectedIdentifier === "") {
+  if (!selectedIdentifier || savedTitlesDropdown.value !== selectedIdentifier) {
     alert("Välj en sida att ta bort");
     return;
   }
@@ -320,13 +333,11 @@ function DeleteData() {
         console.error("Delete error:", error);
         alert("Ett fel uppstod vid borttagning. Försök igen.");
       });
-  } else {
-    alert("Sidan ej raderad");
   }
 }
 
 // Function to display saved titles
-function displaySavedTitles() {
+function displaySavedTitles(selectedIdentifier = activeRecordId) {
   const dbref = ref(db);
 
   get(child(dbref, "lathund/products"))
@@ -347,9 +358,9 @@ function displaySavedTitles() {
         const titles = entries.map(([key, value]) => value.title);
 
         // Populate dropdown with titles and associate each title with its identifier
-        populateDropdownList(identifiers, titles);
+        populateDropdownList(identifiers, titles, selectedIdentifier);
       } else {
-        populateDropdownList([], []);
+        populateDropdownList([], [], "");
       }
     })
     .catch((error) => {
@@ -358,27 +369,106 @@ function displaySavedTitles() {
 }
 
 // Function to populate dropdown list
-function populateDropdownList(identifiers, titles) {
-  const dropdown = document.getElementById('savedTitlesDropdown');
+let savedPages = [];
 
-  // Clear existing options
-  dropdown.innerHTML = '<option value="">Välj en sida</option>';
+function populateDropdownList(identifiers, titles, selectedIdentifier = activeRecordId) {
+  savedPages = identifiers.map((id, index) => ({ id, title: sanitizeInput(titles[index]) }));
+  activeRecordId = identifiers.includes(selectedIdentifier) ? selectedIdentifier : "";
+  renderDropdown();
+}
 
-  // Add titles to the dropdown (sanitized to prevent XSS)
-  titles.forEach((title, index) => {
-    const option = document.createElement('option');
-    option.value = identifiers[index];
-    option.textContent = sanitizeInput(title); // Sanitize even when displaying
-    dropdown.appendChild(option);
+// Renders the dropdown filtered by the search box; the open page is always kept.
+function renderDropdown() {
+  const filter = pageSearch.value.trim().toLowerCase();
+  const matches = savedPages.filter(page =>
+    page.id === activeRecordId || page.title.toLowerCase().includes(filter)
+  );
+
+  savedTitlesDropdown.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = filter
+    ? `${matches.length} träff(ar) – välj en sida`
+    : `Välj en sida (${savedPages.length})`;
+  savedTitlesDropdown.appendChild(placeholder);
+
+  // textContent displays titles as text rather than interpreting them as HTML.
+  matches.forEach(page => {
+    const option = document.createElement("option");
+    option.value = page.id;
+    option.textContent = page.title;
+    savedTitlesDropdown.appendChild(option);
   });
+
+  savedTitlesDropdown.value = activeRecordId;
+  updateActionButtons();
 }
 
 // Function to fill the form with data for the selected title
 function findDataForSelectedTitle() {
-  const selectedIdentifier = document.getElementById('savedTitlesDropdown').value;
-  
+  const selectedIdentifier = savedTitlesDropdown.value;
+
+  if (hasUnsavedChanges()) {
+    const discardChanges = window.confirm("Du har osparade ändringar. Vill du kasta dem och öppna en annan sida?");
+    if (!discardChanges) {
+      savedTitlesDropdown.value = activeRecordId;
+      updateActionButtons();
+      return;
+    }
+  }
+
+  updateActionButtons();
   if (selectedIdentifier) {
     FindData();
+  } else {
+    clearForm();
+  }
+}
+
+function getFormSnapshot() {
+  const values = [titleInput.value];
+  for (let i = 1; i <= numberRows; i++) {
+    values.push(
+      document.querySelector("#produkt" + i).value,
+      document.querySelector("#produktNummer" + i).value
+    );
+  }
+  return JSON.stringify(values);
+}
+
+function hasUnsavedChanges() {
+  return savedFormSnapshot !== getFormSnapshot();
+}
+
+function markFormAsSaved() {
+  savedFormSnapshot = getFormSnapshot();
+}
+
+function updateActionButtons() {
+  const hasSelection = Boolean(activeRecordId && savedTitlesDropdown.value === activeRecordId);
+  deleteButton.disabled = !hasSelection;
+  exportButton.disabled = !hasSelection;
+  updatePageStatus();
+}
+
+function updatePageStatus() {
+  const page = savedPages.find(p => p.id === activeRecordId);
+  const unsaved = hasUnsavedChanges();
+  pageStatus.classList.toggle("unsaved", unsaved);
+  const name = page ? `Öppen sida: ${page.title}` : "Ny sida (ej sparad)";
+  pageStatus.textContent = unsaved ? `${name} ● osparade ändringar` : name;
+}
+
+function populateForm(data) {
+  titleInput.value = sanitizeInput(data.title || "");
+
+  for (let i = 1; i <= numberRows; i++) {
+    const produktInput = document.querySelector("#produkt" + i);
+    const produktNummerInput = document.querySelector("#produktNummer" + i);
+
+    produktInput.value = sanitizeInput(data["produkt" + i] || "");
+    produktNummerInput.value = sanitizeInput(data["produktNummer" + i] || "");
+    handleInputChange({ target: produktNummerInput });
   }
 }
 
@@ -396,37 +486,76 @@ function clearForm() {
     if (barcodeImg) barcodeImg.src = "";
   }
   
-  document.getElementById('savedTitlesDropdown').value = "";
+  activeRecordId = "";
+  savedTitlesDropdown.value = "";
+  markFormAsSaved();
+  updateActionButtons();
 }
 
 // Call the function to display saved titles on page load
 displaySavedTitles();
 
 // Attach event listener to the dropdown list to trigger data retrieval on selection change
-document.getElementById('savedTitlesDropdown').addEventListener('change', findDataForSelectedTitle);
+savedTitlesDropdown.addEventListener('change', findDataForSelectedTitle);
+
+window.addEventListener("beforeunload", (event) => {
+  if (hasUnsavedChanges()) {
+    event.preventDefault();
+    event.returnValue = "";
+  }
+});
+
+saveButton.addEventListener("click", saveCurrentPage);
+
+function saveCurrentPage() {
+  if (titleInput.value.trim() === "") {
+    alert("Överskrift måste fyllas i");
+    titleInput.focus();
+    return;
+  }
+  if (activeRecordId) {
+    UpdateData();
+  } else {
+    InsertData();
+  }
+}
+
+document.addEventListener("keydown", (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+    event.preventDefault();
+    saveCurrentPage();
+  }
+});
+
+pageSearch.addEventListener("input", renderDropdown);
+pageSearch.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  const firstMatch = [...savedTitlesDropdown.options].find(option => option.value && option.value !== activeRecordId)
+    || [...savedTitlesDropdown.options].find(option => option.value);
+  if (firstMatch) {
+    savedTitlesDropdown.value = firstMatch.value;
+    findDataForSelectedTitle();
+  }
+});
+
+document.querySelector(".formcontainer").addEventListener("input", updatePageStatus);
 
 insertButton.addEventListener("click", function () {
   if (titleInput.value.trim() !== "") {
     InsertData();
   } else {
     alert("Överskrift måste fyllas i");
-  }
-});
-
-updateButton.addEventListener("click", function () {
-  if (titleInput.value.trim() !== "") {
-    UpdateData();
-  } else {
-    alert("Hämta sidan du vill uppdatera.");
+    titleInput.focus();
   }
 });
 
 deleteButton.addEventListener("click", function () {
-  if (titleInput.value.trim() !== "") {
-    DeleteData();
-  } else {
+  if (!savedTitlesDropdown.value) {
     alert("Hämta sidan du vill radera.");
+    return;
   }
+  DeleteData();
 });
 
 printButton.addEventListener("click", function () {
@@ -434,7 +563,13 @@ printButton.addEventListener("click", function () {
 });
 
 clearButton.addEventListener("click", function () {
+  if (hasUnsavedChanges() && !window.confirm("Du har osparade ändringar. Vill du rensa formuläret och kasta dem?")) {
+    return;
+  }
   clearForm();
+  pageSearch.value = "";
+  renderDropdown();
+  titleInput.focus();
 });
 
 exportButton.addEventListener("click", function () {
@@ -495,6 +630,9 @@ for (let i = 1; i <= numberRows; i++) {
   produktNummerInput.addEventListener('input', handleInputChange);
 }
 
+markFormAsSaved();
+updateActionButtons();
+
 // Initial barcode generation on page load
 document.querySelectorAll('[name="produktNummer"]').forEach(input => {
   const section = input.closest('section');
@@ -513,10 +651,10 @@ function s2ab(s) {
 }
 
 function exportData() {
-  const selectedTitle = document.getElementById('savedTitlesDropdown').value;
+  const selectedTitle = activeRecordId;
 
   // Check if a title is selected
-  if (!selectedTitle) {
+  if (!selectedTitle || savedTitlesDropdown.value !== selectedTitle) {
     alert("Välj en sida att exportera");
     return;
   }
