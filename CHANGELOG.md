@@ -2,6 +2,34 @@
 
 Alla viktiga ändringar i detta projekt dokumenteras i denna fil.
 
+## [2.6.0] 261109
+
+## Tillagt
+
+ - Lathund: flexibelt antal rader. Lägg till rader med "Lägg till rad" (max 24 per sida, vilket ryms på ett A4) och ta bort rader med papperskorgen.
+ - Lathund: flytta rader med dra och släpp via handtaget (fungerar med mus och pekskärm). Piltangenterna fungerar som alternativ.
+ - Lathund: sökbar sidväljare överst, samt snabbtangent Ctrl+S för att spara.
+ - Lathund: statusrad som visar vilken sida som är öppen och om det finns osparade ändringar.
+ - Lathund: toast-meddelanden i stället för dialogrutor.
+ - Lathund: varning vid osparade ändringar när man byter sida, rensar formuläret eller lämnar sidan.
+
+## Ändrat
+
+ - Lathund: ny layout med verktygsrad överst, tydligare knappar med enhetliga ikoner (Spara, Spara som ny, Ny tom sida, Skriv ut, Exportera, Importera, Radera) och ljusare, modernare design.
+ - Lathund: anpassad för mobil och surfplatta.
+ - Lathund: Excel-import validerar kolumnerna Produkter och prodNr, avvisar filer med fler än 24 rader och sparar sidan i ett enda skrivning. Import och export följer radernas ordning.
+ - Lathund: utskriftsmarginalerna upptill och nedtill har minskats till 3 mm. Tomma rader skrivs fortfarande ut.
+ - Lathund: SheetJS uppgraderad från 0.17.5 till 0.20.1.
+
+## Fixat
+
+ - Lathund: vald sida försvann efter att man sparat. Den förblir nu vald.
+ - Lathund: citattecken och andra tecken i produktnamn (t.ex. 3/4") togs bort vid sparning. De bevaras nu.
+ - Lathund: Uppdatera, Radera och Exportera är nu endast aktiva när en sida är öppen.
+ - Lathund: verktygsraden hamnade under navigationsfältet vid scroll.
+ - Lathund: ogiltiga produktnummer kunde ge fel vid generering av streckkod. Användaren får nu ett meddelande.
+ - Lathund: äldre sidor med fler än 23 rader kan öppnas och redigeras utan att innehåll försvinner.
+
 ###[2.5.3] 261008
 
 ## Fixat
