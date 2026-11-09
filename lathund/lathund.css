@@ -277,8 +277,55 @@
 }
 
 .row-controls .remove-row {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
     color: #b91c1c;
     border-color: #b91c1c;
+}
+
+.row-controls .remove-row:hover {
+    color: white;
+    background: #b91c1c;
+}
+
+.row-controls .drag-row {
+    min-width: 36px;
+    font-size: 1.15rem;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.formulär section.dragging-row {
+    outline: 2px solid #1565c0;
+    outline-offset: -2px;
+    background-color: #e8f2ff;
+}
+
+.dragging-row .drag-row {
+    cursor: grabbing;
+}
+
+.row-help {
+    max-width: 600px;
+    margin: 0 auto 8px;
+    padding: 0 8px;
+    font-size: 0.875rem;
+    color: #444;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .row-actions {
@@ -330,7 +377,8 @@
 
     /*.formulär section.empty-row,*/
     .row-controls,
-    .row-actions {
+    .row-actions,
+    .row-help {
         display: none;
     }
 

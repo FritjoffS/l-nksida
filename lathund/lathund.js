@@ -69,6 +69,7 @@ const savedTitlesDropdown = document.querySelector("#savedTitlesDropdown");
 const form = document.getElementById("productForm");
 const addRowButton = document.getElementById("addRowButton");
 const rowCountStatus = document.getElementById("rowCountStatus");
+const rowMoveStatus = document.getElementById("rowMoveStatus");
 let activeRecordId = "";
 let savedFormSnapshot = "";
 
@@ -486,6 +487,7 @@ function updatePageStatus() {
 }
 
 function populateForm(data) {
+  finishRowDrag(true);
   titleInput.value = sanitizeInput(data.title || "");
   const rows = readProductRows(data);
   form.replaceChildren();
@@ -499,6 +501,7 @@ function populateForm(data) {
 
 // Function to clear form
 function clearForm() {
+  finishRowDrag(true);
   titleInput.value = "";
   form.replaceChildren();
   for (let i = 0; i < initialRowCount; i++) addProductRow();
@@ -635,16 +638,16 @@ function updateRowLabels() {
     section.querySelector('[name="produkt"]').setAttribute("aria-label", `Produkt, rad ${rowNumber}`);
     section.querySelector('[name="produktNummer"]').setAttribute("aria-label", `Produktnummer, rad ${rowNumber}`);
     section.querySelector(".remove-row").setAttribute("aria-label", `Ta bort rad ${rowNumber}`);
-    const moveUp = section.querySelector(".move-row-up");
-    const moveDown = section.querySelector(".move-row-down");
-    moveUp.setAttribute("aria-label", `Flytta rad ${rowNumber} uppåt`);
-    moveDown.setAttribute("aria-label", `Flytta rad ${rowNumber} nedåt`);
-    moveUp.disabled = index === 0;
-    moveDown.disabled = index === sections.length - 1;
+    section.querySelector(".drag-row").setAttribute("aria-label", `Flytta rad ${rowNumber}`);
   });
 }
 
-function moveProductRow(section, direction, button) {
+function announceRowPosition(section) {
+  const index = Array.from(form.children).indexOf(section);
+  rowMoveStatus.textContent = `Raden är på plats ${index + 1} av ${form.children.length}.`;
+}
+
+function moveProductRow(section, direction) {
   const sibling = direction === "up" ? section.previousElementSibling : section.nextElementSibling;
   if (!sibling) return;
 
@@ -655,12 +658,82 @@ function moveProductRow(section, direction, button) {
   }
   updateRowLabels();
   updatePageStatus();
-  if (button.disabled) {
-    section.querySelector(direction === "up" ? ".move-row-down" : ".move-row-up").focus();
-  } else {
-    button.focus();
-  }
+  section.querySelector(".drag-row").focus();
+  announceRowPosition(section);
 }
+
+let rowDrag = null;
+
+function positionDraggedRow(clientY) {
+  const target = Array.from(form.children).find(row =>
+    row !== rowDrag.section && clientY < row.getBoundingClientRect().top + row.getBoundingClientRect().height / 2
+  );
+  if (target === rowDrag.section.nextElementSibling || (!target && !rowDrag.section.nextElementSibling)) return;
+  form.insertBefore(rowDrag.section, target || null);
+  updateRowLabels();
+  updatePageStatus();
+}
+
+function scrollDuringDrag() {
+  if (!rowDrag || !rowDrag.dragging) return;
+  const edge = 60;
+  const speed = rowDrag.clientY < edge ? -12 : rowDrag.clientY > window.innerHeight - edge ? 12 : 0;
+  if (!speed) {
+    rowDrag.scrollFrame = null;
+    return;
+  }
+  const previousScroll = window.scrollY;
+  window.scrollBy(0, speed);
+  if (window.scrollY === previousScroll) {
+    rowDrag.scrollFrame = null;
+    return;
+  }
+  positionDraggedRow(rowDrag.clientY);
+  rowDrag.scrollFrame = requestAnimationFrame(scrollDuringDrag);
+}
+
+function finishRowDrag(cancelled) {
+  if (!rowDrag) return;
+  const { section, originalNext, dragging, scrollFrame, pointerId } = rowDrag;
+  if (scrollFrame !== null) cancelAnimationFrame(scrollFrame);
+  if (cancelled && section.parentElement === form) {
+    form.insertBefore(section, originalNext && originalNext.parentElement === form ? originalNext : null);
+  }
+  section.classList.remove("dragging-row");
+  rowDrag = null;
+  if (form.hasPointerCapture(pointerId)) form.releasePointerCapture(pointerId);
+  updateRowLabels();
+  updatePageStatus();
+  if (dragging && !cancelled && section.parentElement === form) announceRowPosition(section);
+}
+
+form.addEventListener("pointermove", event => {
+  if (!rowDrag || event.pointerId !== rowDrag.pointerId) return;
+  rowDrag.clientY = event.clientY;
+  if (!rowDrag.dragging && Math.abs(event.clientY - rowDrag.startY) >= 5) {
+    rowDrag.dragging = true;
+    rowDrag.section.classList.add("dragging-row");
+  }
+  if (rowDrag.dragging) {
+    positionDraggedRow(event.clientY);
+    if (rowDrag.scrollFrame === null) scrollDuringDrag();
+  }
+});
+
+form.addEventListener("pointerup", event => {
+  if (rowDrag && event.pointerId === rowDrag.pointerId) finishRowDrag(false);
+});
+form.addEventListener("pointercancel", event => {
+  if (rowDrag && event.pointerId === rowDrag.pointerId) finishRowDrag(true);
+});
+form.addEventListener("lostpointercapture", event => {
+  if (rowDrag && event.pointerId === rowDrag.pointerId) finishRowDrag(true);
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && rowDrag) {
+    finishRowDrag(true);
+  }
+});
 
 function updateRowEmptyState(section) {
   const isEmpty = !section.querySelector('[name="produkt"]').value.trim()
@@ -690,27 +763,36 @@ function addProductRow(row = { produkt: "", produktNummer: "" }) {
   const rowControls = document.createElement("div");
   rowControls.className = "row-controls";
 
-  const moveUpButton = document.createElement("button");
-  moveUpButton.type = "button";
-  moveUpButton.className = "move-row-up";
-  moveUpButton.textContent = "↑";
-  moveUpButton.title = "Flytta raden uppåt";
-  moveUpButton.addEventListener("click", () => moveProductRow(section, "up", moveUpButton));
-
-  const moveDownButton = document.createElement("button");
-  moveDownButton.type = "button";
-  moveDownButton.className = "move-row-down";
-  moveDownButton.textContent = "↓";
-  moveDownButton.title = "Flytta raden nedåt";
-  moveDownButton.addEventListener("click", () => moveProductRow(section, "down", moveDownButton));
+  const dragHandle = document.createElement("button");
+  dragHandle.type = "button";
+  dragHandle.className = "drag-row";
+  dragHandle.textContent = "⋮⋮";
+  dragHandle.title = "Dra för att flytta raden, eller använd piltangenterna";
+  dragHandle.setAttribute("aria-describedby", "rowMoveHelp");
+  dragHandle.addEventListener("pointerdown", event => {
+    if (!event.isPrimary || event.button !== 0 || rowDrag) return;
+    rowDrag = {
+      section, pointerId: event.pointerId, startY: event.clientY, clientY: event.clientY,
+      originalNext: section.nextElementSibling, dragging: false, scrollFrame: null,
+    };
+    form.setPointerCapture(event.pointerId);
+  });
+  dragHandle.addEventListener("keydown", event => {
+    if (!rowDrag && (event.key === "ArrowUp" || event.key === "ArrowDown")) {
+      event.preventDefault();
+      moveProductRow(section, event.key === "ArrowUp" ? "up" : "down");
+    }
+  });
 
   const removeButton = document.createElement("button");
   removeButton.type = "button";
   removeButton.className = "remove-row";
-  removeButton.textContent = "Ta bort";
+  removeButton.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
+  removeButton.title = "Ta bort raden";
   removeButton.addEventListener("click", () => {
     if ((produktInput.value.trim() || produktNummerInput.value.trim())
       && !window.confirm("Vill du ta bort raden och dess innehåll?")) return;
+    finishRowDrag(true);
     section.remove();
     if (!form.children.length) addProductRow();
     updateRowLabels();
@@ -720,7 +802,7 @@ function addProductRow(row = { produkt: "", produktNummer: "" }) {
   section.appendChild(produktInput);
   section.appendChild(produktNummerInput);
   section.appendChild(barcodeImg);
-  rowControls.append(moveUpButton, moveDownButton, removeButton);
+  rowControls.append(dragHandle, removeButton);
   section.appendChild(rowControls);
 
   form.appendChild(section);
