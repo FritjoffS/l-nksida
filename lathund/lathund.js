@@ -34,7 +34,8 @@ window.logout = logout;
 // Call checkAuthState on page load
 checkAuthState();
 
-const numberRows = 23; // Number of rows to generate
+const initialRowCount = 3;
+const MAX_ROWS = 24;
 
 const titleInput = document.querySelector("#titleInput");
 const insertButton = document.querySelector("#insertButton");
@@ -65,6 +66,9 @@ const clearButton = document.querySelector("#clearButton");
 const exportButton = document.querySelector("#exportButton");
 const importButton = document.querySelector("#importButton");
 const savedTitlesDropdown = document.querySelector("#savedTitlesDropdown");
+const form = document.getElementById("productForm");
+const addRowButton = document.getElementById("addRowButton");
+const rowCountStatus = document.getElementById("rowCountStatus");
 let activeRecordId = "";
 let savedFormSnapshot = "";
 
@@ -121,6 +125,51 @@ function validateProductNumber(number) {
   return { valid: true, sanitized };
 }
 
+function getRows() {
+  return Array.from(form.querySelectorAll("section"), section => ({
+    produkt: section.querySelector('[name="produkt"]').value,
+    produktNummer: section.querySelector('[name="produktNummer"]').value,
+  }));
+}
+
+function collectProductData(title) {
+  const rows = getRows();
+  const data = { title, rowCount: rows.length };
+
+  for (const [index, row] of rows.entries()) {
+    const product = validateProductName(row.produkt);
+    const number = validateProductNumber(row.produktNummer);
+    if (!product.valid || !number.valid) {
+      alert(`Rad ${index + 1}: ${!product.valid ? product.message : number.message}`);
+      return null;
+    }
+    data[`produkt${index + 1}`] = product.sanitized;
+    data[`produktNummer${index + 1}`] = number.sanitized;
+  }
+  return data;
+}
+
+function readProductRows(data) {
+  const indices = Object.keys(data)
+    .map(key => /^(?:produkt|produktNummer)([1-9]\d*)$/.exec(key))
+    .filter(Boolean)
+    .map(match => Number(match[1]));
+  const legacyCount = indices.reduce((max, index) => Math.max(max, index), 0);
+  const count = Number.isSafeInteger(data.rowCount) && data.rowCount >= 0
+    ? Math.max(data.rowCount, legacyCount)
+    : legacyCount;
+  const rows = Array.from({ length: count }, (_, index) => ({
+    produkt: String(data[`produkt${index + 1}`] ?? ""),
+    produktNummer: String(data[`produktNummer${index + 1}`] ?? ""),
+  }));
+  if (!Number.isSafeInteger(data.rowCount)) {
+    while (rows.length && !rows[rows.length - 1].produkt && !rows[rows.length - 1].produktNummer) {
+      rows.pop();
+    }
+  }
+  return rows;
+}
+
 async function InsertData() {
   // Validate and sanitize title
   const titleValidation = validateTitle(titleInput.value);
@@ -133,7 +182,14 @@ async function InsertData() {
 
   // Check if title already exists
   const dbref = ref(db);
-  const snapshot = await get(child(dbref, "lathund/products"));
+  let snapshot;
+  try {
+    snapshot = await get(child(dbref, "lathund/products"));
+  } catch (error) {
+    console.error("Save lookup error:", error);
+    alert("Ett fel uppstod vid sparande. Försök igen.");
+    return;
+  }
   
   if (snapshot.exists()) {
     const data = snapshot.val();
@@ -147,47 +203,18 @@ async function InsertData() {
     }
   }
 
-  const dataObject = {
-    title: sanitizedTitle,
-  };
-
-  let hasValidProduct = false;
-
-  for (let i = 1; i <= numberRows; i++) {
-    const produktInput = document.querySelector("#produkt" + i);
-    const produktNummerInput = document.querySelector("#produktNummer" + i);
-    
-    // Validate and sanitize product data
-    const produktValidation = validateProductName(produktInput.value);
-    const nummerValidation = validateProductNumber(produktNummerInput.value);
-    
-    if (!produktValidation.valid) {
-      alert(`Rad ${i}: ${produktValidation.message}`);
-      return;
-    }
-    
-    if (!nummerValidation.valid) {
-      alert(`Rad ${i}: ${nummerValidation.message}`);
-      return;
-    }
-    
-    dataObject["produkt" + i] = produktValidation.sanitized;
-    dataObject["produktNummer" + i] = nummerValidation.sanitized;
-    
-    // Check if at least one product has data
-    if (produktValidation.sanitized || nummerValidation.sanitized) {
-      hasValidProduct = true;
-    }
-  }
+  const dataObject = collectProductData(sanitizedTitle);
+  if (!dataObject) return;
+  const hasValidProduct = getRows().some(row => row.produkt.trim() || row.produktNummer.trim());
 
   if (hasValidProduct) {
     const newPostRef = push(ref(db, "lathund/products"));
+    const submittedSnapshot = getFormSnapshot();
+    const previousRecordId = activeRecordId;
     set(newPostRef, dataObject)
       .then(() => {
         alert("Sidan sparad som: " + sanitizedTitle);
-        activeRecordId = newPostRef.key;
-        populateForm(dataObject);
-        markFormAsSaved();
+        finishSave(newPostRef.key, previousRecordId, dataObject, submittedSnapshot);
         displaySavedTitles(activeRecordId);
       })
       .catch((error) => {
@@ -252,7 +279,14 @@ async function UpdateData() {
 
   // Check if new title already exists (excluding current entry)
   const dbref = ref(db);
-  const snapshot = await get(child(dbref, "lathund/products"));
+  let snapshot;
+  try {
+    snapshot = await get(child(dbref, "lathund/products"));
+  } catch (error) {
+    console.error("Update lookup error:", error);
+    alert("Ett fel uppstod vid uppdatering. Försök igen.");
+    return;
+  }
   
   if (snapshot.exists()) {
     const data = snapshot.val();
@@ -267,38 +301,24 @@ async function UpdateData() {
     }
   }
 
-  const dataObject = {
-    title: sanitizedTitle,
-  };
+  const dataObject = collectProductData(sanitizedTitle);
+  if (!dataObject) return;
 
-  for (let i = 1; i <= numberRows; i++) {
-    const produktInput = document.querySelector("#produkt" + i);
-    const produktNummerInput = document.querySelector("#produktNummer" + i);
-    
-    // Validate and sanitize product data
-    const produktValidation = validateProductName(produktInput.value);
-    const nummerValidation = validateProductNumber(produktNummerInput.value);
-    
-    if (!produktValidation.valid) {
-      alert(`Rad ${i}: ${produktValidation.message}`);
-      return;
-    }
-    
-    if (!nummerValidation.valid) {
-      alert(`Rad ${i}: ${nummerValidation.message}`);
-      return;
-    }
-    
-    dataObject["produkt" + i] = produktValidation.sanitized;
-    dataObject["produktNummer" + i] = nummerValidation.sanitized;
+  const existingData = snapshot.exists() ? snapshot.val()[selectedIdentifier] : null;
+  const removedFields = {};
+  if (existingData) {
+    Object.keys(existingData).forEach(key => {
+      if (/^(?:produkt|produktNummer)[1-9]\d*$/.test(key) && !(key in dataObject)) {
+        removedFields[key] = null;
+      }
+    });
   }
 
-  update(ref(db, "lathund/products/" + selectedIdentifier), dataObject)
+  const submittedSnapshot = getFormSnapshot();
+  update(ref(db, "lathund/products/" + selectedIdentifier), { ...removedFields, ...dataObject })
     .then(() => {
       alert("Sidan uppdaterad");
-      activeRecordId = selectedIdentifier;
-      populateForm(dataObject);
-      markFormAsSaved();
+      finishSave(selectedIdentifier, selectedIdentifier, dataObject, submittedSnapshot);
       displaySavedTitles(activeRecordId);
     })
     .catch((error) => {
@@ -364,7 +384,8 @@ function displaySavedTitles(selectedIdentifier = activeRecordId) {
       }
     })
     .catch((error) => {
-      console.error(error);
+      console.error("Load titles error:", error);
+      alert("Ett fel uppstod när sparade sidor skulle hämtas. Försök igen.");
     });
 }
 
@@ -426,14 +447,7 @@ function findDataForSelectedTitle() {
 }
 
 function getFormSnapshot() {
-  const values = [titleInput.value];
-  for (let i = 1; i <= numberRows; i++) {
-    values.push(
-      document.querySelector("#produkt" + i).value,
-      document.querySelector("#produktNummer" + i).value
-    );
-  }
-  return JSON.stringify(values);
+  return JSON.stringify([titleInput.value, getRows()]);
 }
 
 function hasUnsavedChanges() {
@@ -442,6 +456,18 @@ function hasUnsavedChanges() {
 
 function markFormAsSaved() {
   savedFormSnapshot = getFormSnapshot();
+}
+
+function finishSave(recordId, previousRecordId, data, submittedSnapshot) {
+  if (activeRecordId !== previousRecordId) return;
+  activeRecordId = recordId;
+  if (getFormSnapshot() === submittedSnapshot) {
+    populateForm(data);
+    markFormAsSaved();
+  } else {
+    savedFormSnapshot = JSON.stringify([data.title, readProductRows(data)]);
+  }
+  updatePageStatus();
 }
 
 function updateActionButtons() {
@@ -461,30 +487,22 @@ function updatePageStatus() {
 
 function populateForm(data) {
   titleInput.value = sanitizeInput(data.title || "");
-
-  for (let i = 1; i <= numberRows; i++) {
-    const produktInput = document.querySelector("#produkt" + i);
-    const produktNummerInput = document.querySelector("#produktNummer" + i);
-
-    produktInput.value = sanitizeInput(data["produkt" + i] || "");
-    produktNummerInput.value = sanitizeInput(data["produktNummer" + i] || "");
-    handleInputChange({ target: produktNummerInput });
+  const rows = readProductRows(data);
+  form.replaceChildren();
+  if (rows.length) {
+    rows.forEach(row => addProductRow(row));
+  } else {
+    for (let i = 0; i < initialRowCount; i++) addProductRow();
   }
+  updateRowLabels();
 }
 
 // Function to clear form
 function clearForm() {
   titleInput.value = "";
-  
-  for (let i = 1; i <= numberRows; i++) {
-    const produktInput = document.querySelector("#produkt" + i);
-    const produktNummerInput = document.querySelector("#produktNummer" + i);
-    const barcodeImg = document.querySelector(`#produktSection${i} .barcode`);
-    
-    produktInput.value = "";
-    produktNummerInput.value = "";
-    if (barcodeImg) barcodeImg.src = "";
-  }
+  form.replaceChildren();
+  for (let i = 0; i < initialRowCount; i++) addProductRow();
+  updateRowLabels();
   
   activeRecordId = "";
   savedTitlesDropdown.value = "";
@@ -582,10 +600,16 @@ importButton.addEventListener("click", function () {
 
 function generateBarcode(produktNummer, barcodeImg) {
   if (produktNummer) {
-    JsBarcode(barcodeImg, produktNummer, {
-      format: "CODE128",
-      displayValue: false,
-    });
+    try {
+      JsBarcode(barcodeImg, produktNummer, {
+        format: "CODE128",
+        displayValue: false,
+      });
+    } catch (error) {
+      barcodeImg.removeAttribute("src");
+      console.error("Barcode error:", error);
+      alert("Ogiltigt produktnummer för streckkod: " + produktNummer);
+    }
   } else {
     // Clear the barcode image if the produktNummer is empty
     barcodeImg.src = '';
@@ -600,45 +624,129 @@ function handleInputChange(event) {
   generateBarcode(produktNummerInput.value, barcodeImg);
 }
 
-const form = document.getElementById('productForm');
-for (let i = 1; i <= numberRows; i++) {
+function updateRowLabels() {
+  const sections = form.querySelectorAll("section");
+  addRowButton.disabled = sections.length >= MAX_ROWS;
+  rowCountStatus.textContent = sections.length > MAX_ROWS
+    ? `${sections.length} rader. Ta bort rader för att nå max ${MAX_ROWS}.`
+    : `${sections.length} av ${MAX_ROWS} rader${sections.length === MAX_ROWS ? " – max antal rader" : ""}`;
+  sections.forEach((section, index) => {
+    const rowNumber = index + 1;
+    section.querySelector('[name="produkt"]').setAttribute("aria-label", `Produkt, rad ${rowNumber}`);
+    section.querySelector('[name="produktNummer"]').setAttribute("aria-label", `Produktnummer, rad ${rowNumber}`);
+    section.querySelector(".remove-row").setAttribute("aria-label", `Ta bort rad ${rowNumber}`);
+    const moveUp = section.querySelector(".move-row-up");
+    const moveDown = section.querySelector(".move-row-down");
+    moveUp.setAttribute("aria-label", `Flytta rad ${rowNumber} uppåt`);
+    moveDown.setAttribute("aria-label", `Flytta rad ${rowNumber} nedåt`);
+    moveUp.disabled = index === 0;
+    moveDown.disabled = index === sections.length - 1;
+  });
+}
+
+function moveProductRow(section, direction, button) {
+  const sibling = direction === "up" ? section.previousElementSibling : section.nextElementSibling;
+  if (!sibling) return;
+
+  if (direction === "up") {
+    form.insertBefore(section, sibling);
+  } else {
+    form.insertBefore(sibling, section);
+  }
+  updateRowLabels();
+  updatePageStatus();
+  if (button.disabled) {
+    section.querySelector(direction === "up" ? ".move-row-down" : ".move-row-up").focus();
+  } else {
+    button.focus();
+  }
+}
+
+function updateRowEmptyState(section) {
+  const isEmpty = !section.querySelector('[name="produkt"]').value.trim()
+    && !section.querySelector('[name="produktNummer"]').value.trim();
+  section.classList.toggle("empty-row", isEmpty);
+}
+
+function addProductRow(row = { produkt: "", produktNummer: "" }) {
   const section = document.createElement('section');
-  section.id = `produktSection${i}`;
 
   const produktInput = document.createElement('input');
   produktInput.type = 'text';
-  produktInput.id = `produkt${i}`;
   produktInput.name = 'produkt';
   produktInput.placeholder = 'Produkt';
+  produktInput.value = row.produkt;
 
   const produktNummerInput = document.createElement('input');
   produktNummerInput.type = 'text';
-  produktNummerInput.id = `produktNummer${i}`;
   produktNummerInput.name = 'produktNummer';
   produktNummerInput.placeholder = 'Produktnummer';
+  produktNummerInput.value = row.produktNummer;
 
   const barcodeImg = document.createElement('img');
   barcodeImg.className = 'barcode';
+  barcodeImg.alt = "";
+
+  const rowControls = document.createElement("div");
+  rowControls.className = "row-controls";
+
+  const moveUpButton = document.createElement("button");
+  moveUpButton.type = "button";
+  moveUpButton.className = "move-row-up";
+  moveUpButton.textContent = "↑";
+  moveUpButton.title = "Flytta raden uppåt";
+  moveUpButton.addEventListener("click", () => moveProductRow(section, "up", moveUpButton));
+
+  const moveDownButton = document.createElement("button");
+  moveDownButton.type = "button";
+  moveDownButton.className = "move-row-down";
+  moveDownButton.textContent = "↓";
+  moveDownButton.title = "Flytta raden nedåt";
+  moveDownButton.addEventListener("click", () => moveProductRow(section, "down", moveDownButton));
+
+  const removeButton = document.createElement("button");
+  removeButton.type = "button";
+  removeButton.className = "remove-row";
+  removeButton.textContent = "Ta bort";
+  removeButton.addEventListener("click", () => {
+    if ((produktInput.value.trim() || produktNummerInput.value.trim())
+      && !window.confirm("Vill du ta bort raden och dess innehåll?")) return;
+    section.remove();
+    if (!form.children.length) addProductRow();
+    updateRowLabels();
+    updatePageStatus();
+  });
 
   section.appendChild(produktInput);
   section.appendChild(produktNummerInput);
   section.appendChild(barcodeImg);
+  rowControls.append(moveUpButton, moveDownButton, removeButton);
+  section.appendChild(rowControls);
 
   form.appendChild(section);
 
-  // Attach event listener to input elements
   produktNummerInput.addEventListener('input', handleInputChange);
+  section.addEventListener("input", () => updateRowEmptyState(section));
+  updateRowEmptyState(section);
+  if (row.produktNummer) handleInputChange({ target: produktNummerInput });
+  return produktInput;
 }
 
+addRowButton.addEventListener("click", () => {
+  if (form.querySelectorAll("section").length >= MAX_ROWS) {
+    showToast(`En lathund kan ha högst ${MAX_ROWS} rader.`, "warning");
+    return;
+  }
+  const input = addProductRow();
+  updateRowLabels();
+  updatePageStatus();
+  input.focus();
+});
+
+for (let i = 0; i < initialRowCount; i++) addProductRow();
+updateRowLabels();
 markFormAsSaved();
 updateActionButtons();
-
-// Initial barcode generation on page load
-document.querySelectorAll('[name="produktNummer"]').forEach(input => {
-  const section = input.closest('section');
-  const barcodeImg = section.querySelector('.barcode');
-  generateBarcode(input.value, barcodeImg);
-});
 
 // Function to convert a string to an ArrayBuffer, used by export function
 function s2ab(s) {
@@ -659,34 +767,10 @@ function exportData() {
     return;
   }
 
-  const dataObject = {
-    title: titleInput.value,
-  };
-
-  for (let i = 1; i <= numberRows; i++) {
-    const produktInput = document.querySelector("#produkt" + i);
-    const produktNummerInput = document.querySelector("#produktNummer" + i);
-    
-    dataObject["produkt" + i] = produktInput.value;
-    dataObject["produktNummer" + i] = produktNummerInput.value;
-  }
-
-  // Convert the object data to an array of objects
-  const dataArray = [dataObject];
-
-  // Create an array for the headers
-  const headers = ["Produkter", "prodNr"];
-
-  // Create an array for the transposed data
-  const transposedData = [headers];
-
-  // Loop through the dataArray and push the values to transposedData
-  dataArray.forEach(function (row) {
-    for (let i = 1; i <= numberRows; i++) {
-      const rowData = [row['produkt' + i], row['produktNummer' + i]];
-      transposedData.push(rowData);
-    }
-  });
+  const transposedData = [
+    ["Produkter", "prodNr"],
+    ...getRows().map(row => [row.produkt, row.produktNummer]),
+  ];
 
   // Convert the transposed data to XLSX format using SheetJS
   const workbook = XLSX.utils.book_new();
@@ -727,31 +811,58 @@ function importData() {
     if (file) {
       const reader = new FileReader();
 
-      reader.onload = function (e) {
+      reader.onload = async function (e) {
+        let dataObject;
         try {
           const workbook = XLSX.read(e.target.result, { type: 'binary' });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          if (!sheet) throw new Error("Arbetsblad saknas");
+          const sheetRows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: "", blankrows: true });
+          const headers = sheetRows.shift() || [];
+          const productColumn = headers.indexOf("Produkter");
+          const numberColumn = headers.indexOf("prodNr");
+          if (productColumn < 0 || numberColumn < 0) throw new Error("Kolumnerna Produkter och prodNr saknas");
 
-          // Assuming the first sheet is the one you want to import
-          const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-
-          // Extract the filename (excluding extension) and use it as the title
-          const filenameWithoutExtension = file.name.replace(/\.[^/.]+$/, "");
-          const newPostRef = push(ref(db, "lathund/products"));
-          set(child(newPostRef, "title"), filenameWithoutExtension);
-
-          // Set the data to the new post
-          jsonData.forEach((row, index) => {
-            set(child(newPostRef, "produkt" + (index + 1)), row.Produkter || "");
-            set(child(newPostRef, "produktNummer" + (index + 1)), row.prodNr || "");
+          const rows = sheetRows.map(row => ({
+            produkt: String(row[productColumn] ?? ""),
+            produktNummer: String(row[numberColumn] ?? ""),
+          }));
+          while (rows.length && !rows[rows.length - 1].produkt && !rows[rows.length - 1].produktNummer) {
+            rows.pop();
+          }
+          if (rows.length > MAX_ROWS) {
+            showToast(`Filen har ${rows.length} rader. En lathund kan ha högst ${MAX_ROWS} rader.`, "warning");
+            return;
+          }
+          dataObject = {
+            title: file.name.replace(/\.[^/.]+$/, ""),
+            rowCount: rows.length,
+          };
+          rows.forEach((row, index) => {
+            dataObject[`produkt${index + 1}`] = row.produkt;
+            dataObject[`produktNummer${index + 1}`] = row.produktNummer;
           });
+        } catch (error) {
+          console.error("Import error:", error);
+          alert("Ogiltig XLSX-fil. Kontrollera att kolumnerna Produkter och prodNr finns.");
+          return;
+        }
 
+        try {
+          const newPostRef = push(ref(db, "lathund/products"));
+          await set(newPostRef, dataObject);
           alert("Data importerad");
           displaySavedTitles();
         } catch (error) {
-          alert("Ogiltig XLSX-fil");
+          console.error("Import save error:", error);
+          alert("Ett fel uppstod vid import. Försök igen.");
         }
       };
 
+      reader.onerror = () => {
+        console.error("File read error:", reader.error);
+        alert("Ett fel uppstod när filen lästes. Försök igen.");
+      };
       reader.readAsBinaryString(file);
     }
   });
