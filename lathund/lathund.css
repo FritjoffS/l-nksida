@@ -1,9 +1,4 @@
-body {
-    margin: 0px;
-    /* background-image: url("../img/b-m-back.jpg"); */
-    background-color: slategray;
-    /* background-attachment: fixed; */
-}
+
 
 #toolbar {
     position: sticky;
@@ -157,7 +152,7 @@ body {
 }
 
 .formcontainer {
-    max-width: 800px;
+    max-width: 880px;
     margin: 20px auto;
     background-color: white;
 }
@@ -176,6 +171,8 @@ body {
     color: black;
     text-align: center;
     width: 600px;
+    max-width: 100%;
+    box-sizing: border-box;
     margin: 20px auto 0px;
     border: black solid 2px;
     background-color: white;
@@ -193,9 +190,13 @@ body {
 }
 
 .formulär section {
-    /* box-sizing: content-box; */
-    padding: 0px 0px;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 3.7fr) minmax(0, 1.15fr) minmax(80px, 1.15fr);
+    align-items: center;
+    box-sizing: border-box;
     width: 600px;
+    max-width: 100%;
     margin: 0 auto;
     border-left: black solid 2px;
     border-right: black solid 2px;
@@ -204,16 +205,20 @@ body {
 }
 
 .formulär input[name="produkt"] {
-    width: 50%;
-    height: 20px;
-    padding: 10px 20px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 40px;
+    padding: 10px;
     font-size: 1.2rem;
     border: none;
 }
 
 .formulär input[name="produktNummer"] {
-    width: 17%;
-    height: 20px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 40px;
     padding: 10px 10px;
     font-size: 1rem;
     border-left: black solid 2px;
@@ -223,18 +228,71 @@ body {
 }
 
 .formulär .barcode {
+    justify-self: center;
     max-width: 100%;
-    /* Ensure the barcode image does not exceed the width of its container */
-    height: 40px;
-    /* Maintain the aspect ratio of the barcode image */
-    margin-top: 0px;
-    /* Adjust the margin between the ProduktNummer input and barcode */
-    margin-left: 5px;
-    /* Adjust the margin between the ProduktNummer input and barcode */
-    vertical-align: middle;
-    text-align: left;
-    padding-left: 10px;
+    height: auto;
+    max-height: 40px;
+}
 
+.formulär .barcode:not([src]),
+.formulär .barcode[src=""] {
+    visibility: hidden;
+}
+
+.row-controls {
+    position: absolute;
+    left: calc(100% + 6px);
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.row-controls button {
+    width: auto;
+    height: 34px;
+    margin: 0;
+    padding: 6px;
+    font-size: 0.875rem;
+    background: white;
+    border: 1px solid #8a949e;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.row-controls button:hover {
+    transform: none;
+}
+
+.row-controls button:focus-visible {
+    outline: 3px solid #2196f3;
+    outline-offset: 1px;
+}
+
+.row-controls button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.row-controls .remove-row {
+    color: #b91c1c;
+    border-color: #b91c1c;
+}
+
+.row-actions {
+    max-width: 600px;
+    margin: 12px auto;
+}
+
+@media screen and (max-width: 880px) {
+    .header,
+    .formulär section {
+        width: calc(100% - 140px);
+        margin-left: 0;
+        margin-right: auto;
+    }
 }
 
 @media print {
@@ -261,28 +319,19 @@ body {
     }
 
     .header {
-        margin: 10px auto 0px;
+        margin: 0 auto;
     }
 
     .formulär section {
         padding: 0px;
         margin: 0 auto;
+        break-inside: avoid;
     }
 
-    .formulär input[name="produkt"] {
-        padding: 8px 15px;
-        font-size: 1.1rem;
-    }
-
-    .formulär input[name="produktNummer"] {
-        padding: 8px 8px;
-        font-size: 0.95rem;
-    }
-
-    .formulär .barcode {
-        height: 35px;
-        margin-top: 0px;
-        margin-left: 3px;
+    /*.formulär section.empty-row,*/
+    .row-controls,
+    .row-actions {
+        display: none;
     }
 
     .buttons, br, #toolbar, #toastContainer, #savedTitlesDropdown {
@@ -291,6 +340,6 @@ body {
 
     @page {
         size: A4;
-        margin: 10mm 15mm;
+        margin: 3mm 15mm;
     }
 }
