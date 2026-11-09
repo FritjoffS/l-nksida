@@ -37,6 +37,18 @@ checkAuthState();
 const initialRowCount = 3;
 const MAX_ROWS = 24;
 
+// The navbar is position: fixed, so the sticky toolbar must sit below it.
+const navbarHost = document.getElementById("navbar");
+const navResizeObserver = new ResizeObserver(([entry]) => {
+  document.documentElement.style.setProperty("--nav-offset", `${entry.target.getBoundingClientRect().height}px`);
+});
+const observeNavbar = () => {
+  const nav = navbarHost.querySelector("nav");
+  if (nav) navResizeObserver.observe(nav);
+};
+new MutationObserver(observeNavbar).observe(navbarHost, { childList: true, subtree: true });
+observeNavbar();
+
 const titleInput = document.querySelector("#titleInput");
 const insertButton = document.querySelector("#insertButton");
 const saveButton = document.querySelector("#saveButton");
@@ -753,7 +765,7 @@ function addProductRow(row = { produkt: "", produktNummer: "" }) {
   const produktNummerInput = document.createElement('input');
   produktNummerInput.type = 'text';
   produktNummerInput.name = 'produktNummer';
-  produktNummerInput.placeholder = 'Produktnummer';
+  produktNummerInput.placeholder = 'Nummer';
   produktNummerInput.value = row.produktNummer;
 
   const barcodeImg = document.createElement('img');
@@ -766,7 +778,7 @@ function addProductRow(row = { produkt: "", produktNummer: "" }) {
   const dragHandle = document.createElement("button");
   dragHandle.type = "button";
   dragHandle.className = "drag-row";
-  dragHandle.textContent = "⋮⋮";
+  dragHandle.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="6" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="18" r="1.7"/><circle cx="15" cy="18" r="1.7"/></svg>';
   dragHandle.title = "Dra för att flytta raden, eller använd piltangenterna";
   dragHandle.setAttribute("aria-describedby", "rowMoveHelp");
   dragHandle.addEventListener("pointerdown", event => {
